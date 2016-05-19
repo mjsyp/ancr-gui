@@ -13,9 +13,9 @@ class Window(Frame):
         self.quit()
         
     def initUI(self):
-        # TODO: create main frame, divided into two panels
-        #       create main toolbar
-        #       call frontendLeft/frontendRight, which will fill in each panel
+        # TODO:  X  create main frame, divided into two panels
+        #        X  create main toolbar
+        #           call frontendLeft/frontendRight, which will fill in each panel
 
         self.parent.title("GUI")
 
@@ -32,11 +32,16 @@ class Window(Frame):
 
 
         # Create left and right frames
-        self.leftFrame = Frame(self.parent, bg="black", height=600, width=600) #colored background to see structure of frames
-        self.rightFrame = Frame(self.parent, bg="gray", height=600, width=300)
+        self.leftFrame = Frame(self.parent, height=600, width=600) 
+        self.rightFrame = Frame(self.parent, bg="gray", height=600, width=300) #colored bg to see panels
 
         self.leftFrame.pack(side="left", fill="both", expand=1)
+        self.leftFrame.pack_propagate(0)
         self.rightFrame.pack(side="right", fill="both", expand=1)
+
+
+        # Use frontendLeft to fill left frame (TODO)
+        geoCanvas = FrontendLeft(self.leftFrame)
 
 
 
@@ -48,3 +53,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
