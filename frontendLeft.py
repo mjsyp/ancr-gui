@@ -48,6 +48,9 @@ class FrontendLeft(Frame):
 		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 
 		if (len(selected) > 0):
+			for widget in self.rightFrame.winfo_children():
+				widget.destroy()
+
 			systemInfo = FrontendRight(self.rightFrame, selected[0])
 
 	def undo(self):
