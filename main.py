@@ -1,5 +1,6 @@
 from Tkinter import *
 from frontendLeft import *
+from frontendRight import *
 
 class Window(Frame):
   
@@ -30,10 +31,15 @@ class Window(Frame):
         fileTab.add_command(label="Exit", command=self.onExit)
         menubar.add_cascade(label="File", menu=fileTab)
 
+        editTab = Menu(menubar)
+        editTab.add_command(label="Undo")
+        menubar.add_cascade(label="Edit", menu=editTab)
+
+
 
         # Create left and right frames
-        self.leftFrame = Frame(self.parent, height=600, width=600) 
-        self.rightFrame = Frame(self.parent, bg="gray", height=600, width=300) #colored bg to see panels
+        self.leftFrame = Frame(self.parent, height=600, width=600, bg='light blue') #light colored bg to see panel
+        self.rightFrame = Frame(self.parent, bg="dark gray", height=600, width=300) #dark colored bg to see panel
 
         self.leftFrame.pack(side="left", fill="both", expand=1)
         self.leftFrame.pack_propagate(0)
@@ -42,6 +48,7 @@ class Window(Frame):
 
         # Use frontendLeft to fill left frame (TODO)
         geoCanvas = FrontendLeft(self.leftFrame)
+        systemInfo = FrontendRight(self.rightFrame)
 
 
 
