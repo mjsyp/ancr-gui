@@ -28,7 +28,7 @@ class FrontendLeft(Frame):
 	#creates nodes, edges and selction events
 	def createNode(self, event):
 		r = 8
-		self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red')
+		self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red') 
 	
 	def deleteNode(self):
 		pass
@@ -38,7 +38,7 @@ class FrontendLeft(Frame):
 		self.edgeStartY=event.y
 	
 	def createEdge(self, event):
-		self.systemsCanvas.create_line(self.edgeStartX, self.edgeStartY, event.x, event.y)
+		self.systemsCanvas.create_line(self.edgeStartX, self.edgeStartY, event.x, event.y, tag='edge')
 
 	def deleteEdge(self):
 		pass
@@ -51,7 +51,29 @@ class FrontendLeft(Frame):
 		pass
 
 	def undo(self):
-		pass
+		itemList=self.systemsCanvas.find_all()
+		lastItemIndex=len(itemList)-1
+		self.systemsCanvas.delete(itemList[lastItemIndex])
+
+	def newOptionMenu(self, event):
+		if self.v.get()=="Create New":
+			self.createNewPopUpMenu=Toplevel(self.parent)
+			self.createNewPopUpMenu.title('Create New')
+			self.createNewEntry=Entry(self.createNewPopUpMenu)
+			self.createNewEntry.pack()
+			self.createNewPopUpMenu.bind('<Return>', self.createNew)
+		else:
+			self.systemsCanvas.delete('edge')
+	
+	def createNew(self, event):
+		entry=self.createNewEntry.get()
+		self.optionList.insert(len(self.optionList)-1, entry)
+		self.dropdown.destroy()
+		self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
+		self.dropdown.configure(bg="light blue")
+		self.dropdown.pack(side='left')
+		self.createNewPopUpMenu.destroy()
+
 
 	def initUI(self):
 		# TODO: create toolbar
@@ -63,25 +85,25 @@ class FrontendLeft(Frame):
 		self.toolbar = Frame(self.parent, bg=self.color)
 		self.toolbar.pack()
 
-		optionList = ('Geometry', '...', 'Create New')
+		self.optionList = ['Geometry', 'Electric', 'Egress', 'Information', 'Chill Water', 'All', 'Create New']
 		self.v = StringVar()
-		self.v.set(optionList[0])
+		self.v.set(self.optionList[0])
 
-		dropdown = OptionMenu(self.toolbar, self.v, *optionList)
-		dropdown.configure(bg=self.color)
-		dropdown.pack(side='top')
+		self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
+		self.dropdown.configure(bg=self.color)
+		self.dropdown.pack(side='left')
 
 		#creates toolbar buttons, with functionality 
-		nodeButton = Button(self.toolbar, text="node", command=self.nodeButtonClick, 
-			highlightbackground=self.color)
+		nodeButton = Button(self.toolbar, text="node", command=self.nodeButtonClick,
+                        highlightbackground=self.color)
 		edgeButton = Button(self.toolbar, text="edge", command=self.edgeButtonClick,
-			highlightbackground=self.color)
+                        highlightbackground=self.color)
 		selectButton = Button(self.toolbar, text="select", command=self.selectButtonClick,
-			highlightbackground=self.color)
-		nodeButton.pack(side='left')
-		edgeButton.pack(side='left')
-		selectButton.pack(side='left')
+                          highlightbackground=self.color)
+		selectButton.pack(side='right')
+		edgeButton.pack(side='right')
+		nodeButton.pack(side='right')
 
 		#creates canvas 
-		self.systemsCanvas = Canvas(self.parent, height=550, width=600, bg='white')
+		self.systemsCanvas = Canvas(self.parent, height=570, width=600, bg='white')
 		self.systemsCanvas.pack(fill="both", expand=1)
