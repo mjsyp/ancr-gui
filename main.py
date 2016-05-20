@@ -44,11 +44,11 @@ class Window(Frame):
         self.leftFrame.pack(side="left", fill="both", expand=1)
         self.leftFrame.pack_propagate(0)
         self.rightFrame.pack(side="right", fill="both", expand=1)
+        self.rightFrame.pack_propagate(0)
 
 
         # Use frontendLeft to fill left frame (TODO)
-        geoCanvas = FrontendLeft(self.leftFrame)
-        systemInfo = FrontendRight(self.rightFrame)
+        geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame)
 
 
 
