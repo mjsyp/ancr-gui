@@ -7,6 +7,27 @@ class FrontendLeft(Frame):
 		self.parent = parent;
 		self.initUI()
 
+	def createNode(self):
+		pass
+
+	def deleteNode(self):
+		pass
+
+	def createEdge(self):
+		pass
+
+	def deleteEdge(self):
+		pass
+
+	def selectNode(self):
+		pass
+
+	def multiSelect(self):
+		pass
+
+	def undo(self):
+		pass
+
 	def initUI(self):
 		# TODO: create toolbar
 		#       create canvas
