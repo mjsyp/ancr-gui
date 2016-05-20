@@ -47,8 +47,8 @@ class FrontendLeft(Frame):
 		r = 24
 		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 
-		systemInfo = FrontendRight(self.rightFrame, selected[0])
-		pass
+		if (len(selected) > 0):
+			systemInfo = FrontendRight(self.rightFrame, selected[0])
 
 	def undo(self):
 		itemList=self.systemsCanvas.find_all()
