@@ -27,6 +27,9 @@ class FrontendLeft(Frame):
 		r = 8
 		self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red')
 	
+	def deleteNode(self):
+		pass
+
 	def edgeStart(self, event):
 		self.edgeStartX=event.x
 		self.edgeStartY=event.y
@@ -34,6 +37,17 @@ class FrontendLeft(Frame):
 	def createEdge(self, event):
 		self.systemsCanvas.create_line(self.edgeStartX, self.edgeStartY, event.x, event.y)
 
+	def deleteEdge(self):
+		pass
+
+	def selectNode(self):
+		pass
+
+	def multiSelect(self):
+		pass
+
+	def undo(self):
+		pass
 
 	def initUI(self):
 		# TODO: create toolbar
