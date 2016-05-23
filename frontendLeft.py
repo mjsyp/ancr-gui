@@ -36,11 +36,21 @@ class FrontendLeft(Frame):
 		pass
 
 	def edgeStart(self, event):
-		self.edgeStartX=event.x
-		self.edgeStartY=event.y
-	
+		r = 24
+		self.startNode = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
+		if len(self.startNode)>0:
+			self.startNodeCoords=self.systemsCanvas.coords(self.startNode)
+			self.startNodeX=(self.startNodeCoords[0]+self.startNodeCoords[2])/2
+			self.startNodeY=(self.startNodeCoords[1]+self.startNodeCoords[3])/2
+
 	def createEdge(self, event):
-		self.systemsCanvas.create_line(self.edgeStartX, self.edgeStartY, event.x, event.y, tag='edge')
+		r = 24
+		self.endNode = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
+		if len(self.endNode)>0:
+			self.endNodeCoords=self.systemsCanvas.coords(self.endNode)
+			self.endNodeX=(self.endNodeCoords[0]+self.endNodeCoords[2])/2
+			self.endNodeY=(self.endNodeCoords[1]+self.endNodeCoords[3])/2 
+			self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY)
 
 	def deleteEdge(self):
 		pass
