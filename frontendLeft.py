@@ -1,5 +1,6 @@
 from Tkinter import *
 from frontendRight import *
+import tkSimpleDialog
 
 class FrontendLeft(Frame):
 	def __init__(self, parent, rightFrame):
@@ -12,6 +13,7 @@ class FrontendLeft(Frame):
 
 	#toolbar button click events
 	def nodeButtonClick(self):
+		self.nodeButton.configure(relief=SUNKEN)
 		self.systemsCanvas.bind('<Button-1>', self.createNode)
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 	
@@ -25,7 +27,7 @@ class FrontendLeft(Frame):
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.selectNode)
 
-	#creates nodes, edges and selction events
+	#creates nodes, edges and selection events
 	def createNode(self, event):
 		r = 8
 		self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red') 
@@ -34,11 +36,21 @@ class FrontendLeft(Frame):
 		pass
 
 	def edgeStart(self, event):
-		self.edgeStartX=event.x
-		self.edgeStartY=event.y
-	
+		r = 24
+		self.startNode = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
+		if len(self.startNode)>0:
+			self.startNodeCoords=self.systemsCanvas.coords(self.startNode)
+			self.startNodeX=(self.startNodeCoords[0]+self.startNodeCoords[2])/2
+			self.startNodeY=(self.startNodeCoords[1]+self.startNodeCoords[3])/2
+
 	def createEdge(self, event):
-		self.systemsCanvas.create_line(self.edgeStartX, self.edgeStartY, event.x, event.y, tag='edge')
+		r = 24
+		self.endNode = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
+		if len(self.endNode)>0:
+			self.endNodeCoords=self.systemsCanvas.coords(self.endNode)
+			self.endNodeX=(self.endNodeCoords[0]+self.endNodeCoords[2])/2
+			self.endNodeY=(self.endNodeCoords[1]+self.endNodeCoords[3])/2 
+			self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY)
 
 	def deleteEdge(self):
 		pass
@@ -51,31 +63,27 @@ class FrontendLeft(Frame):
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
 
-			systemInfo = FrontendRight(self.rightFrame, selected[0])
+			self.systemInfo = FrontendRight(self.rightFrame, selected[0])
 
 	def undo(self):
 		itemList=self.systemsCanvas.find_all()
 		lastItemIndex=len(itemList)-1
 		self.systemsCanvas.delete(itemList[lastItemIndex])
 
+	# creates new system in option menu
 	def newOptionMenu(self, event):
 		if self.v.get()=="Create New":
-			self.createNewPopUpMenu=Toplevel(self.parent)
-			self.createNewPopUpMenu.title('Create New')
-			self.createNewEntry=Entry(self.createNewPopUpMenu)
-			self.createNewEntry.pack()
-			self.createNewPopUpMenu.bind('<Return>', self.createNew)
+			typeLabel = tkSimpleDialog.askstring(title="New System", prompt="Enter a new system")
+			if typeLabel != None:
+				self.optionList.insert(len(self.optionList)-1, typeLabel)
+				self.v.set(self.optionList[len(self.optionList)-2])
+				self.dropdown.destroy()
+				self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
+				self.dropdown.configure(bg="light blue")
+				self.dropdown.pack(side='left')
+			
 		else:
 			self.systemsCanvas.delete('edge')
-	
-	def createNew(self, event):
-		entry=self.createNewEntry.get()
-		self.optionList.insert(len(self.optionList)-1, entry)
-		self.dropdown.destroy()
-		self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
-		self.dropdown.configure(bg="light blue")
-		self.dropdown.pack(side='left')
-		self.createNewPopUpMenu.destroy()
 
 
 	def initUI(self):
@@ -97,15 +105,15 @@ class FrontendLeft(Frame):
 		self.dropdown.pack(side='left')
 
 		#creates toolbar buttons, with functionality 
-		nodeButton = Button(self.toolbar, text="node", command=self.nodeButtonClick,
+		self.nodeButton = Button(self.toolbar, text="node", command=self.nodeButtonClick,
                         highlightbackground=self.color)
-		edgeButton = Button(self.toolbar, text="edge", command=self.edgeButtonClick,
+		self.edgeButton = Button(self.toolbar, text="edge", command=self.edgeButtonClick,
                         highlightbackground=self.color)
-		selectButton = Button(self.toolbar, text="select", command=self.selectButtonClick,
+		self.selectButton = Button(self.toolbar, text="select", command=self.selectButtonClick,
                           highlightbackground=self.color)
-		selectButton.pack(side='right')
-		edgeButton.pack(side='right')
-		nodeButton.pack(side='right')
+		self.selectButton.pack(side='right')
+		self.edgeButton.pack(side='right')
+		self.nodeButton.pack(side='right')
 
 		#creates canvas 
 		self.systemsCanvas = Canvas(self.parent, height=570, width=600, bg='white')
