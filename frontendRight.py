@@ -13,40 +13,42 @@ class FrontendRight(Frame):
 	def createNewType(self):
 		typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
 
-		self.optionList.append(typeLabel)
-		self.v.set(self.optionList[len(self.optionList)-1])
-		self.dropdown.grid_forget()
-		self.dropdown = OptionMenu(self.typeMenu, self.v, *self.optionList)
-		self.dropdown.configure(bg=self.color)
-		self.dropdown.grid(row=2, column=1)
+		if typeLabel != None:
+			self.optionList.append(typeLabel)
+			self.v.set(self.optionList[len(self.optionList)-1])
+			self.dropdown.grid_forget()
+			self.dropdown = OptionMenu(self.typeMenu, self.v, *self.optionList)
+			self.dropdown.configure(bg=self.color)
+			self.dropdown.grid(row=2, column=1)
 
 	def createNewDemand(self):
 		label = tkSimpleDialog.askstring(title="Label", prompt="Enter a Label Name") # Prompt for label
 
-		# Create new label and corresponding entry
-		self.numAddedDemands += 1
-		self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
-		self.newDemandLabel.grid(row=3+self.numAddedDemands, column=1)
-		self.newDemandEntry = Entry(self.parent, highlightbackground=self.color)
-		self.newDemandEntry.grid(row=3+self.numAddedDemands, column=2)
+		if label != None:
+			# Create new label and corresponding entry
+			self.numAddedDemands += 1
+			self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
+			self.newDemandLabel.grid(row=3+self.numAddedDemands, column=1)
+			self.newDemandEntry = Entry(self.parent, highlightbackground=self.color)
+			self.newDemandEntry.grid(row=3+self.numAddedDemands, column=2)
 
-		# Move all other labels/entries down to make room for new demand label
-		self.createDemandBtn.grid_forget()
-		self.createDemandBtn.grid(row=4+self.numAddedDemands, column=1)
-		self.geometryLabel.grid_forget()
-		self.geometryLabel.grid(row=5+self.numAddedDemands, column=0)
-		self.xLabel.grid_forget()
-		self.xLabel.grid(row=5+self.numAddedDemands, column=1)
-		self.xEntry.grid_forget()
-		self.xEntry.grid(row=5+self.numAddedDemands, column=2)
-		self.yLabel.grid_forget()
-		self.yLabel.grid(row=6+self.numAddedDemands, column=1)
-		self.yEntry.grid_forget()
-		self.yEntry.grid(row=6+self.numAddedDemands, column=2)
-		self.zLabel.grid_forget()
-		self.zLabel.grid(row=7+self.numAddedDemands, column=1)
-		self.zEntry.grid_forget()
-		self.zEntry.grid(row=7+self.numAddedDemands, column=2)
+			# Move all other labels/entries down to make room for new demand label
+			self.createDemandBtn.grid_forget()
+			self.createDemandBtn.grid(row=4+self.numAddedDemands, column=1)
+			self.geometryLabel.grid_forget()
+			self.geometryLabel.grid(row=5+self.numAddedDemands, column=0)
+			self.xLabel.grid_forget()
+			self.xLabel.grid(row=5+self.numAddedDemands, column=1)
+			self.xEntry.grid_forget()
+			self.xEntry.grid(row=5+self.numAddedDemands, column=2)
+			self.yLabel.grid_forget()
+			self.yLabel.grid(row=6+self.numAddedDemands, column=1)
+			self.yEntry.grid_forget()
+			self.yEntry.grid(row=6+self.numAddedDemands, column=2)
+			self.zLabel.grid_forget()
+			self.zLabel.grid(row=7+self.numAddedDemands, column=1)
+			self.zEntry.grid_forget()
+			self.zEntry.grid(row=7+self.numAddedDemands, column=2)
 
 	def initUI(self):
 		#Title
