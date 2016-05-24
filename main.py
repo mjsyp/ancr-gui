@@ -47,6 +47,9 @@ class Window(Frame):
         editTab.add_command(label="Undo", command=geoCanvas.undo)
         menubar.add_cascade(label="Edit", menu=editTab)
 
+        self.parent.bind('<Control-z>', geoCanvas.undo)
+        self.parent.bind('<Command-z>', geoCanvas.undo)
+
 def main():
     root = Tk()
     app = Window(root)

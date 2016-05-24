@@ -60,7 +60,7 @@ class FrontendRight(Frame):
 		self.nameLabel.grid(row=1, column=0)
 
 		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
-		self.nameEntry.grid(row=1, column=1, columnspan=2)
+		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W)
 
 		# Type
 		self.typeLabel = Label(self.parent, text="Type:", bg=self.color)
