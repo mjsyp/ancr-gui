@@ -50,7 +50,7 @@ class FrontendLeft(Frame):
 			self.endNodeCoords=self.systemsCanvas.coords(self.endNode)
 			self.endNodeX=(self.endNodeCoords[0]+self.endNodeCoords[2])/2
 			self.endNodeY=(self.endNodeCoords[1]+self.endNodeCoords[3])/2 
-			self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY)
+			self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge')
 
 	def deleteEdge(self):
 		pass
