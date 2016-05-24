@@ -65,7 +65,7 @@ class FrontendLeft(Frame):
 
 			self.systemInfo = FrontendRight(self.rightFrame, selected[0])
 
-	def undo(self):
+	def undo(self, event=None):
 		itemList=self.systemsCanvas.find_all()
 		lastItemIndex=len(itemList)-1
 		self.systemsCanvas.delete(itemList[lastItemIndex])
