@@ -1,12 +1,14 @@
 from Tkinter import *
 import tkSimpleDialog
+import networkx as nx
 
 class FrontendRight(Frame):
-	def __init__(self, parent, nodeIndex):
+	def __init__(self, parent, nodeIndex, G):
 		Frame.__init__(self, parent)
 		
 		self.parent = parent
 		self.nodeIndex = nodeIndex
+		self.G = G
 		self.color = "dark gray"
 		self.initUI()
 
@@ -111,4 +113,7 @@ class FrontendRight(Frame):
 		self.zLabel.grid(row=7, column=1, padx=1, pady=1)
 		self.zEntry = Entry(self.parent, highlightbackground=self.color)
 		self.zEntry.grid(row=7, column=2)
+
+		self.saveBtn = Button(self.parent, text="Save", bg=self.color)
+		self.saveBtn.pack(side="bottom")
 

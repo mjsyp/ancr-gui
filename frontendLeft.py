@@ -1,13 +1,15 @@
 from Tkinter import *
 from frontendRight import *
 import tkSimpleDialog
+import networkx as nx
 
 class FrontendLeft(Frame):
-	def __init__(self, parent, rightFrame):
+	def __init__(self, parent, rightFrame, G):
 		Frame.__init__(self, parent)
 
 		self.parent = parent
 		self.rightFrame = rightFrame
+		self.G = G
 		self.color = "light blue"
 		self.initUI()
 
@@ -63,7 +65,7 @@ class FrontendLeft(Frame):
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
 
-			self.systemInfo = FrontendRight(self.rightFrame, selected[0])
+			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G)
 
 	def undo(self, event=None):
 		itemList=self.systemsCanvas.find_all()
@@ -87,10 +89,6 @@ class FrontendLeft(Frame):
 
 
 	def initUI(self):
-		# TODO: create toolbar
-		#       create canvas
-		#       implement functionality to draw on canvas
-
 		# toolbar: implemented using a frame with dropdown/buttons placed on it
 		#          referenced from http://zetcode.com/gui/tkinter/menustoolbars/
 		self.toolbar = Frame(self.parent, bg=self.color)

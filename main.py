@@ -1,23 +1,21 @@
 from Tkinter import *
 from frontendLeft import *
 from frontendRight import *
+import networkx as nx
 
 class Window(Frame):
   
     def __init__(self, parent):
-        Frame.__init__(self, parent)   
+        Frame.__init__(self, parent)
          
         self.parent = parent
+        self.G = nx.Graph()
         self.initUI()
 
     def onExit(self):
         self.quit()
         
     def initUI(self):
-        # TODO:  X  create main frame, divided into two panels
-        #        X  create main toolbar
-        #           call frontendLeft/frontendRight, which will fill in each panel
-
         self.parent.title("GUI")
 
         # Create left and right frames
@@ -29,8 +27,8 @@ class Window(Frame):
         self.rightFrame.pack(side="right", fill="y", expand=0)
         self.rightFrame.pack_propagate(0)
 
-        # Use frontendLeft to fill left frame (TODO)
-        geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame)
+        # Use frontendLeft to fill left frame
+        geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G)
 
         # Main Menubar
         menubar = Menu(self.parent)
