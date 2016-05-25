@@ -32,8 +32,9 @@ class FrontendLeft(Frame):
 	#creates nodes, edges and selection events
 	def createNode(self, event):
 		r = 8
-		self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
-	
+		item=self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
+		self.G.add_node(item, Geometry=0, Electric=0, Egress=0, Information=0, ChillWater=0, x=0, y=0, z=0, Name=None)
+
 	def deleteNode(self):
 		pass
 
@@ -53,6 +54,7 @@ class FrontendLeft(Frame):
 			self.endNodeX=(self.endNodeCoords[0]+self.endNodeCoords[2])/2
 			self.endNodeY=(self.endNodeCoords[1]+self.endNodeCoords[3])/2 
 			self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge')
+			self.G.add_edge(self.startNode[0], self.endNode[0])
 
 	def deleteEdge(self):
 		pass
