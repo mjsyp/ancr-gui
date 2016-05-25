@@ -83,7 +83,7 @@ class FrontendLeft(Frame):
 				self.dropdown.pack(side='left')
 			
 		else:
-			self.systemsCanvas.delete('edge')
+			pass
 
 
 	def initUI(self):
@@ -98,7 +98,7 @@ class FrontendLeft(Frame):
 
 		self.optionList = ['Geometry', 'Electric', 'Egress', 'Information', 'Chill Water', 'All', 'Create New']
 		self.v = StringVar()
-		self.v.set(self.optionList[0])
+		self.v.set(self.optionList[5])
 
 		self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
 		self.dropdown.configure(bg=self.color)
