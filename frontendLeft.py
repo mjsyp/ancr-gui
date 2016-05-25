@@ -32,7 +32,7 @@ class FrontendLeft(Frame):
 	#creates nodes, edges and selection events
 	def createNode(self, event):
 		r = 8
-		self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red') 
+		self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
 	
 	def deleteNode(self):
 		pass
@@ -52,7 +52,7 @@ class FrontendLeft(Frame):
 			self.endNodeCoords=self.systemsCanvas.coords(self.endNode)
 			self.endNodeX=(self.endNodeCoords[0]+self.endNodeCoords[2])/2
 			self.endNodeY=(self.endNodeCoords[1]+self.endNodeCoords[3])/2 
-			self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY)
+			self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge')
 
 	def deleteEdge(self):
 		pass
@@ -85,7 +85,7 @@ class FrontendLeft(Frame):
 				self.dropdown.pack(side='left')
 			
 		else:
-			self.systemsCanvas.delete('edge')
+			pass
 
 
 	def initUI(self):
@@ -96,7 +96,7 @@ class FrontendLeft(Frame):
 
 		self.optionList = ['Geometry', 'Electric', 'Egress', 'Information', 'Chill Water', 'All', 'Create New']
 		self.v = StringVar()
-		self.v.set(self.optionList[0])
+		self.v.set(self.optionList[5])
 
 		self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
 		self.dropdown.configure(bg=self.color)
