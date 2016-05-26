@@ -2,6 +2,7 @@ from Tkinter import *
 from frontendLeft import *
 from frontendRight import *
 import networkx as nx
+import matplotlib.pyplot as plt
 
 class Window(Frame):
   
@@ -14,6 +15,12 @@ class Window(Frame):
 
     def onExit(self):
         self.quit()
+
+    def save(self):
+        outFile=open('gui.txt', 'w')
+        s=str(self.G.nodes(data=True))
+        outFile.write(s)
+        outFile.close()
         
     def initUI(self):
         self.parent.title("GUI")
@@ -36,7 +43,7 @@ class Window(Frame):
 
         fileTab = Menu(menubar)
         fileTab.add_command(label="Open...")
-        fileTab.add_command(label="Save")
+        fileTab.add_command(label="Save", command=self.save)
         fileTab.add_command(label="Save As...")
         fileTab.add_command(label="Exit", command=self.onExit)
         menubar.add_cascade(label="File", menu=fileTab)
@@ -52,9 +59,13 @@ def main():
     root = Tk()
     app = Window(root)
     root.mainloop()  
+    #to see the networkx representation of the graph after exiting the gui:
+    #nx.draw(app.G)
+    #plt.show()
 
 
 if __name__ == '__main__':
     main()
+    
 
 
