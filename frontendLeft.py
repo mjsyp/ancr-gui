@@ -67,7 +67,7 @@ class FrontendLeft(Frame):
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
 
-			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, list(self.optionList))
+			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList)
 
 	def undo(self, event=None):
 		itemList=self.systemsCanvas.find_all()

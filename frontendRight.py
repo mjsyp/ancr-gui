@@ -5,17 +5,28 @@ import networkx as nx
 class FrontendRight(Frame):
 	def __init__(self, parent, nodeIndex, G, systemList):
 		Frame.__init__(self, parent)
-		
+
 		self.parent = parent
 		self.nodeIndex = nodeIndex
 		self.G = G
 
-		self.systemList = systemList
+		# sync Demands with toolbar dropdown, but delete "Create New" and "All"
+		self.systemList = list(systemList)
 		try:
-			self.systemList.remove('Create New')
-			self.systemList.remove('All')
-		except ValueError:
-			pass
+ 			self.systemList.remove('Create New')
+ 			self.systemList.remove('Chill Water')
+ 			self.systemList.remove('All')
+ 		except ValueError:
+ 			pass
+
+		for x in self.G.node[self.nodeIndex]:
+			if (x not in ['Name', 'Type', 'x', 'y', 'z'] and x not in systemList):
+				self.systemList.append(x)
+
+		# initialize a dictionary where each system = None
+		self.systemDict = {}
+		for x in self.systemList:
+			self.systemDict[x] = None
 
 		self.color = "dark gray"
 		self.initUI()
@@ -25,7 +36,7 @@ class FrontendRight(Frame):
 		self.typeLabel.grid(row=2, column=0)
 
 		self.typeMenu = Frame(self.parent, highlightbackground=self.color)
-		self.typeMenu.grid(row=2, column=1)
+		self.typeMenu.grid(row=2, column=1, padx=10)
 		self.optionList = ['Hello', 'World']
 		self.v = StringVar()
 		self.v.set(self.optionList[0])
@@ -49,6 +60,10 @@ class FrontendRight(Frame):
 			self.dropdown.grid(row=2, column=1)
 
 	def createDemandLabel(self):
+		# Demand
+ 		self.demandLabel = Label(self.parent, text="Demand:", bg=self.color)
+ 		self.demandLabel.grid(row=3, column=0, padx=5)
+
 		self.createDemandBtn = Button(self.parent, text="Create New", 
 			command=self.createNewDemand, highlightbackground=self.color)
 		self.createDemandBtn.grid(row=4, column=1)
@@ -59,17 +74,22 @@ class FrontendRight(Frame):
 			self.createNewDemand(x)
 
 	def createNewDemand(self, label=None):
-		if label == None:
+		if label == None: # prompt for a label if none was provided as a parameter
 			label = tkSimpleDialog.askstring(title="Label", prompt="Enter a Label Name") # Prompt for label
 			# add new label to systemList
-			self.systemList.append(label)
+			if label != None: # check for 'Cancel' option
+				self.systemList.append(label) # add new system to systemList
 
 		if label != None: # check for 'Cancel' option
 			# Create new label and corresponding entry
 			self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
 			self.newDemandLabel.grid(row=3+self.numDemands, column=1)
-			self.newDemandEntry = Entry(self.parent, highlightbackground=self.color)
-			self.newDemandEntry.grid(row=3+self.numDemands, column=2)
+			newEntry = Entry(self.parent, highlightbackground=self.color)
+			newEntry.grid(row=3+self.numDemands, column=2, padx=10)
+			newEntry.insert(0, '0')
+			if label not in self.G.node[self.nodeIndex]:
+				self.G.node[self.nodeIndex][label] = 0
+			self.systemDict[label] = newEntry
 
 			# delete existing buttons/labels
 			if hasattr(self, 'createDemandBtn'):
@@ -103,7 +123,7 @@ class FrontendRight(Frame):
 
 	def createGeometryLabel(self):
 		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color)
-		self.geometryLabel.grid(row=5, column=0)
+		self.geometryLabel.grid(row=5, column=0, padx=5)
 
 		self.xLabel = Label(self.parent, text="x", bg=self.color)
 		self.xLabel.grid(row=5, column=1, padx=1, pady=1)
@@ -135,28 +155,32 @@ class FrontendRight(Frame):
 		if 'z' in self.G.node[self.nodeIndex]:
 			self.zEntry.delete(0, END)
 			self.zEntry.insert(0, self.G.node[self.nodeIndex]['z'])
+		for x in self.systemList:
+			self.systemDict[x].delete(0, END)
+			self.systemDict[x].insert(0, self.G.node[self.nodeIndex][x])
 
 	def saveAttributes(self):
 		self.G.node[self.nodeIndex]['Name'] = self.nameEntry.get()
 		self.G.node[self.nodeIndex]['Type'] = self.v.get()
-		# TODO: set demand
-		#self.G.node[self.nodeIndex]['Electric'] = self
-
 		self.G.node[self.nodeIndex]['x'] = self.xEntry.get()
 		self.G.node[self.nodeIndex]['y'] = self.yEntry.get()
 		self.G.node[self.nodeIndex]['z'] = self.zEntry.get()
 
+		# Demands
+		for x in self.systemList:
+			self.G.node[self.nodeIndex][x] = self.systemDict[x].get()
+
 	def initUI(self):
 		# Title
 		self.title = Label(self.parent, text="Node " + str(self.nodeIndex), bg=self.color)
-		self.title.grid(row=0, columnspan=3, sticky=N)
+		self.title.grid(row=0, columnspan=3, sticky=N, pady=10)
 
 		# Name
 		self.nameLabel = Label(self.parent, text="Name:", bg=self.color)
-		self.nameLabel.grid(row=1, column=0)
+		self.nameLabel.grid(row=1, column=0, padx=5)
 
 		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
-		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W)
+		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W, padx=10)
 
 		# Type, Demand, Geometry
 		self.createTypeLabel()
