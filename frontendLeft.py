@@ -67,7 +67,7 @@ class FrontendLeft(Frame):
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
 
-			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList)
+			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, list(self.optionList))
 
 	def undo(self, event=None):
 		itemList=self.systemsCanvas.find_all()
@@ -79,8 +79,8 @@ class FrontendLeft(Frame):
 		if self.v.get()=="Create New":
 			typeLabel = tkSimpleDialog.askstring(title="New System", prompt="Enter a new system")
 			if typeLabel != None:
-				self.optionList.insert(len(self.optionList)-1, typeLabel)
-				self.v.set(self.optionList[len(self.optionList)-2])
+				self.optionList.insert(len(self.optionList)-2, typeLabel)
+				self.v.set(self.optionList[len(self.optionList)-3])
 				self.dropdown.destroy()
 				self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
 				self.dropdown.configure(bg="light blue")

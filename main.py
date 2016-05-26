@@ -2,7 +2,7 @@ from Tkinter import *
 from frontendLeft import *
 from frontendRight import *
 import networkx as nx
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 class Window(Frame):
   

@@ -121,10 +121,10 @@ class FrontendRight(Frame):
 		self.zEntry.grid(row=7, column=2)
 
 	def repopulateData(self):
-		if 'Name' in self.G.node[self.nodeIndex]:
+		if 'Name' in self.G.node[self.nodeIndex] and self.G.node[self.nodeIndex]['Name'] != None:
 			self.nameEntry.delete(0, END)
 			self.nameEntry.insert(0, self.G.node[self.nodeIndex]['Name'])
-		if 'Type' in self.G.node[self.nodeIndex]:
+		if 'Type' in self.G.node[self.nodeIndex] and self.G.node[self.nodeIndex]['Type'] != None:
 			self.v.set(self.G.node[self.nodeIndex]['Type'])
 		if 'x' in self.G.node[self.nodeIndex]:
 			self.xEntry.delete(0, END)
