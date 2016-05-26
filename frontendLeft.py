@@ -32,7 +32,8 @@ class FrontendLeft(Frame):
 	#creates nodes, edges and selection events
 	def createNode(self, event):
 		r = 8
-		self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
+		id = self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node')
+		self.G.add_node(id)
 	
 	def deleteNode(self):
 		pass
@@ -65,7 +66,7 @@ class FrontendLeft(Frame):
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
 
-			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G)
+			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList)
 
 	def undo(self, event=None):
 		itemList=self.systemsCanvas.find_all()
