@@ -10,7 +10,7 @@ class Window(Frame):
         Frame.__init__(self, parent)
          
         self.parent = parent
-        self.G = nx.Graph()
+        self.G = nx.MultiGraph()
         self.initUI()
 
     def onExit(self):
