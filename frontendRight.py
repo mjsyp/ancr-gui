@@ -10,25 +10,25 @@ class FrontendRight(Frame):
 		self.nodeIndex = nodeIndex
 		self.G = G
 
-		# sync Demands with toolbar dropdown, but delete "Create New" and "All"
-		self.systemList = list(systemList)
+		self.systemDict = {}
+		for x in systemList:
+			self.systemDict[x] = 0
+		for x in self.G.node[self.nodeIndex]:
+			if x not in self.systemDict.keys():
+				self.systemDict[x] = 0
+
 		try:
- 			self.systemList.remove('Create New')
- 			self.systemList.remove('Chill Water')
- 			self.systemList.remove('All')
- 		except ValueError:
+			del self.systemDict['x']
+ 			del self.systemDict['y']
+ 			del self.systemDict['z']
+ 			del self.systemDict['Create New']
+ 			del self.systemDict['All']
+ 			del self.systemDict['Name']
+ 			del self.systemDict['Type']
+ 		except KeyError:
  			pass
 
-		for x in self.G.node[self.nodeIndex]:
-			if (x not in ['Name', 'Type', 'x', 'y', 'z'] and x not in systemList):
-				self.systemList.append(x)
-
-		# initialize a dictionary where each system = None
-		self.systemDict = {}
-		for x in self.systemList:
-			self.systemDict[x] = None
-
-		self.color = "dark gray"
+ 		self.color = "dark gray"
 		self.initUI()
 
 	def createTypeLabel(self):
@@ -46,7 +46,7 @@ class FrontendRight(Frame):
 
 		self.createTypeBtn = Button(self.parent, text="Create New", 
 			command=self.createNewType, highlightbackground=self.color)
-		self.createTypeBtn.grid(row=2, column=2)
+		self.createTypeBtn.grid(row=2, column=2, padx=10)
 
 	def createNewType(self):
 		typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
@@ -70,21 +70,21 @@ class FrontendRight(Frame):
 
 		self.numDemands = 0
 
-		for x in self.systemList:
+		for x in self.systemDict.keys():
 			self.createNewDemand(x)
 
 	def createNewDemand(self, label=None):
 		if label == None: # prompt for a label if none was provided as a parameter
 			label = tkSimpleDialog.askstring(title="Label", prompt="Enter a Label Name") # Prompt for label
-			# add new label to systemList
+			# add new key to systemDict
 			if label != None: # check for 'Cancel' option
-				self.systemList.append(label) # add new system to systemList
+				self.systemDict[label] = None
 
 		if label != None: # check for 'Cancel' option
 			# Create new label and corresponding entry
 			self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
 			self.newDemandLabel.grid(row=3+self.numDemands, column=1)
-			newEntry = Entry(self.parent, highlightbackground=self.color)
+			newEntry = Entry(self.parent, highlightbackground=self.color, width=7)
 			newEntry.grid(row=3+self.numDemands, column=2, padx=10)
 			newEntry.insert(0, '0')
 			if label not in self.G.node[self.nodeIndex]:
@@ -127,17 +127,17 @@ class FrontendRight(Frame):
 
 		self.xLabel = Label(self.parent, text="x", bg=self.color)
 		self.xLabel.grid(row=5, column=1, padx=1, pady=1)
-		self.xEntry = Entry(self.parent, highlightbackground=self.color)
+		self.xEntry = Entry(self.parent, highlightbackground=self.color, width=7)
 		self.xEntry.grid(row=5, column=2)
 
 		self.yLabel = Label(self.parent, text="y", bg=self.color)
 		self.yLabel.grid(row=6, column=1, padx=1, pady=1)
-		self.yEntry = Entry(self.parent, highlightbackground=self.color)
+		self.yEntry = Entry(self.parent, highlightbackground=self.color, width=7)
 		self.yEntry.grid(row=6, column=2)
 
 		self.zLabel = Label(self.parent, text="z", bg=self.color)
 		self.zLabel.grid(row=7, column=1, padx=1, pady=1)
-		self.zEntry = Entry(self.parent, highlightbackground=self.color)
+		self.zEntry = Entry(self.parent, highlightbackground=self.color, width=7)
 		self.zEntry.grid(row=7, column=2)
 
 	def repopulateData(self):
@@ -155,20 +155,20 @@ class FrontendRight(Frame):
 		if 'z' in self.G.node[self.nodeIndex]:
 			self.zEntry.delete(0, END)
 			self.zEntry.insert(0, self.G.node[self.nodeIndex]['z'])
-		for x in self.systemList:
+		for x in self.systemDict.keys():
 			self.systemDict[x].delete(0, END)
 			self.systemDict[x].insert(0, self.G.node[self.nodeIndex][x])
 
 	def saveAttributes(self):
 		self.G.node[self.nodeIndex]['Name'] = self.nameEntry.get()
 		self.G.node[self.nodeIndex]['Type'] = self.v.get()
-		self.G.node[self.nodeIndex]['x'] = self.xEntry.get()
-		self.G.node[self.nodeIndex]['y'] = self.yEntry.get()
-		self.G.node[self.nodeIndex]['z'] = self.zEntry.get()
+		self.G.node[self.nodeIndex]['x'] = int(self.xEntry.get())
+		self.G.node[self.nodeIndex]['y'] = int(self.yEntry.get())
+		self.G.node[self.nodeIndex]['z'] = int(self.zEntry.get())
 
 		# Demands
-		for x in self.systemList:
-			self.G.node[self.nodeIndex][x] = self.systemDict[x].get()
+		for x in self.systemDict.keys():
+			self.G.node[self.nodeIndex][x] = int(self.systemDict[x].get())
 
 	def initUI(self):
 		# Title
