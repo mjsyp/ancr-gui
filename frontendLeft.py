@@ -102,6 +102,11 @@ class FrontendLeft(Frame):
 				self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
 				self.dropdown.configure(bg="light blue")
 				self.dropdown.pack(side='left')
+				for nodeitem in self.systemsCanvas.find_withtag('node'):
+					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
+				for edgeitem in self.systemsCanvas.find_withtag('edge'):
+					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+			
 		elif self.v.get()=='All':
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
 				self.systemsCanvas.itemconfig(nodeitem, state='normal')
@@ -110,10 +115,10 @@ class FrontendLeft(Frame):
 			
 		else:
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
-				if self.G.node[nodeitem][self.v.get()] !=0:
-					self.systemsCanvas.itemconfig(nodeitem, state='normal')
-				else:
+				if int(self.G.node[nodeitem][self.v.get()])==0:
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
+				else:
+					self.systemsCanvas.itemconfig(nodeitem, state='normal')
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
 				if (self.systemsCanvas.itemcget(int(self.systemsCanvas.gettags(edgeitem)[1]), 'state')=='normal') and (self.systemsCanvas.itemcget(int(self.systemsCanvas.gettags(edgeitem)[2]), 'state')=='normal'):
 					self.systemsCanvas.itemconfig(edgeitem, state='normal')
