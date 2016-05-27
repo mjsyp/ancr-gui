@@ -96,9 +96,6 @@ class FrontendLeft(Frame):
 		if self.v.get()=="Create New":
 			typeLabel = tkSimpleDialog.askstring(title="New System", prompt="Enter a new system")
 			if typeLabel != None:
-				for nodeitem in self.systemsCanvas.find_withtag('node'):
-					self.G.node[nodeitem][typeLabel] = 0
-
 				self.optionList.insert(len(self.optionList)-2, typeLabel)
 				self.v.set(self.optionList[len(self.optionList)-2])
 				self.dropdown.destroy()
@@ -106,8 +103,12 @@ class FrontendLeft(Frame):
 				self.dropdown.configure(bg="light blue")
 				self.dropdown.pack(side='left')
 
-
-
+				for nodeitem in self.systemsCanvas.find_withtag('node'):
+					self.G.node[nodeitem][typeLabel] = 0
+					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
+				for edgeitem in self.systemsCanvas.find_withtag('edge'):
+					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+			
 		elif self.v.get()=='All':
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
 				self.systemsCanvas.itemconfig(nodeitem, state='normal')
@@ -116,11 +117,10 @@ class FrontendLeft(Frame):
 			
 		else:
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
-				if int(self.G.node[nodeitem][self.v.get()]) != int(0):
-					print "Node " + str(nodeitem) + ": " + str(self.G.node[nodeitem][self.v.get()])
-					self.systemsCanvas.itemconfig(nodeitem, state='normal')
-				else:
+				if int(self.G.node[nodeitem][self.v.get()])==0:
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
+				else:
+					self.systemsCanvas.itemconfig(nodeitem, state='normal')
 
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
 				if (self.systemsCanvas.itemcget(int(self.systemsCanvas.gettags(edgeitem)[1]), 'state')=='normal') and (self.systemsCanvas.itemcget(int(self.systemsCanvas.gettags(edgeitem)[2]), 'state')=='normal'):
