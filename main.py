@@ -10,7 +10,7 @@ class Window(Frame):
         Frame.__init__(self, parent)
          
         self.parent = parent
-        self.G = nx.MultiGraph()
+        self.G = nx.DiGraph()
         self.initUI()
 
     def onExit(self):
@@ -26,7 +26,7 @@ class Window(Frame):
         self.parent.title("GUI")
 
         # Create left and right frames
-        self.leftFrame = Frame(self.parent, height=600, width=600, bg='light blue') #light colored bg to see panel
+        self.leftFrame = Frame(self.parent, height=600, width=700, bg='light blue') #light colored bg to see panel
         self.rightFrame = Frame(self.parent, bg="dark gray", height=600, width=300) #dark colored bg to see panel
 
         self.leftFrame.pack(side="left", fill="both", expand=1)
