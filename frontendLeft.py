@@ -26,6 +26,7 @@ class FrontendLeft(Frame):
 	# function when the 'create edge' button is pressed  
 	def createEdgeButtonClick(self):
 		self.systemsCanvas.unbind('<Button-1>')
+		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<ButtonPress-1>', self.edgeStart)
 		self.systemsCanvas.bind('<ButtonRelease-1>', self.createEdge)
 	
@@ -98,7 +99,7 @@ class FrontendLeft(Frame):
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
 
-			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList)
+			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList, 'node')
 
 	# finds edge overlapping mouse click with a radius of r 
 	def selectEdge(self, event):
@@ -107,13 +108,33 @@ class FrontendLeft(Frame):
 		if len(selected) > 0:
 			selected_tag = self.systemsCanvas.gettags(selected[0])[0]
 			if selected_tag == 'edge':
-				print "edge %s" % (selected[0])
-	
-	def deleteNode(self, event):
-		pass
+				for widget in self.rightFrame.winfo_children():
+					widget.destroy()
 
+				self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList, 'edge')
+	
+	# deletes selected node with radius r and any edges overlapping it in both Tkinter and networkX
+	def deleteNode(self, event):
+		r = 24
+		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
+
+		if (len(selected) > 0):
+			itemTag=self.systemsCanvas.gettags(selected)[0]
+			if itemTag == 'node':
+				self.G.remove_node(selected[0])
+				overlapped = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
+				for x in overlapped:
+					self.systemsCanvas.delete(x)
+
+	# deletes selected edge with radius r in both Tkinter and networkX
 	def deleteEdge(self, event):
-		pass
+		r = 4
+		selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
+		if len(selected) > 0:
+			itemTag = self.systemsCanvas.gettags(selected[0])[0]
+			if itemTag == 'edge':
+				self.G.remove_edge(int(self.systemsCanvas.gettags(selected[0])[1]), int(self.systemsCanvas.gettags(selected[0])[2]))
+				self.systemsCanvas.delete(selected)
 	
 	# deletes last object created on the canvas
 	def undo(self, event=None):
@@ -166,11 +187,15 @@ class FrontendLeft(Frame):
 					self.systemsCanvas.itemconfig(edgeitem, state='normal')
 				else:
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+
+	# Analysis modules for the networkx graph:
+
+	# shows each nodes degree 
+	def nodeDegrees(self):
+		degrees=nx.degree(self.G)
 				
 
-			
-
-
+	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
 	def initUI(self):
 		# creates toolbar: implemented using a frame with dropdown/buttons placed on it
 		#          referenced from http://zetcode.com/gui/tkinter/menustoolbars/
