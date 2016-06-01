@@ -23,6 +23,8 @@ class FrontendRight(Frame):
  			del self.systemDict['z']
  			del self.systemDict['Create New']
  			del self.systemDict['All']
+ 			del self.systemDict['x_coord']
+ 			del self.systemDict['y_coord']
  			del self.systemDict['Name']
  			del self.systemDict['Type']
  		except KeyError:
@@ -46,7 +48,7 @@ class FrontendRight(Frame):
 
 		self.createTypeBtn = Button(self.parent, text="Create New", 
 			command=self.createNewType, highlightbackground=self.color)
-		self.createTypeBtn.grid(row=2, column=2, padx=10)
+		self.createTypeBtn.grid(row=2, column=2)
 
 	def createNewType(self):
 		typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
@@ -84,7 +86,7 @@ class FrontendRight(Frame):
 			# Create new label and corresponding entry
 			self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
 			self.newDemandLabel.grid(row=3+self.numDemands, column=1)
-			newEntry = Entry(self.parent, highlightbackground=self.color, width=7)
+			newEntry = Entry(self.parent, highlightbackground=self.color, width=9)
 			newEntry.grid(row=3+self.numDemands, column=2, padx=10)
 			newEntry.insert(0, '0')
 			if label not in self.G.node[self.nodeIndex]:
@@ -127,17 +129,17 @@ class FrontendRight(Frame):
 
 		self.xLabel = Label(self.parent, text="x", bg=self.color)
 		self.xLabel.grid(row=5, column=1, padx=1, pady=1)
-		self.xEntry = Entry(self.parent, highlightbackground=self.color, width=7)
+		self.xEntry = Entry(self.parent, highlightbackground=self.color, width=9)
 		self.xEntry.grid(row=5, column=2)
 
 		self.yLabel = Label(self.parent, text="y", bg=self.color)
 		self.yLabel.grid(row=6, column=1, padx=1, pady=1)
-		self.yEntry = Entry(self.parent, highlightbackground=self.color, width=7)
+		self.yEntry = Entry(self.parent, highlightbackground=self.color, width=9)
 		self.yEntry.grid(row=6, column=2)
 
 		self.zLabel = Label(self.parent, text="z", bg=self.color)
 		self.zLabel.grid(row=7, column=1, padx=1, pady=1)
-		self.zEntry = Entry(self.parent, highlightbackground=self.color, width=7)
+		self.zEntry = Entry(self.parent, highlightbackground=self.color, width=9)
 		self.zEntry.grid(row=7, column=2)
 
 	def repopulateData(self):

@@ -33,7 +33,7 @@ class FrontendLeft(Frame):
 	def createNode(self, event):
 		r = 8
 		item=self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
-		self.G.add_node(item, Geometry=0, Electric=0, Egress=0, Information=0, x=0, y=0, z=0, Name=None)
+		self.G.add_node(item, Geometry=0, Electric=0, Egress=0, Information=0, x=0, y=0, z=0, Name=None, x_coord=event.x, y_coord=event.y)
 		self.G.node[item]['Chill Water']=0
 
 	def deleteNode(self):
@@ -97,7 +97,7 @@ class FrontendLeft(Frame):
 			typeLabel = tkSimpleDialog.askstring(title="New System", prompt="Enter a new system")
 			if typeLabel != None:
 				self.optionList.insert(len(self.optionList)-2, typeLabel)
-				self.v.set(self.optionList[len(self.optionList)-2])
+				self.v.set(self.optionList[len(self.optionList)-3])
 				self.dropdown.destroy()
 				self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
 				self.dropdown.configure(bg="light blue")
