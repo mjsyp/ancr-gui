@@ -60,8 +60,8 @@ class FrontendLeft(Frame):
 	#creates a red circular node of radius r at the location of the mouse click and initilizes node propoerties
 	def createNode(self, event):
 		r = 8
-		item = self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
-		self.G.add_node(item, Geometry=0, Electric=0, Egress=0, Information=0, x=0, y=0, z=0, Name=None)
+		item=self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
+		self.G.add_node(item, Geometry=0, Electric=0, Egress=0, Information=0, x=0, y=0, z=0, Name=None, x_coord=event.x, y_coord=event.y)
 		self.G.node[item]['Chill Water']=0
 
 	#determines the x and y coordinates of where the edge will start, checks that starting coords are from a node

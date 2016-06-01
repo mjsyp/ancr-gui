@@ -2,6 +2,8 @@ from Tkinter import *
 from frontendLeft import *
 from frontendRight import *
 import networkx as nx
+import tkFileDialog
+import pickle
 #import matplotlib.pyplot as plt
 
 class Window(Frame):
@@ -21,6 +23,12 @@ class Window(Frame):
         s=str(self.G.nodes(data=True))
         outFile.write(s)
         outFile.close()
+
+    def save_as(self):
+        f = tkFileDialog.asksaveasfile(mode='w', defaultextension=".txt")
+        if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
+            return
+        pickle.dump(self.G, open('gui.txt', 'w'))
         
     def initUI(self):
         self.parent.title("GUI")
@@ -44,7 +52,7 @@ class Window(Frame):
         fileTab = Menu(menubar)
         fileTab.add_command(label="Open...")
         fileTab.add_command(label="Save", command=self.save)
-        fileTab.add_command(label="Save As...")
+        fileTab.add_command(label="Save As...", command=self.save_as)
         fileTab.add_command(label="Exit", command=self.onExit)
         menubar.add_cascade(label="File", menu=fileTab)
 
