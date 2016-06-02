@@ -18,8 +18,7 @@ class Window(Frame):
     def exit(self):
         self.quit()
 
-    def save(self):
-        # saves all networkX info in a text file called 'gui.txt' in current working directory
+    def save(self, event=None):
         outFile=open('gui.txt', 'w')
         s=str(self.G.nodes(data=True))
         outFile.write(s)
@@ -52,19 +51,30 @@ class Window(Frame):
 
         # File Tab
         fileTab = Menu(menubar)
-        fileTab.add_command(label="Open...")
-        fileTab.add_command(label="Save", command=self.save)
+        fileTab.add_command(label="Open...", accelerator="Command-O")
+        fileTab.add_command(label="Save", command=self.save, accelerator="Command-S")
         fileTab.add_command(label="Save As...", command=self.save_as)
         fileTab.add_command(label="Exit", command=self.exit)
         menubar.add_cascade(label="File", menu=fileTab)
 
         # Edit Tab
         editTab = Menu(menubar)
-        editTab.add_command(label="Undo", command=geoCanvas.undo)
+        editTab.add_command(label="Undo", command=geoCanvas.undo, accelerator="Command-Z")
         menubar.add_cascade(label="Edit", menu=editTab)
+
+        viewTab = Menu(menubar)
+        viewTab.add_command(label="View Labels")
+        menubar.add_cascade(label="View", menu=viewTab)
+
+        analysisTab = Menu(menubar)
+        analysisTab.add_command(label="Node Degrees", command=geoCanvas.nodeDegrees)
+        menubar.add_cascade(label="Analysis", menu=analysisTab)
 
         self.parent.bind('<Control-z>', geoCanvas.undo)
         self.parent.bind('<Command-z>', geoCanvas.undo)
+        self.parent.bind('<Control-s>', self.save)
+        self.parent.bind('<Command-s>', self.save)
+
 
 def main():
     root = Tk()
