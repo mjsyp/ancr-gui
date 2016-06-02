@@ -163,15 +163,20 @@ class FrontendLeft(Frame):
 				self.dropdown.pack(side='left')
 
 				for nodeitem in self.systemsCanvas.find_withtag('node'):
-					self.G.node[nodeitem][typeLabel] = 0
+					self.G.node[nodeitem][typeLabel] = None
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
 				for edgeitem in self.systemsCanvas.find_withtag('edge'):
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
 
 				# refresh right panel to include new Demand
-				self.systemInfo.createNewDemand(typeLabel)
-				self.systemInfo.systemDict[typeLabel] = None
-				self.systemInfo.saveAttributes()
+				try:
+					self.systemInfo.createNewDemand(typeLabel)
+					self.systemInfo.systemDict[typeLabel] = None
+					self.systemInfo.saveAttributes()
+				# if right panel hasn't been created yet, there will be an Attribute Error
+				# there is no point in refreshing so just pass
+				except AttributeError: 
+					pass
 
 			
 		elif self.v.get() == 'All':

@@ -171,7 +171,7 @@ class FrontendRight(Frame):
 			if 'z' in self.G.node[self.index]:
 				self.zEntry.delete(0, END)
 				self.zEntry.insert(0, self.G.node[self.index]['z'])
-			if 'Notes' in self.G.node[self.nodeIndex]:
+			if 'Notes' in self.G.node[self.index]:
 				self.notes.delete('0.0', END)
 				self.notes.insert('0.0', self.G.node[self.index]['Notes'])
             
@@ -186,16 +186,16 @@ class FrontendRight(Frame):
 			self.G.node[self.index]['x'] = int(self.xEntry.get())
 			self.G.node[self.index]['y'] = int(self.yEntry.get())
 			self.G.node[self.index]['z'] = int(self.zEntry.get())
-            self.G.node[self.index]['Notes'] = self.notes.get('0.0', END)
+			self.G.node[self.index]['Notes'] = self.notes.get('0.0', END)
 
 			# Demands
 			for x in self.systemDict.keys():
-                try:
-                    self.G.node[self.index][x] = int(self.systemDict[x].get())
-                except AttributeError:
-                    pass
-                except ValueError:
-                    pass
+				try:
+					self.G.node[self.index][x] = int(self.systemDict[x].get())
+				except AttributeError:
+					pass
+				except ValueError:
+					pass
 
 	def initUI(self):
 		# Title
