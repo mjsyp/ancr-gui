@@ -27,6 +27,7 @@ class FrontendRight(Frame):
  			del self.systemDict['y_coord']
  			del self.systemDict['Name']
  			del self.systemDict['Type']
+ 			del self.systemDict['Notes']
  		except KeyError:
  			pass
 
@@ -68,7 +69,7 @@ class FrontendRight(Frame):
 
 		self.createDemandBtn = Button(self.parent, text="Create New", 
 			command=self.createNewDemand, highlightbackground=self.color)
-		self.createDemandBtn.grid(row=4, column=1)
+		self.createDemandBtn.grid(row=3, column=1)
 
 		self.numDemands = 0
 
@@ -76,19 +77,21 @@ class FrontendRight(Frame):
 			self.createNewDemand(x)
 
 	def createNewDemand(self, label=None):
-		if label == None: # prompt for a label if none was provided as a parameter
+		# If no label was provided as a parameter, prompt for a label
+		if label == None:
 			label = tkSimpleDialog.askstring(title="Label", prompt="Enter a Label Name") # Prompt for label
-			# add new key to systemDict
-			if label != None: # check for 'Cancel' option
+			# If user didn't hit Cancel dialog window, add new key to systemDict
+			if label != None: 
 				self.systemDict[label] = None
 
-		if label != None: # check for 'Cancel' option
+		# If user didn't hit Cancel in dialog window, continue
+		if label != None:
 			# Create new label and corresponding entry
 			self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
 			self.newDemandLabel.grid(row=3+self.numDemands, column=1)
 			newEntry = Entry(self.parent, highlightbackground=self.color, width=9)
 			newEntry.grid(row=3+self.numDemands, column=2, padx=10)
-			newEntry.insert(0, '0')
+			#newEntry.insert(0, None)
 			if label not in self.G.node[self.nodeIndex]:
 				self.G.node[self.nodeIndex][label] = 0
 			self.systemDict[label] = newEntry
@@ -110,6 +113,10 @@ class FrontendRight(Frame):
 				self.zLabel.grid_forget()
 			if hasattr(self, 'zEntry'):
 				self.zEntry.grid_forget()
+			if hasattr(self, 'notesLabel'):
+				self.notesLabel.grid_forget()
+			if hasattr(self, 'notes'):
+				self.notes.grid_forget()
 
 			# Move down to make room for new demand label
 			self.createDemandBtn.grid(row=4+self.numDemands, column=1)
@@ -120,6 +127,8 @@ class FrontendRight(Frame):
 			self.yEntry.grid(row=6+self.numDemands, column=2)
 			self.zLabel.grid(row=7+self.numDemands, column=1)
 			self.zEntry.grid(row=7+self.numDemands, column=2)
+			self.notesLabel.grid(row=8+self.numDemands, column=0)
+			self.notes.grid(row=8+self.numDemands, column=1, rowspan=8, columnspan=2, pady=5)
 
 			self.numDemands += 1
 
@@ -157,6 +166,10 @@ class FrontendRight(Frame):
 		if 'z' in self.G.node[self.nodeIndex]:
 			self.zEntry.delete(0, END)
 			self.zEntry.insert(0, self.G.node[self.nodeIndex]['z'])
+		if 'Notes' in self.G.node[self.nodeIndex]:
+			self.notes.delete('0.0', END)
+			self.notes.insert('0.0', self.G.node[self.nodeIndex]['Notes'])
+
 		for x in self.systemDict.keys():
 			self.systemDict[x].delete(0, END)
 			self.systemDict[x].insert(0, self.G.node[self.nodeIndex][x])
@@ -167,10 +180,16 @@ class FrontendRight(Frame):
 		self.G.node[self.nodeIndex]['x'] = int(self.xEntry.get())
 		self.G.node[self.nodeIndex]['y'] = int(self.yEntry.get())
 		self.G.node[self.nodeIndex]['z'] = int(self.zEntry.get())
+		self.G.node[self.nodeIndex]['Notes'] = self.notes.get('0.0', END)
 
 		# Demands
 		for x in self.systemDict.keys():
-			self.G.node[self.nodeIndex][x] = int(self.systemDict[x].get())
+			try:
+				self.G.node[self.nodeIndex][x] = int(self.systemDict[x].get())
+			except AttributeError:
+				pass
+			except ValueError:
+				pass
 
 	def initUI(self):
 		# Title
@@ -183,6 +202,12 @@ class FrontendRight(Frame):
 
 		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
 		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W, padx=10)
+
+		# Notes
+		self.notesLabel = Label(self.parent, text="Notes:", bg=self.color)
+		self.notesLabel.grid(row=8, column=0)
+		self.notes = Text(self.parent, height=8, width=23, font='TkDefaultFont')
+		self.notes.grid(row=8, column=1, columnspan=2, rowspan=8, pady=5, padx=10)
 
 		# Type, Demand, Geometry
 		self.createTypeLabel()

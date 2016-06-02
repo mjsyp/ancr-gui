@@ -15,10 +15,11 @@ class Window(Frame):
         self.G = nx.DiGraph()
         self.initUI()
 
-    def onExit(self):
+    def exit(self):
         self.quit()
 
     def save(self):
+        # saves all networkX info in a text file called 'gui.txt' in current working directory
         outFile=open('gui.txt', 'w')
         s=str(self.G.nodes(data=True))
         outFile.write(s)
@@ -45,17 +46,19 @@ class Window(Frame):
         # Use frontendLeft to fill left frame
         geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G)
 
-        # Main Menubar
+        # MAIN MENUBAR
         menubar = Menu(self.parent)
         self.parent.config(menu=menubar)
 
+        # File Tab
         fileTab = Menu(menubar)
         fileTab.add_command(label="Open...")
         fileTab.add_command(label="Save", command=self.save)
         fileTab.add_command(label="Save As...", command=self.save_as)
-        fileTab.add_command(label="Exit", command=self.onExit)
+        fileTab.add_command(label="Exit", command=self.exit)
         menubar.add_cascade(label="File", menu=fileTab)
 
+        # Edit Tab
         editTab = Menu(menubar)
         editTab.add_command(label="Undo", command=geoCanvas.undo)
         menubar.add_cascade(label="Edit", menu=editTab)

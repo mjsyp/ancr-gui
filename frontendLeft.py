@@ -61,8 +61,7 @@ class FrontendLeft(Frame):
 	def createNode(self, event):
 		r = 8
 		item=self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
-		self.G.add_node(item, Geometry=0, Electric=0, Egress=0, Information=0, x=0, y=0, z=0, Name=None, x_coord=event.x, y_coord=event.y)
-		self.G.node[item]['Chill Water']=0
+		self.G.add_node(item, x=0, y=0, z=0, Name=None, x_coord=event.x, y_coord=event.y)
 
 	#determines the x and y coordinates of where the edge will start, checks that starting coords are from a node
 	def edgeStart(self, event):
@@ -147,6 +146,12 @@ class FrontendLeft(Frame):
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
 				for edgeitem in self.systemsCanvas.find_withtag('edge'):
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+
+				# refresh right panel to include new Demand
+				self.systemInfo.createNewDemand(typeLabel)
+				self.systemInfo.systemDict[typeLabel] = None
+				self.systemInfo.saveAttributes()
+
 			
 		elif self.v.get() == 'All':
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
@@ -178,9 +183,9 @@ class FrontendLeft(Frame):
 		self.toolbar.pack()
 
 		#creates systems dropdown menu
-		self.optionList = ['Geometry', 'Electric', 'Egress', 'Information', 'Chill Water', 'All', 'Create New']
+		self.optionList = ['All', 'Create New']
 		self.v = StringVar()
-		self.v.set(self.optionList[5])
+		self.v.set(self.optionList[len(self.optionList) - 2])
 
 		self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
 		self.dropdown.configure(bg=self.color)
