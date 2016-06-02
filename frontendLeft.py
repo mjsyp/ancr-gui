@@ -11,6 +11,11 @@ class FrontendLeft(Frame):
 		self.rightFrame = rightFrame
 		self.G = G
 		self.color = "light blue"
+
+		# stacks keep track of canvas item ID's as they are created/deleted
+		self.undoStack = []
+		self.redoStack = []
+
 		self.initUI()
 
 	#toolbar button click events:
@@ -64,6 +69,8 @@ class FrontendLeft(Frame):
 		item=self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
 		self.G.add_node(item, x=0, y=0, z=0, Name=None, x_coord=event.x, y_coord=event.y)
 
+		self.undoStack.append(item)
+
 	#determines the x and y coordinates of where the edge will start, checks that starting coords are from a node
 	def edgeStart(self, event):
 		r = 24
@@ -88,6 +95,8 @@ class FrontendLeft(Frame):
 			self.G.add_edge(self.startNode[0], self.endNode[0])
 			self.systemsCanvas.addtag_withtag(str(self.startNode[0]), item)
 			self.systemsCanvas.addtag_withtag(str(self.endNode[0]), item)
+
+			self.undoStack.append(item)
 			
 	# finds node enclosed by mouse click with a radius of r and displays node information
 	def selectNode(self, event):
@@ -118,12 +127,20 @@ class FrontendLeft(Frame):
 		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 
 		if (len(selected) > 0):
-			itemTag=self.systemsCanvas.gettags(selected)[0]
+			itemTag = self.systemsCanvas.gettags(selected)[0]
+
 			if itemTag == 'node':
-				self.G.remove_node(selected[0])
+				self.undoStack.append(selected[0]) # add node ID to undo stack
+				self.G.remove_node(selected[0]) # remove node from networkX
+
+				# remove node and any associated edges from Canvas
 				overlapped = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
 				for x in overlapped:
-					self.systemsCanvas.delete(x)
+					#self.systemsCanvas.delete(x)
+					self.systemsCanvas.dtag(x, 'node')
+					self.systemsCanvas.addtag_withtag('deleted', x)
+					self.systemsCanvas.itemconfig(x, state='hidden')
+
 
 	# deletes selected edge with radius r in both Tkinter and networkX
 	def deleteEdge(self, event):
@@ -131,21 +148,58 @@ class FrontendLeft(Frame):
 		selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
 		if len(selected) > 0:
 			itemTag = self.systemsCanvas.gettags(selected[0])[0]
+
 			if itemTag == 'edge':
+				# remove edge from networkX
 				self.G.remove_edge(int(self.systemsCanvas.gettags(selected[0])[1]), int(self.systemsCanvas.gettags(selected[0])[2]))
-				self.systemsCanvas.delete(selected)
+				#self.systemsCanvas.delete(selected)
+				
+				self.undoStack.append(selected[0])
+				self.systemsCanvas.dtag(selected[0])
+				self.systemsCanvas.addtag_withtag('deleted', selected[0])
+				self.systemsCanvas.itemconfig(selected[0], state='hidden')
+
 	
-	# deletes last object created on the canvas
+	# undo last action performed on canvas (creation or deletion) using a stack
 	def undo(self, event=None):
-		itemList = self.systemsCanvas.find_all()
-		if len(itemList) > 0:
-			lastItemIndex = len(itemList)-1
-			lastItemTag = self.systemsCanvas.gettags(itemList[lastItemIndex])[0]
-			if lastItemTag == 'node':
-				self.G.remove_node(itemList[lastItemIndex])
-			elif lastItemTag == 'edge':
-				self.G.remove_edge(int(self.systemsCanvas.gettags(itemList[lastItemIndex])[1]), int(self.systemsCanvas.gettags(itemList[lastItemIndex])[2]))
-			self.systemsCanvas.delete(itemList[lastItemIndex])
+		item = self.undoStack[len(self.undoStack)-1] # save last item on stack
+		self.undoStack.pop() # pop last item from stack
+		self.redoStack.append(item) # add to redoStack
+
+		#print str(item)+ " " + self.systemsCanvas.gettags(item)[0]
+
+		# check what the tag of the item is to determine which action to undo
+		if self.systemsCanvas.gettags(item)[0] == 'deleted': # item was previously deleted
+			self.systemsCanvas.dtag(item) # get rid of 'deleted' tag
+			self.systemsCanvas.itemconfig(item, state='normal') # re-show item
+
+			# re-append 'node' or 'edge' tag accordingly
+			if self.systemsCanvas.type(item) == 'oval': # node
+				self.systemsCanvas.addtag_withtag('node', item)
+			elif self.systemsCanvas.type(item) == 'line': # edge
+				self.systemsCanvas.addtag_withtag('edge', item)
+
+		elif self.systemsCanvas.gettags(item)[0] == 'node': # node was previously created
+			self.G.remove_node(item) # remove node from networkX
+
+			# remove node and any associated edges from Canvas
+			r=4
+			coords = self.systemsCanvas.coords(item)
+			overlapped = self.systemsCanvas.find_overlapping(coords[0]-r, coords[1]-r, coords[0]+r, coords[1]+r)
+
+			for x in overlapped:
+				self.systemsCanvas.dtag(x)
+				self.systemsCanvas.addtag_withtag('deleted', x)
+				self.systemsCanvas.itemconfig(x, state='hidden')
+
+		elif self.systemsCanvas.gettags(item)[0] == 'edge': # node was previously created
+			# remove edge from networkX
+			self.G.remove_edge(int(self.systemsCanvas.gettags(item)[1]), int(self.systemsCanvas.gettags(item)[2]))
+
+			self.systemsCanvas.dtag(item)
+			self.systemsCanvas.addtag_withtag('deleted', item)
+			self.systemsCanvas.itemconfig(item, state='hidden')
+
 
 
 
@@ -226,9 +280,9 @@ class FrontendLeft(Frame):
                         highlightbackground=self.color)
 		self.createEdgeButton = Button(self.toolbar, text="create edge", command=self.createEdgeButtonClick,
                         highlightbackground=self.color)
-		self.selectNodeButton = Button(self.toolbar, text="node select", command=self.selectNodeButtonClick,
+		self.selectNodeButton = Button(self.toolbar, text="select node", command=self.selectNodeButtonClick,
                           highlightbackground=self.color)
-		self.selectEdgeButton = Button(self.toolbar, text="edge select", command=self.selectEdgeButtonClick, highlightbackground=self.color)
+		self.selectEdgeButton = Button(self.toolbar, text="select edge", command=self.selectEdgeButtonClick, highlightbackground=self.color)
 		self.deleteNodeButton = Button(self.toolbar, text='delete node', command=self.deleteNodeButtonClick, highlightbackground=self.color)
 		self.deleteEdgeButton = Button(self.toolbar, text='delete edge', command=self.deleteEdgeButtonClick, highlightbackground=self.color)
 
