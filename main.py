@@ -60,6 +60,7 @@ class Window(Frame):
         # Edit Tab
         editTab = Menu(menubar)
         editTab.add_command(label="Undo", command=geoCanvas.undo, accelerator="Command-Z")
+        editTab.add_command(label="Redo", command=geoCanvas.redo, accelerator="Command-Shift-Z")
         menubar.add_cascade(label="Edit", menu=editTab)
 
         viewTab = Menu(menubar)
@@ -72,6 +73,8 @@ class Window(Frame):
 
         self.parent.bind('<Control-z>', geoCanvas.undo)
         self.parent.bind('<Command-z>', geoCanvas.undo)
+        self.parent.bind('<Control-Z>', geoCanvas.redo)
+        self.parent.bind('<Command-Z>', geoCanvas.redo)
         self.parent.bind('<Control-s>', self.save)
         self.parent.bind('<Command-s>', self.save)
 

@@ -159,25 +159,21 @@ class FrontendLeft(Frame):
 				self.systemsCanvas.addtag_withtag('deleted', selected[0])
 				self.systemsCanvas.itemconfig(selected[0], state='hidden')
 
-	
-	# undo last action performed on canvas (creation or deletion) using a stack
-	def undo(self, event=None):
-		item = self.undoStack[len(self.undoStack)-1] # save last item on stack
-		self.undoStack.pop() # pop last item from stack
-		self.redoStack.append(item) # add to redoStack
-
-		#print str(item)+ " " + self.systemsCanvas.gettags(item)[0]
-
+	def undoRedoAction(self, item):
 		# check what the tag of the item is to determine which action to undo
 		if self.systemsCanvas.gettags(item)[0] == 'deleted': # item was previously deleted
-			self.systemsCanvas.dtag(item) # get rid of 'deleted' tag
+			self.systemsCanvas.dtag(item, 'deleted') # get rid of 'deleted' tag
 			self.systemsCanvas.itemconfig(item, state='normal') # re-show item
 
 			# re-append 'node' or 'edge' tag accordingly
 			if self.systemsCanvas.type(item) == 'oval': # node
+				coords = self.systemsCanvas.coords(item)
+				self.G.add_node(item, x=0, y=0, z=0, Name=None, x_coord=coords[0], y_coord=coords[1])
 				self.systemsCanvas.addtag_withtag('node', item)
+
 			elif self.systemsCanvas.type(item) == 'line': # edge
 				self.systemsCanvas.addtag_withtag('edge', item)
+				# TODO: re-add edge to networkX
 
 		elif self.systemsCanvas.gettags(item)[0] == 'node': # node was previously created
 			self.G.remove_node(item) # remove node from networkX
@@ -188,20 +184,36 @@ class FrontendLeft(Frame):
 			overlapped = self.systemsCanvas.find_overlapping(coords[0]-r, coords[1]-r, coords[0]+r, coords[1]+r)
 
 			for x in overlapped:
-				self.systemsCanvas.dtag(x)
+				self.systemsCanvas.dtag(x, 'node')
+				self.systemsCanvas.dtag(x, 'edge')
 				self.systemsCanvas.addtag_withtag('deleted', x)
 				self.systemsCanvas.itemconfig(x, state='hidden')
 
-		elif self.systemsCanvas.gettags(item)[0] == 'edge': # node was previously created
+		elif self.systemsCanvas.gettags(item)[0] == 'edge': # edge was previously created
 			# remove edge from networkX
 			self.G.remove_edge(int(self.systemsCanvas.gettags(item)[1]), int(self.systemsCanvas.gettags(item)[2]))
 
-			self.systemsCanvas.dtag(item)
+			self.systemsCanvas.dtag(item, 'edge')
 			self.systemsCanvas.addtag_withtag('deleted', item)
 			self.systemsCanvas.itemconfig(item, state='hidden')
 
+	# undo last action performed on canvas (creation or deletion) using a stack
+	def undo(self, event=None):
+		if len(self.undoStack) > 0:
+			item = self.undoStack[len(self.undoStack)-1] # save last item on stack
+			self.undoStack.pop() # pop last item from stack
+			self.redoStack.append(item) # add to redoStack
 
+			self.undoRedoAction(item)
+			
 
+	def redo(self, event=None):
+		if len(self.redoStack) > 0:
+			item = self.redoStack[len(self.redoStack)-1]
+			self.redoStack.pop()
+			self.undoStack.append(item)
+
+			self.undoRedoAction(item)
 
 
 	# creates new system in option menu and only displays nodes with specific system demands
@@ -276,15 +288,18 @@ class FrontendLeft(Frame):
 		self.dropdown.pack(side='left')
 
 		#creates toolbar buttons, with functionality and binds them to their repsective button click function
-		self.createNodeButton = Button(self.toolbar, text="create node", command=self.createNodeButtonClick,
-                        highlightbackground=self.color)
+		self.createNodeButton = Button(self.toolbar, text="create node", command=self.createNodeButtonClick, 
+			highlightbackground=self.color)
 		self.createEdgeButton = Button(self.toolbar, text="create edge", command=self.createEdgeButtonClick,
-                        highlightbackground=self.color)
+			highlightbackground=self.color)
 		self.selectNodeButton = Button(self.toolbar, text="select node", command=self.selectNodeButtonClick,
-                          highlightbackground=self.color)
-		self.selectEdgeButton = Button(self.toolbar, text="select edge", command=self.selectEdgeButtonClick, highlightbackground=self.color)
-		self.deleteNodeButton = Button(self.toolbar, text='delete node', command=self.deleteNodeButtonClick, highlightbackground=self.color)
-		self.deleteEdgeButton = Button(self.toolbar, text='delete edge', command=self.deleteEdgeButtonClick, highlightbackground=self.color)
+			highlightbackground=self.color)
+		self.selectEdgeButton = Button(self.toolbar, text="select edge", command=self.selectEdgeButtonClick, 
+			highlightbackground=self.color)
+		self.deleteNodeButton = Button(self.toolbar, text='delete node', command=self.deleteNodeButtonClick, 
+			highlightbackground=self.color)
+		self.deleteEdgeButton = Button(self.toolbar, text='delete edge', command=self.deleteEdgeButtonClick, 
+			highlightbackground=self.color)
 
 		self.deleteEdgeButton.pack(side='right')
 		self.deleteNodeButton.pack(side='right')
