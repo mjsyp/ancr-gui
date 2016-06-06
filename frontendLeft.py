@@ -66,7 +66,7 @@ class FrontendLeft(Frame):
 	#creates a red circular node of radius r at the location of the mouse click and initilizes node propoerties
 	def createNode(self, event):
 		r = 8
-		item=self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
+		item = self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
 		self.G.add_node(item, x=0, y=0, z=0, Name=None, x_coord=event.x, y_coord=event.y)
 
 		self.undoStack.append(item)
@@ -76,10 +76,10 @@ class FrontendLeft(Frame):
 		r = 24
 		self.startNode = ()
 		self.startNode = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
-		if len(self.startNode)>0:
-			self.startNodeCoords=self.systemsCanvas.coords(self.startNode[0])
-			self.startNodeX=(self.startNodeCoords[0]+self.startNodeCoords[2])/2
-			self.startNodeY=(self.startNodeCoords[1]+self.startNodeCoords[3])/2
+		if len(self.startNode) > 0:
+			self.startNodeCoords = self.systemsCanvas.coords(self.startNode[0])
+			self.startNodeX = (self.startNodeCoords[0] + self.startNodeCoords[2]) / 2
+			self.startNodeY = (self.startNodeCoords[1] + self.startNodeCoords[3]) / 2
 	
 	# determines the x and y coordinates of where the edge will terminate, and then creates a line from startNode to endNode
 	# will only allow the creation of an edge to happen between two nodes 
@@ -87,11 +87,11 @@ class FrontendLeft(Frame):
 		r = 24
 		self.endNode = ()
 		self.endNode = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
-		if (len(self.startNode)>0) and (len(self.endNode)>0):
-			self.endNodeCoords=self.systemsCanvas.coords(self.endNode[0])
-			self.endNodeX=(self.endNodeCoords[0]+self.endNodeCoords[2])/2
-			self.endNodeY=(self.endNodeCoords[1]+self.endNodeCoords[3])/2 	
-			item=self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge')
+		if (len(self.startNode) > 0) and (len(self.endNode) > 0):
+			self.endNodeCoords = self.systemsCanvas.coords(self.endNode[0])
+			self.endNodeX = (self.endNodeCoords[0] + self.endNodeCoords[2]) / 2
+			self.endNodeY = (self.endNodeCoords[1] + self.endNodeCoords[3]) / 2 	
+			item = self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge')
 			self.G.add_edge(self.startNode[0], self.endNode[0])
 			self.systemsCanvas.addtag_withtag(str(self.startNode[0]), item)
 			self.systemsCanvas.addtag_withtag(str(self.endNode[0]), item)
@@ -136,7 +136,6 @@ class FrontendLeft(Frame):
 				# remove node and any associated edges from Canvas
 				overlapped = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
 				for x in overlapped:
-					#self.systemsCanvas.delete(x)
 					self.systemsCanvas.dtag(x, 'node')
 					self.systemsCanvas.addtag_withtag('deleted', x)
 					self.systemsCanvas.itemconfig(x, state='hidden')
@@ -146,22 +145,35 @@ class FrontendLeft(Frame):
 	def deleteEdge(self, event):
 		r = 4
 		selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
-		if len(selected) > 0:
-			itemTag = self.systemsCanvas.gettags(selected[0])[0]
 
-			if itemTag == 'edge':
+		if len(selected) > 0:
+			if self.systemsCanvas.type(selected[0]) == 'line':
 				# remove edge from networkX
-				self.G.remove_edge(int(self.systemsCanvas.gettags(selected[0])[1]), int(self.systemsCanvas.gettags(selected[0])[2]))
-				#self.systemsCanvas.delete(selected)
+				nodes = [n for n in self.systemsCanvas.gettags(selected[0]) if n.isdigit()]
+				self.G.remove_edge(int(nodes[0]), int(nodes[1]))
 				
 				self.undoStack.append(selected[0])
-				self.systemsCanvas.dtag(selected[0])
+				self.systemsCanvas.dtag(selected[0], 'edge')
 				self.systemsCanvas.addtag_withtag('deleted', selected[0])
 				self.systemsCanvas.itemconfig(selected[0], state='hidden')
 
+
+	def checkTag(self, item):
+		for x in self.systemsCanvas.gettags(item):
+			if x == 'deleted':
+				return 'deleted'
+			elif x == 'node':
+				return 'node'
+			elif x == 'edge':
+				return 'edge'
+
+		return 'none'
+
 	def undoRedoAction(self, item):
+		tag = self.checkTag(item)
+
 		# check what the tag of the item is to determine which action to undo
-		if self.systemsCanvas.gettags(item)[0] == 'deleted': # item was previously deleted
+		if tag == 'deleted': # item was previously deleted
 			self.systemsCanvas.dtag(item, 'deleted') # get rid of 'deleted' tag
 			self.systemsCanvas.itemconfig(item, state='normal') # re-show item
 
@@ -173,9 +185,13 @@ class FrontendLeft(Frame):
 
 			elif self.systemsCanvas.type(item) == 'line': # edge
 				self.systemsCanvas.addtag_withtag('edge', item)
-				# TODO: re-add edge to networkX
 
-		elif self.systemsCanvas.gettags(item)[0] == 'node': # node was previously created
+				# re-add edge to networkX
+				nodes = [n for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+				self.G.add_edge(int(nodes[0]), int(nodes[1]))
+
+
+		elif tag == 'node': # node was previously created
 			self.G.remove_node(item) # remove node from networkX
 
 			# remove node and any associated edges from Canvas
@@ -189,9 +205,10 @@ class FrontendLeft(Frame):
 				self.systemsCanvas.addtag_withtag('deleted', x)
 				self.systemsCanvas.itemconfig(x, state='hidden')
 
-		elif self.systemsCanvas.gettags(item)[0] == 'edge': # edge was previously created
+		elif tag == 'edge': # edge was previously created
 			# remove edge from networkX
-			self.G.remove_edge(int(self.systemsCanvas.gettags(item)[1]), int(self.systemsCanvas.gettags(item)[2]))
+			nodes = [n for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+			self.G.remove_edge(int(nodes[0]), int(nodes[1]))
 
 			self.systemsCanvas.dtag(item, 'edge')
 			self.systemsCanvas.addtag_withtag('deleted', item)
@@ -244,7 +261,6 @@ class FrontendLeft(Frame):
 				except AttributeError: 
 					pass
 
-			
 		elif self.v.get() == 'All':
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
 				self.systemsCanvas.itemconfig(nodeitem, state='normal')
