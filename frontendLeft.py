@@ -134,6 +134,8 @@ class FrontendLeft(Frame):
 			self.G.node[item][key] = self.D.node[item][key]
 		self.D.remove_node(item)
 
+
+
 	# deletes selected node with radius r and any edges overlapping it in both Tkinter and networkX
 	def deleteNode(self, event):
 		r = 24
@@ -226,7 +228,10 @@ class FrontendLeft(Frame):
 		elif tag == 'edge': # edge was previously created
 			# remove edge from networkX
 			nodes = [n for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-			self.G.remove_edge(int(nodes[0]), int(nodes[1]))
+			try:
+				self.G.remove_edge(int(nodes[0]), int(nodes[1]))
+			except nx.NetworkXError:
+				pass
 
 			self.systemsCanvas.dtag(item, 'edge')
 			self.systemsCanvas.addtag_withtag('deleted', item)
