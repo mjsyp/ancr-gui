@@ -13,6 +13,7 @@ class Window(Frame):
          
         self.parent = parent
         self.G = nx.DiGraph()
+        self.D = nx.DiGraph()
         self.initUI()
 
     def exit(self):
@@ -43,7 +44,7 @@ class Window(Frame):
         self.rightFrame.pack_propagate(0)
 
         # Use frontendLeft to fill left frame
-        geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G)
+        geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G, self.D)
 
         # MAIN MENUBAR
         menubar = Menu(self.parent)
