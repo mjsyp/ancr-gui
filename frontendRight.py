@@ -19,19 +19,12 @@ class FrontendRight(Frame):
 				if x not in self.systemDict.keys():
 					self.systemDict[x] = 0
 
-		try:
-			del self.systemDict['x']
- 			del self.systemDict['y']
- 			del self.systemDict['z']
- 			del self.systemDict['Create New']
- 			del self.systemDict['All']
- 			del self.systemDict['x_coord']
- 			del self.systemDict['y_coord']
- 			del self.systemDict['Name']
- 			del self.systemDict['Type']
- 			del self.systemDict['Notes']
- 		except KeyError:
- 			pass
+		# delete unwanted keys that result from syncing main optionList with Demand
+		for x in ['x', 'y', 'z', 'Create New', 'All', 'x_coord', 'y_coord', 'Name', 'Type', 'Notes']:
+			try:
+				del self.systemDict[x]
+ 			except KeyError:
+ 				pass
 
  		self.color = "dark gray"
 		self.initUI()

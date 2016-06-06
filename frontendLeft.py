@@ -99,6 +99,7 @@ class FrontendLeft(Frame):
 
 			self.undoStack.append(item)
 			
+			
 	# finds node enclosed by mouse click with a radius of r and displays node information
 	def selectNode(self, event):
 		r = 24
@@ -122,7 +123,7 @@ class FrontendLeft(Frame):
 
 				self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList, 'edge')
 	
-	
+
 	# deletes node with ID=item from G_delete; adds node along with attributes to G_add
 	def deleteNodeNX(self, item, G_delete, G_add):
 		G_add.add_node(item)
