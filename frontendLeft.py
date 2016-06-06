@@ -122,18 +122,22 @@ class FrontendLeft(Frame):
 
 				self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList, 'edge')
 	
-	def deleteNodeNX(self, item):
-		self.D.add_node(item)
-		for key in self.G.node[item]:
-			self.D.node[item][key] = self.G.node[item][key]
-		self.G.remove_node(item)
+	
+	# deletes node with ID=item from G_delete; adds node along with attributes to G_add
+	def deleteNodeNX(self, item, G_delete, G_add):
+		G_add.add_node(item)
+		for key in G_delete.node[item]:
+			G_add.node[item][key] = G_delete.node[item][key]
+		G_delete.remove_node(item)
 
-	def reAddNodeNX(self, item):
-		self.G.add_node(item)
-		for key in self.D.node[item]:
-			self.G.node[item][key] = self.D.node[item][key]
-		self.D.remove_node(item)
-
+	# deletes edge with ID=item from G_delete; adds edge to G_add
+	def deleteEdgeNX(self, item, G_delete, G_add):
+		nodes = [n for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+		G_add.add_edge(int(nodes[0]), int(nodes[1]))
+		try:
+			G_delete.remove_edge(int(nodes[0]), int(nodes[1]))
+		except nx.NetworkXError:
+			pass
 
 
 	# deletes selected node with radius r and any edges overlapping it in both Tkinter and networkX
@@ -146,7 +150,7 @@ class FrontendLeft(Frame):
 
 			if itemTag == 'node':
 				# remove node and any associated edges from NetworkX
-				self.deleteNodeNX(selected[0])
+				self.deleteNodeNX(selected[0], self.G, self.D)
 
 				# remove node and any associated edges from Canvas
 				overlapped = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
@@ -169,7 +173,7 @@ class FrontendLeft(Frame):
 			if self.systemsCanvas.type(selected[0]) == 'line':
 				# remove edge from networkX
 				nodes = [n for n in self.systemsCanvas.gettags(selected[0]) if n.isdigit()]
-				self.G.remove_edge(int(nodes[0]), int(nodes[1]))
+				self.deleteEdgeNX(selected[0], self.G, self.D)
 				
 				self.undoStack.append(selected[0])
 				self.systemsCanvas.dtag(selected[0], 'edge')
@@ -199,18 +203,13 @@ class FrontendLeft(Frame):
 
 			# re-append 'node' or 'edge' tag accordingly
 			if self.systemsCanvas.type(item) == 'oval': # node
-				#coords = self.systemsCanvas.coords(item)
-				#self.G.add_node(item, x=0, y=0, z=0, Name=None, x_coord=coords[0], y_coord=coords[1])
-				self.reAddNodeNX(item)
 				self.systemsCanvas.addtag_withtag('node', item)
+				self.deleteNodeNX(item, self.D, self.G) # re-add node to networkX
 
 			elif self.systemsCanvas.type(item) == 'line': # edge
 				self.systemsCanvas.addtag_withtag('edge', item)
-
-				# re-add edge to networkX
-				nodes = [n for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-				self.G.add_edge(int(nodes[0]), int(nodes[1]))
-
+				self.deleteEdgeNX(item, self.D, self.G) # re-add edge to networkX
+				
 		elif tag == 'node': # node was previously created
 			self.deleteNodeNX(item) # remove node from networkX
 
@@ -228,10 +227,7 @@ class FrontendLeft(Frame):
 		elif tag == 'edge': # edge was previously created
 			# remove edge from networkX
 			nodes = [n for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-			try:
-				self.G.remove_edge(int(nodes[0]), int(nodes[1]))
-			except nx.NetworkXError:
-				pass
+			self.deleteEdgeNX(item, self.G, self.D)
 
 			self.systemsCanvas.dtag(item, 'edge')
 			self.systemsCanvas.addtag_withtag('deleted', item)
