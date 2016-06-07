@@ -87,45 +87,20 @@ class FrontendRight(Frame):
 			newEntry = Entry(self.parent, highlightbackground=self.color, width=9)
 			newEntry.grid(row=3+self.numDemands, column=2, padx=10)
 			
+			# add the label to NetworkX and initialize its value to 0
 			#newEntry.insert(0, '0')
 			if self.type == 'node':
 				if label not in self.G.node[self.index]:
 					self.G.node[self.index][label] = 0
 				self.systemDict[label] = newEntry
 
-			# delete existing buttons/labels
-			if hasattr(self, 'createDemandBtn'):
-				self.createDemandBtn.grid_forget()
-			if hasattr(self, 'geometryLabel'):
-				self.geometryLabel.grid_forget()
-			if hasattr(self, 'xLabel'):
-				self.xLabel.grid_forget()
-			if hasattr(self, 'xEntry'):
-				self.xEntry.grid_forget()
-			if hasattr(self, 'yLabel'):
-				self.yLabel.grid_forget()
-			if hasattr(self, 'yEntry'):
-				self.yEntry.grid_forget()
-			if hasattr(self, 'zLabel'):
-				self.zLabel.grid_forget()
-			if hasattr(self, 'zEntry'):
-				self.zEntry.grid_forget()
-			if hasattr(self, 'notesLabel'):
-				self.notesLabel.grid_forget()
-			if hasattr(self, 'notes'):
-				self.notes.grid_forget()
-
-			# Move down to make room for new demand label
+			# move widgets down to make room for new demand label
 			self.createDemandBtn.grid(row=4+self.numDemands, column=1)
-			self.geometryLabel.grid(row=5+self.numDemands, column=0)
-			self.xLabel.grid(row=5+self.numDemands, column=1)
-			self.xEntry.grid(row=5+self.numDemands, column=2)
-			self.yLabel.grid(row=6+self.numDemands, column=1)
-			self.yEntry.grid(row=6+self.numDemands, column=2)
-			self.zLabel.grid(row=7+self.numDemands, column=1)
-			self.zEntry.grid(row=7+self.numDemands, column=2)
-			self.notesLabel.grid(row=8+self.numDemands, column=0)
-			self.notes.grid(row=8+self.numDemands, column=1, rowspan=8, columnspan=2, pady=5)
+
+			for label in self.parent.grid_slaves():
+				if int(label.grid_info()["row"]) > (4 + self.numDemands):
+					newRow = int(label.grid_info()["row"]) + self.numDemands + 1
+					label.grid_configure(row=newRow)
 
 			self.numDemands += 1
 

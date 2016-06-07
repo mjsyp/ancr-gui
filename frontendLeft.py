@@ -62,7 +62,7 @@ class FrontendLeft(Frame):
 
 
 	
-	#creation, selection, and deletion of nodes/edges events:
+	"""---------------creation, selection, and deletion of nodes/edges events:---------------"""
 
 	#creates a red circular node of radius r at the location of the mouse click and initilizes node propoerties
 	def createNode(self, event):
@@ -99,7 +99,7 @@ class FrontendLeft(Frame):
 
 			self.undoStack.append(item)
 			
-			
+
 	# finds node enclosed by mouse click with a radius of r and displays node information
 	def selectNode(self, event):
 		r = 24
