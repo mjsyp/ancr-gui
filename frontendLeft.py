@@ -27,6 +27,8 @@ class FrontendLeft(Frame):
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.createNode)
+		self.systemsCanvas.itemconfig('node', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black')
 	
 	# binds mouse clicks to the startEdge function and binds mouse click releases to the createEdge
 	# function when the 'create edge' button is pressed  
@@ -35,30 +37,40 @@ class FrontendLeft(Frame):
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<ButtonPress-1>', self.edgeStart)
 		self.systemsCanvas.bind('<ButtonRelease-1>', self.createEdge)
+		self.systemsCanvas.itemconfig('node', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black')
 	
 	# binds mouse clicks to the selectNode function when the 'select node' button is pressed 
 	def selectNodeButtonClick(self):
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.selectNode)
+		self.systemsCanvas.itemconfig('node', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black')
 	
 	# binds mouse clicks to the selectEdge function when the 'select edge' button is pressed 
 	def selectEdgeButtonClick(self):
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.selectEdge)
+		self.systemsCanvas.itemconfig('node', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black')
 	
 	# binds mouse clicks to the deleteNode function when the 'delete node' button is pressed 
 	def deleteNodeButtonClick(self):
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.deleteNode)
+		self.systemsCanvas.itemconfig('node', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black')
 	
 	# binds mouse clicks to the deleteEdge function when the 'delete edge' button is pressed 
 	def deleteEdgeButtonClick(self):
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.deleteEdge)
+		self.systemsCanvas.itemconfig('node', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black')
 
 
 	
@@ -100,29 +112,37 @@ class FrontendLeft(Frame):
 			self.undoStack.append(item)
 			
 			
-	# finds node enclosed by mouse click with a radius of r and displays node information
+	# finds node enclosed by mouse click with a radius of r, changes node color and displays node information
 	def selectNode(self, event):
-		r = 24
+		r = 18
 		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
-
+		self.systemsCanvas.itemconfig('node', fill='red')
 		if (len(selected) > 0):
+			self.systemsCanvas.itemconfig(selected[0], fill='green')
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
 
 			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList, 'node')
+		else:
+			for widget in self.rightFrame.winfo_children():
+				widget.destroy()
 
-	# finds edge overlapping mouse click with a radius of r 
+	# finds edge overlapping mouse click with a radius of r, changes edge color and displays edge information
 	def selectEdge(self, event):
 		r = 4
 		selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
+		self.systemsCanvas.itemconfig('edge', fill='black')
 		if len(selected) > 0:
 			selected_tag = self.systemsCanvas.gettags(selected[0])[0]
 			if selected_tag == 'edge':
+				self.systemsCanvas.itemconfig(selected[0], fill='green')
 				for widget in self.rightFrame.winfo_children():
 					widget.destroy()
 
 				self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList, 'edge')
-	
+		else:
+			for widget in self.rightFrame.winfo_children():
+				widget.destroy()
 
 	# deletes node with ID=item from G_delete; adds node along with attributes to G_add
 	def deleteNodeNX(self, item, G_delete, G_add):
@@ -180,6 +200,20 @@ class FrontendLeft(Frame):
 				self.systemsCanvas.dtag(selected[0], 'edge')
 				self.systemsCanvas.addtag_withtag('deleted', selected[0])
 				self.systemsCanvas.itemconfig(selected[0], state='hidden')
+	
+	# shows all node names when' Show Labels' is clicked
+	def showLabels(self):
+		for item in self.systemsCanvas.find_withtag('node'):
+			nodeName = self.G.node[item]['Name']
+			if nodeName != None:
+				nodeLabel=Label(self.systemsCanvas, text=nodeName)
+				nodeLabel.place(x=self.G.node[item]['x_coord'], y=self.G.node[item]['y_coord']-20, anchor='center')
+
+	# hides all node names when 'Hide Labels' is clicked
+	def hideLabels(self):
+		for widget in self.systemsCanvas.winfo_children():
+				widget.destroy()
+
 
 
 	def checkTag(self, item):
