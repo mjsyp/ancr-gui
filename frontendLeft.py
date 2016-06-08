@@ -121,7 +121,6 @@ class FrontendLeft(Frame):
 			self.systemsCanvas.itemconfig(selected[0], fill='green')
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
-
 			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList, 'node')
 		else:
 			for widget in self.rightFrame.winfo_children():

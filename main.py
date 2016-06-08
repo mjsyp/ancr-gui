@@ -4,7 +4,7 @@ from frontendRight import *
 import networkx as nx
 import tkFileDialog
 import pickle
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 class Window(Frame):
   
@@ -38,6 +38,9 @@ class Window(Frame):
             return
         else:
             self.G = pickle.load(open(str(f)))
+            for widget in self.leftFrame.winfo_children():
+                widget.destroy()
+            self.geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G, self.D)
             for nodeNum in self.G.nodes():
                 r = 8
                 self.geoCanvas.systemsCanvas.create_oval(self.G.node[nodeNum]['x_coord']-r, self.G.node[nodeNum]['y_coord']-r, self.G.node[nodeNum]['x_coord']+r, self.G.node[nodeNum]['y_coord']+r, fill='red', tag='node') 
@@ -102,8 +105,8 @@ def main():
     app = Window(root)
     root.mainloop()  
     #to see the networkx representation of the graph after exiting the gui:
-    #nx.draw(app.G)
-    #plt.show()
+    nx.draw(app.G)
+    plt.show()
 
 
 if __name__ == '__main__':
