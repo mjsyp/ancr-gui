@@ -4,7 +4,7 @@ from frontendRight import *
 import networkx as nx
 import tkFileDialog
 import pickle
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 class Window(Frame):
   
@@ -41,27 +41,12 @@ class Window(Frame):
             for widget in self.leftFrame.winfo_children():
                 widget.destroy()
             self.geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G, self.D)
+            self.createTabs()
             for nodeNum in self.G.nodes():
                 r = 8
                 self.geoCanvas.systemsCanvas.create_oval(self.G.node[nodeNum]['x_coord']-r, self.G.node[nodeNum]['y_coord']-r, self.G.node[nodeNum]['x_coord']+r, self.G.node[nodeNum]['y_coord']+r, fill='red', tag='node') 
 
-
-        
-    def initUI(self):
-        self.parent.title("GUI")
-
-        # Create left and right frames
-        self.leftFrame = Frame(self.parent, height=600, width=700, bg='light blue') #light colored bg to see panel
-        self.rightFrame = Frame(self.parent, bg="dark gray", height=600, width=300) #dark colored bg to see panel
-
-        self.leftFrame.pack(side="left", fill="both", expand=1)
-        self.leftFrame.pack_propagate(0)
-        self.rightFrame.pack(side="right", fill="y", expand=0)
-        self.rightFrame.pack_propagate(0)
-
-        # Use frontendLeft to fill left frame
-        self.geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G, self.D)
-
+    def createTabs(self):
         # MAIN MENUBAR
         menubar = Menu(self.parent)
         self.parent.config(menu=menubar)
@@ -99,14 +84,31 @@ class Window(Frame):
         self.parent.bind('<Control-s>', self.save)
         self.parent.bind('<Command-s>', self.save)
 
+    def initUI(self):
+        self.parent.title("GUI")
+
+        # Create left and right frames
+        self.leftFrame = Frame(self.parent, height=600, width=700, bg='light blue') #light colored bg to see panel
+        self.rightFrame = Frame(self.parent, bg="dark gray", height=600, width=300) #dark colored bg to see panel
+
+        self.leftFrame.pack(side="left", fill="both", expand=1)
+        self.leftFrame.pack_propagate(0)
+        self.rightFrame.pack(side="right", fill="y", expand=0)
+        self.rightFrame.pack_propagate(0)
+
+        # Use frontendLeft to fill left frame
+        self.geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G, self.D)
+
+        self.createTabs()
+
 
 def main():
     root = Tk()
     app = Window(root)
     root.mainloop()  
     #to see the networkx representation of the graph after exiting the gui:
-    nx.draw(app.G)
-    plt.show()
+    #nx.draw(app.G)
+    #plt.show()
 
 
 if __name__ == '__main__':

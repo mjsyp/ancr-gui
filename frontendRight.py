@@ -144,8 +144,9 @@ class FrontendRight(Frame):
 				self.notes.insert('0.0', self.G.node[self.index]['Notes'])
             
 			for x in self.systemDict.keys():
-				self.systemDict[x].delete(0, END)
-				self.systemDict[x].insert(0, self.G.node[self.index][x])
+				if self.G.node[self.index][x] != None:
+					self.systemDict[x].delete(0, END)
+					self.systemDict[x].insert(0, self.G.node[self.index][x])
 
 	def saveAttributes(self):
 		if self.type == 'node':

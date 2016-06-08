@@ -132,9 +132,10 @@ class FrontendLeft(Frame):
 		selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
 		self.systemsCanvas.itemconfig('edge', fill='black')
 		if len(selected) > 0:
-			selected_tag = self.systemsCanvas.gettags(selected[0])[0]
-			if selected_tag == 'edge':
+			# if the item selected is a line (edge), make edge green and display right panel
+			if self.systemsCanvas.type(selected[0]) == 'line':
 				self.systemsCanvas.itemconfig(selected[0], fill='green')
+
 				for widget in self.rightFrame.winfo_children():
 					widget.destroy()
 
@@ -245,7 +246,7 @@ class FrontendLeft(Frame):
 				self.deleteEdgeNX(item, self.D, self.G) # re-add edge to networkX
 				
 		elif tag == 'node': # node was previously created
-			self.deleteNodeNX(item) # remove node from networkX
+			self.deleteNodeNX(item, self.G, self.D) # remove node from networkX
 
 			# remove node and any associated edges from Canvas
 			r=4
@@ -305,15 +306,11 @@ class FrontendLeft(Frame):
 				for edgeitem in self.systemsCanvas.find_withtag('edge'):
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
 
-				# refresh right panel to include new Demand
-				try:
+				# refresh right panel to include new Demand if a node is currently selected
+				if len(self.rightFrame.winfo_children()) > 0:
 					self.systemInfo.createNewDemand(typeLabel)
 					self.systemInfo.systemDict[typeLabel] = None
 					self.systemInfo.saveAttributes()
-				# if right panel hasn't been created yet, there will be an Attribute Error
-				# there is no point in refreshing so just pass
-				except AttributeError: 
-					pass
 
 		elif self.v.get() == 'All':
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
