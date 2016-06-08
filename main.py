@@ -26,10 +26,23 @@ class Window(Frame):
         outFile.close()
 
     def save_as(self):
-        f = tkFileDialog.asksaveasfile(mode='w', defaultextension=".txt")
+        f = tkFileDialog.asksaveasfilename(defaultextension=".txt")
         if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
             return
-        pickle.dump(self.G, open('gui.txt', 'w'))
+        else:
+            pickle.dump(self.G, open(str(f), 'w'))
+
+    def open(self):
+        f = tkFileDialog.askopenfilename()
+        if f is None:
+            return
+        else:
+            self.G = pickle.load(open(str(f)))
+            for nodeNum in self.G.nodes():
+                r = 8
+                self.geoCanvas.systemsCanvas.create_oval(self.G.node[nodeNum]['x_coord']-r, self.G.node[nodeNum]['y_coord']-r, self.G.node[nodeNum]['x_coord']+r, self.G.node[nodeNum]['y_coord']+r, fill='red', tag='node') 
+
+
         
     def initUI(self):
         self.parent.title("GUI")
@@ -44,7 +57,7 @@ class Window(Frame):
         self.rightFrame.pack_propagate(0)
 
         # Use frontendLeft to fill left frame
-        geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G, self.D)
+        self.geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G, self.D)
 
         # MAIN MENUBAR
         menubar = Menu(self.parent)
@@ -52,7 +65,7 @@ class Window(Frame):
 
         # File Tab
         fileTab = Menu(menubar)
-        fileTab.add_command(label="Open...", accelerator="Command-O")
+        fileTab.add_command(label="Open...", accelerator="Command-O", command=self.open)
         fileTab.add_command(label="Save", command=self.save, accelerator="Command-S")
         fileTab.add_command(label="Save As...", command=self.save_as)
         fileTab.add_command(label="Exit", command=self.exit)
@@ -60,22 +73,26 @@ class Window(Frame):
 
         # Edit Tab
         editTab = Menu(menubar)
-        editTab.add_command(label="Undo", command=geoCanvas.undo, accelerator="Command-Z")
-        editTab.add_command(label="Redo", command=geoCanvas.redo, accelerator="Command-Shift-Z")
+        editTab.add_command(label="Undo", command=self.geoCanvas.undo, accelerator="Command-Z")
+        editTab.add_command(label="Redo", command=self.geoCanvas.redo, accelerator="Command-Shift-Z")
         menubar.add_cascade(label="Edit", menu=editTab)
 
+        #View Tab
         viewTab = Menu(menubar)
-        viewTab.add_command(label="View Labels")
+        viewTab.add_command(label="Show Labels", command=self.geoCanvas.showLabels)
+        viewTab.add_command(label="Hide Labels", command=self.geoCanvas.hideLabels)
         menubar.add_cascade(label="View", menu=viewTab)
 
+        #Analysis Tab
         analysisTab = Menu(menubar)
-        analysisTab.add_command(label="Node Degrees", command=geoCanvas.nodeDegrees)
+        analysisTab.add_command(label="Node Degrees", command=self.geoCanvas.nodeDegrees)
         menubar.add_cascade(label="Analysis", menu=analysisTab)
 
-        self.parent.bind('<Control-z>', geoCanvas.undo)
-        self.parent.bind('<Command-z>', geoCanvas.undo)
-        self.parent.bind('<Control-Z>', geoCanvas.redo)
-        self.parent.bind('<Command-Z>', geoCanvas.redo)
+        #Binds submenus to their shortcut key
+        self.parent.bind('<Control-z>', self.geoCanvas.undo)
+        self.parent.bind('<Command-z>', self.geoCanvas.undo)
+        self.parent.bind('<Control-Z>', self.geoCanvas.redo)
+        self.parent.bind('<Command-Z>', self.geoCanvas.redo)
         self.parent.bind('<Control-s>', self.save)
         self.parent.bind('<Command-s>', self.save)
 
