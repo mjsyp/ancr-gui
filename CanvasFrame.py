@@ -189,7 +189,7 @@ class CanvasFrame(Frame):
 		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 
 		if (len(selected) > 0):
-			itemTag = self.systemsCanvas.gettags(selected)[0]
+			itemTag = self.systemsCanvas.gettags(selected[0])[0]
 
 			if itemTag == 'node':
 				# remove node and any associated edges from Canvas
@@ -198,6 +198,8 @@ class CanvasFrame(Frame):
 
 				for x in overlapped:
 					if self.systemsCanvas.type(x) == 'line':
+						# add 'deleted' tag to ea. object x, and make it hidden
+
 						self.systemsCanvas.addtag_withtag('deleted', x)
 						self.systemsCanvas.itemconfig(x, state='hidden')
 
@@ -205,7 +207,6 @@ class CanvasFrame(Frame):
 						self.systemsCanvas.dtag(x, 'edge')
 						self.deleteEdgeNX(x, self.G, self.D)
 						numEdges += 1
-
 
 				self.systemsCanvas.addtag_withtag('deleted', selected[0])
 				self.systemsCanvas.itemconfig(selected[0], state='hidden')
