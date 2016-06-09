@@ -107,6 +107,12 @@ class CanvasFrame(Frame):
 			self.endNodeY = (self.endNodeCoords[1] + self.endNodeCoords[3]) / 2 	
 			item = self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge')
 
+			if self.v.get() == 'All':
+				self.systemsCanvas.itemconfig(item, arrow='none')
+			else:
+				self.systemsCanvas.itemconfig(item, arrow='last')
+
+
 			self.G.add_edge(self.startNode[0], self.endNode[0], x=0, y=0, z=0, Name=None)
 			self.systemsCanvas.addtag_withtag(str(self.startNode[0]), item)
 			self.systemsCanvas.addtag_withtag(str(self.endNode[0]), item)
@@ -349,6 +355,7 @@ class CanvasFrame(Frame):
 				self.systemsCanvas.itemconfig(nodeitem, state='normal')
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
 				self.systemsCanvas.itemconfig(edgeitem, state='normal')
+				self.systemsCanvas.itemconfig(edgeitem, arrow='none')
 			
 		else:
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
@@ -360,6 +367,7 @@ class CanvasFrame(Frame):
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
 				if (self.systemsCanvas.itemcget(int(self.systemsCanvas.gettags(edgeitem)[1]), 'state')=='normal') and (self.systemsCanvas.itemcget(int(self.systemsCanvas.gettags(edgeitem)[2]), 'state')=='normal'):
 					self.systemsCanvas.itemconfig(edgeitem, state='normal')
+					self.systemsCanvas.itemconfig(edgeitem, arrow='last')
 				else:
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
 
