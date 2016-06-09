@@ -165,17 +165,23 @@ class CanvasFrame(Frame):
 	def deleteEdgeNX(self, item, G_delete, G_add):
 		nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
 
-		# check if the node order is swapped
-		if nx.has_path(G_delete, nodes[1], nodes[0]):
-			nodes[0], nodes[1] = nodes[1], nodes[0]
+		try:
+			G_add.add_edge(nodes[0], nodes[1])
 
-		G_add.add_edge(nodes[0], nodes[1])
+			# save all attribute info to G_add
+			for key in G_delete.edge[nodes[0]][nodes[1]]:
+				G_add.edge[nodes[0]][nodes[1]][key] = G_delete.edge[nodes[0]][nodes[1]][key]
 
-		# save all attribute info to G_add
-		for key in G_delete.edge[nodes[0]][nodes[1]]:
-			G_add.edge[nodes[0]][nodes[1]][key] = G_delete.edge[nodes[0]][nodes[1]][key]
+			G_delete.remove_edge(nodes[0], nodes[1])
 
-		G_delete.remove_edge(nodes[0], nodes[1])
+		except KeyError:
+			G_add.add_edge(nodes[1], nodes[0])
+
+			# save all attribute info to G_add
+			for key in G_delete.edge[nodes[1]][nodes[0]]:
+				G_add.edge[nodes[1]][nodes[0]][key] = G_delete.edge[nodes[1]][nodes[0]][key]
+
+			G_delete.remove_edge(nodes[1], nodes[0])
 
 
 	# deletes selected node with radius r and any edges overlapping it in both Tkinter and networkX
@@ -195,6 +201,7 @@ class CanvasFrame(Frame):
 				for x in overlapped:
 					if self.systemsCanvas.type(x) == 'line':
 						# add 'deleted' tag to ea. object x, and make it hidden
+
 						self.systemsCanvas.addtag_withtag('deleted', x)
 						self.systemsCanvas.itemconfig(x, state='hidden')
 
@@ -202,7 +209,7 @@ class CanvasFrame(Frame):
 						self.systemsCanvas.dtag(x, 'edge')
 						self.deleteEdgeNX(x, self.G, self.D)
 						numEdges += 1
-					
+
 				self.systemsCanvas.addtag_withtag('deleted', selected[0])
 				self.systemsCanvas.itemconfig(selected[0], state='hidden')
 				self.systemsCanvas.dtag(selected[0], 'node')
