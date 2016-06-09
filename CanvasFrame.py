@@ -185,7 +185,7 @@ class CanvasFrame(Frame):
 		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 
 		if (len(selected) > 0):
-			itemTag = self.systemsCanvas.gettags(selected)[0]
+			itemTag = self.systemsCanvas.gettags(selected[0])[0]
 
 			if itemTag == 'node':
 				# remove node and any associated edges from Canvas
@@ -193,19 +193,22 @@ class CanvasFrame(Frame):
 				numEdges = 0
 
 				for x in overlapped:
-					# add 'deleted' tag to ea. object x, and make it hidden
-					self.systemsCanvas.addtag_withtag('deleted', x)
-					self.systemsCanvas.itemconfig(x, state='hidden')
-
 					if self.systemsCanvas.type(x) == 'line':
+						# add 'deleted' tag to ea. object x, and make it hidden
+						self.systemsCanvas.addtag_withtag('deleted', x)
+						self.systemsCanvas.itemconfig(x, state='hidden')
+
 						self.undoStack.append(x) # add edge to undo stack
 						self.systemsCanvas.dtag(x, 'edge')
 						self.deleteEdgeNX(x, self.G, self.D)
 						numEdges += 1
-					else:
-						self.systemsCanvas.dtag(x, 'node')
+					
+				self.systemsCanvas.addtag_withtag('deleted', selected[0])
+				self.systemsCanvas.itemconfig(selected[0], state='hidden')
+				self.systemsCanvas.dtag(selected[0], 'node')
 
 				self.deleteNodeNX(selected[0], self.G, self.D) # delete node from networkX
+				self.G.remove_node(selected[0])
 				self.undoStack.append(selected[0]) # add node to undo stack; want this to be on top
 
 
