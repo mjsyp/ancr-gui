@@ -1,9 +1,10 @@
 from Tkinter import *
-from frontendRight import *
+from NodeInfo import *
+from EdgeInfo import *
 import tkSimpleDialog
 import networkx as nx
 
-class FrontendLeft(Frame):
+class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
 		Frame.__init__(self, parent)
 
@@ -105,7 +106,8 @@ class FrontendLeft(Frame):
 			self.endNodeX = (self.endNodeCoords[0] + self.endNodeCoords[2]) / 2
 			self.endNodeY = (self.endNodeCoords[1] + self.endNodeCoords[3]) / 2 	
 			item = self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge')
-			self.G.add_edge(self.startNode[0], self.endNode[0])
+
+			self.G.add_edge(self.startNode[0], self.endNode[0], x=0, y=0, z=0, Name=None)
 			self.systemsCanvas.addtag_withtag(str(self.startNode[0]), item)
 			self.systemsCanvas.addtag_withtag(str(self.endNode[0]), item)
 
@@ -121,7 +123,7 @@ class FrontendLeft(Frame):
 			self.systemsCanvas.itemconfig(selected[0], fill='green')
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
-			self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList, 'node')
+			self.systemInfo = NodeInfo(self.rightFrame, selected[0], self.G, self.optionList)
 		else:
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
@@ -139,7 +141,10 @@ class FrontendLeft(Frame):
 				for widget in self.rightFrame.winfo_children():
 					widget.destroy()
 
-				self.systemInfo = FrontendRight(self.rightFrame, selected[0], self.G, self.optionList, 'edge')
+				nodes = [int(n) for n in self.systemsCanvas.gettags(selected[0]) if n.isdigit()]
+				if nx.has_path(self.G, nodes[1], nodes[0]): # check if the node order is swapped
+					nodes[0], nodes[1] = nodes[1], nodes[0]
+				self.systemInfo = EdgeInfo(self.rightFrame, selected[0], nodes, self.G, self.optionList)
 		else:
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
@@ -149,16 +154,23 @@ class FrontendLeft(Frame):
 		G_add.add_node(item)
 		for key in G_delete.node[item]:
 			G_add.node[item][key] = G_delete.node[item][key]
-		G_delete.remove_node(item)
+		#G_delete.remove_node(item)
 
 	# deletes edge with ID=item from G_delete; adds edge to G_add
 	def deleteEdgeNX(self, item, G_delete, G_add):
-		nodes = [n for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-		G_add.add_edge(int(nodes[0]), int(nodes[1]))
-		try:
-			G_delete.remove_edge(int(nodes[0]), int(nodes[1]))
-		except nx.NetworkXError:
-			pass
+		nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+
+		# check if the node order is swapped
+		if nx.has_path(G_delete, nodes[1], nodes[0]):
+			nodes[0], nodes[1] = nodes[1], nodes[0]
+
+		G_add.add_edge(nodes[0], nodes[1])
+
+		# save all attribute info to G_add
+		for key in G_delete.edge[nodes[0]][nodes[1]]:
+			G_add.edge[nodes[0]][nodes[1]][key] = G_delete.edge[nodes[0]][nodes[1]][key]
+
+		G_delete.remove_edge(nodes[0], nodes[1])
 
 
 	# deletes selected node with radius r and any edges overlapping it in both Tkinter and networkX
@@ -170,19 +182,25 @@ class FrontendLeft(Frame):
 			itemTag = self.systemsCanvas.gettags(selected)[0]
 
 			if itemTag == 'node':
-				# remove node and any associated edges from NetworkX
-				self.deleteNodeNX(selected[0], self.G, self.D)
-
 				# remove node and any associated edges from Canvas
 				overlapped = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
-				for x in overlapped:
-					self.undoStack.append(x) # add item to undo stack
+				numEdges = 0
 
-					# update tags of item
-					self.systemsCanvas.dtag(x, 'node')
-					self.systemsCanvas.dtag(x, 'edge')
+				for x in overlapped:
+					# add 'deleted' tag to ea. object x, and make it hidden
 					self.systemsCanvas.addtag_withtag('deleted', x)
 					self.systemsCanvas.itemconfig(x, state='hidden')
+
+					if self.systemsCanvas.type(x) == 'line':
+						self.undoStack.append(x) # add edge to undo stack
+						self.systemsCanvas.dtag(x, 'edge')
+						self.deleteEdgeNX(x, self.G, self.D)
+						numEdges += 1
+					else:
+						self.systemsCanvas.dtag(x, 'node')
+
+				self.deleteNodeNX(selected[0], self.G, self.D) # delete node from networkX
+				self.undoStack.append(selected[0]) # add node to undo stack; want this to be on top
 
 
 	# deletes selected edge with radius r in both Tkinter and networkX
@@ -193,7 +211,6 @@ class FrontendLeft(Frame):
 		if len(selected) > 0:
 			if self.systemsCanvas.type(selected[0]) == 'line':
 				# remove edge from networkX
-				nodes = [n for n in self.systemsCanvas.gettags(selected[0]) if n.isdigit()]
 				self.deleteEdgeNX(selected[0], self.G, self.D)
 				
 				self.undoStack.append(selected[0])
@@ -213,7 +230,6 @@ class FrontendLeft(Frame):
 	def hideLabels(self):
 		for widget in self.systemsCanvas.winfo_children():
 				widget.destroy()
-
 
 
 	def checkTag(self, item):
@@ -254,14 +270,19 @@ class FrontendLeft(Frame):
 			overlapped = self.systemsCanvas.find_overlapping(coords[0]-r, coords[1]-r, coords[0]+r, coords[1]+r)
 
 			for x in overlapped:
-				self.systemsCanvas.dtag(x, 'node')
-				self.systemsCanvas.dtag(x, 'edge')
 				self.systemsCanvas.addtag_withtag('deleted', x)
 				self.systemsCanvas.itemconfig(x, state='hidden')
 
+				if self.systemsCanvas.type(x) == 'line':
+					self.systemsCanvas.dtag(x, 'edge')
+					self.deleteEdgeNX(x, self.G, self.D)
+				else:
+					self.systemsCanvas.dtag(x, 'node')
+
+			self.deleteNodeNX(item, self.G, self.D)
+
 		elif tag == 'edge': # edge was previously created
 			# remove edge from networkX
-			nodes = [n for n in self.systemsCanvas.gettags(item) if n.isdigit()]
 			self.deleteEdgeNX(item, self.G, self.D)
 
 			self.systemsCanvas.dtag(item, 'edge')
@@ -275,16 +296,13 @@ class FrontendLeft(Frame):
 			item = self.undoStack[len(self.undoStack)-1] # save last item on stack
 			self.undoStack.pop() # pop last item from stack
 			self.redoStack.append(item) # add to redoStack
-
 			self.undoRedoAction(item)
-			
 
 	def redo(self, event=None):
 		if len(self.redoStack) > 0:
 			item = self.redoStack[len(self.redoStack)-1]
 			self.redoStack.pop()
 			self.undoStack.append(item)
-
 			self.undoRedoAction(item)
 
 

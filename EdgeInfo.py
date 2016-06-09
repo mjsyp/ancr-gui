@@ -2,22 +2,21 @@ from Tkinter import *
 import tkSimpleDialog
 import networkx as nx
 
-class FrontendRight(Frame):
-	def __init__(self, parent, index, G, systemList, networkType):
+class EdgeInfo(Frame):
+	def __init__(self, parent, index, nodes, G, systemList):
 		Frame.__init__(self, parent)
 
 		self.parent = parent
 		self.index = index
+		self.nodes = nodes
 		self.G = G
-		self.type=networkType
 
 		self.systemDict = {}
 		for x in systemList:
 			self.systemDict[x] = 0
-		if self.type == 'node':
-			for x in self.G.node[self.index]:
-				if x not in self.systemDict.keys():
-					self.systemDict[x] = 0
+		for x in self.G.edge[self.nodes[0]][self.nodes[1]]:
+			if x not in self.systemDict.keys():
+				self.systemDict[x] = 0
 
 		# delete unwanted keys that result from syncing main optionList with Demand
 		for x in ['x', 'y', 'z', 'Create New', 'All', 'x_coord', 'y_coord', 'Name', 'Type', 'Notes']:
@@ -89,10 +88,9 @@ class FrontendRight(Frame):
 			
 			# add the label to NetworkX and initialize its value to 0
 			#newEntry.insert(0, '0')
-			if self.type == 'node':
-				if label not in self.G.node[self.index]:
-					self.G.node[self.index][label] = 0
-				self.systemDict[label] = newEntry
+			if label not in self.G.edge[self.nodes[0]][self.nodes[1]]:
+				self.G.edge[self.nodes[0]][self.nodes[1]][label] = 0
+			self.systemDict[label] = newEntry
 
 			# move widgets down to make room for new demand label
 			self.createDemandBtn.grid(row=4+self.numDemands, column=1)
@@ -124,55 +122,49 @@ class FrontendRight(Frame):
 		self.zEntry.grid(row=7, column=2)
 
 	def repopulateData(self):
-		if self.type == 'node':
-			if 'Name' in self.G.node[self.index] and self.G.node[self.index]['Name'] != None:
-				self.nameEntry.delete(0, END)
-				self.nameEntry.insert(0, self.G.node[self.index]['Name'])
-			if 'Type' in self.G.node[self.index] and self.G.node[self.index]['Type'] != None:
-				self.v.set(self.G.node[self.index]['Type'])
-			if 'x' in self.G.node[self.index]:
-				self.xEntry.delete(0, END)
-				self.xEntry.insert(0, self.G.node[self.index]['x'])
-			if 'y' in self.G.node[self.index]:
-				self.yEntry.delete(0, END)
-				self.yEntry.insert(0, self.G.node[self.index]['y'])
-			if 'z' in self.G.node[self.index]:
-				self.zEntry.delete(0, END)
-				self.zEntry.insert(0, self.G.node[self.index]['z'])
-			if 'Notes' in self.G.node[self.index]:
-				self.notes.delete('0.0', END)
-				self.notes.insert('0.0', self.G.node[self.index]['Notes'])
-            
-			for x in self.systemDict.keys():
-				if self.G.node[self.index][x] != None:
-					self.systemDict[x].delete(0, END)
-					self.systemDict[x].insert(0, self.G.node[self.index][x])
+		if 'Name' in self.G.edge[self.nodes[0]][self.nodes[1]] and self.G.edge[self.nodes[0]][self.nodes[1]]['Name'] != None:
+			self.nameEntry.delete(0, END)
+			self.nameEntry.insert(0, self.G.edge[self.nodes[0]][self.nodes[1]]['Name'])
+		if 'Type' in self.G.edge[self.nodes[0]][self.nodes[1]] and self.G.edge[self.nodes[0]][self.nodes[1]]['Type'] != None:
+			self.v.set(self.G.edge[self.nodes[0]][self.nodes[1]]['Type'])
+		if 'x' in self.G.edge[self.nodes[0]][self.nodes[1]]:
+			self.xEntry.delete(0, END)
+			self.xEntry.insert(0, self.G.edge[self.nodes[0]][self.nodes[1]]['x'])
+		if 'y' in self.G.edge[self.nodes[0]][self.nodes[1]]:
+			self.yEntry.delete(0, END)
+			self.yEntry.insert(0, self.G.edge[self.nodes[0]][self.nodes[1]]['y'])
+		if 'z' in self.G.edge[self.nodes[0]][self.nodes[1]]:
+			self.zEntry.delete(0, END)
+			self.zEntry.insert(0, self.G.edge[self.nodes[0]][self.nodes[1]]['z'])
+		if 'Notes' in self.G.edge[self.nodes[0]][self.nodes[1]]:
+			self.notes.delete('0.0', END)
+			self.notes.insert('0.0', self.G.edge[self.nodes[0]][self.nodes[1]]['Notes'])
+        
+		for x in self.systemDict.keys():
+			if self.G.edge[self.nodes[0]][self.nodes[1]][x] != None:
+				self.systemDict[x].delete(0, END)
+				self.systemDict[x].insert(0, self.G.edge[self.nodes[0]][self.nodes[1]][x])
 
 	def saveAttributes(self):
-		if self.type == 'node':
-			self.G.node[self.index]['Name'] = self.nameEntry.get()
-			self.G.node[self.index]['Type'] = self.v.get()
-			self.G.node[self.index]['x'] = int(self.xEntry.get())
-			self.G.node[self.index]['y'] = int(self.yEntry.get())
-			self.G.node[self.index]['z'] = int(self.zEntry.get())
-			self.G.node[self.index]['Notes'] = self.notes.get('0.0', END)
+		self.G.edge[self.nodes[0]][self.nodes[1]]['Name'] = self.nameEntry.get()
+		self.G.edge[self.nodes[0]][self.nodes[1]]['Type'] = self.v.get()
+		self.G.edge[self.nodes[0]][self.nodes[1]]['x'] = int(self.xEntry.get())
+		self.G.edge[self.nodes[0]][self.nodes[1]]['y'] = int(self.yEntry.get())
+		self.G.edge[self.nodes[0]][self.nodes[1]]['z'] = int(self.zEntry.get())
+		self.G.edge[self.nodes[0]][self.nodes[1]]['Notes'] = self.notes.get('0.0', END)
 
-			# Demands
-			for x in self.systemDict.keys():
-				try:
-					self.G.node[self.index][x] = int(self.systemDict[x].get())
-				except AttributeError:
-					pass
-				except ValueError:
-					pass
+		# Demands
+		for x in self.systemDict.keys():
+			try:
+				self.G.edge[self.nodes[0]][self.nodes[1]][x] = int(self.systemDict[x].get())
+			except AttributeError:
+				pass
+			except ValueError:
+				pass
 
 	def initUI(self):
 		# Title
-		if self.type == 'node':
-			self.title = Label(self.parent, text="Node " + str(self.index), bg=self.color)
-		elif self.type == 'edge':
-			self.title = Label(self.parent, text="Edge " + str(self.index), bg=self.color)
-
+		self.title = Label(self.parent, text="Edge " + str(self.index), bg=self.color)
 		self.title.grid(row=0, columnspan=3, sticky=N, pady=10)
 
 		# Name

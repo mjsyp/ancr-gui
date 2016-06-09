@@ -1,6 +1,5 @@
 from Tkinter import *
-from frontendLeft import *
-from frontendRight import *
+from CanvasFrame import *
 import networkx as nx
 import tkFileDialog
 import pickle
@@ -40,7 +39,7 @@ class Window(Frame):
             self.G = pickle.load(open(str(f)))
             for widget in self.leftFrame.winfo_children():
                 widget.destroy()
-            self.geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G, self.D)
+            self.geoCanvas = CanvasFrame(self.leftFrame, self.rightFrame, self.G, self.D)
             self.createTabs()
             for nodeNum in self.G.nodes():
                 r = 8
@@ -96,8 +95,8 @@ class Window(Frame):
         self.rightFrame.pack(side="right", fill="y", expand=0)
         self.rightFrame.pack_propagate(0)
 
-        # Use frontendLeft to fill left frame
-        self.geoCanvas = FrontendLeft(self.leftFrame, self.rightFrame, self.G, self.D)
+        # Use CanvasFrame to fill left frame
+        self.geoCanvas = CanvasFrame(self.leftFrame, self.rightFrame, self.G, self.D)
 
         self.createTabs()
 
