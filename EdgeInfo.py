@@ -164,13 +164,9 @@ class EdgeInfo(Frame):
 				pass
 
 	def initUI(self):
-		# Title
-		self.title = Label(self.parent, text="Edge " + str(self.index), bg=self.color)
-		self.title.grid(row=0, columnspan=3, sticky=N, pady=10)
-
 		# Name
 		self.nameLabel = Label(self.parent, text="Name:", bg=self.color)
-		self.nameLabel.grid(row=1, column=0, padx=5)
+		self.nameLabel.grid(row=1, column=0, padx=5, pady=10)
 
 		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
 		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W, padx=10)

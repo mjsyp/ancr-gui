@@ -9,7 +9,6 @@ class NodeInfo(Frame):
 		self.parent = parent
 		self.index = index
 		self.G = G
-
 		self.systemDict = {}
 		for x in systemList:
 			self.systemDict[x] = 0
@@ -152,7 +151,6 @@ class NodeInfo(Frame):
 		self.G.node[self.index]['z'] = int(self.zEntry.get())
 		self.G.node[self.index]['Notes'] = self.notes.get('0.0', END)
 
-		# Demands
 		for x in self.systemDict.keys():
 			try:
 				self.G.node[self.index][x] = int(self.systemDict[x].get())
