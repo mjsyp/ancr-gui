@@ -93,7 +93,7 @@ class FrontendLeft(Frame):
 			self.startNodeCoords = self.systemsCanvas.coords(self.startNode[0])
 			self.startNodeX = (self.startNodeCoords[0] + self.startNodeCoords[2]) / 2
 			self.startNodeY = (self.startNodeCoords[1] + self.startNodeCoords[3]) / 2
-	
+
 	# determines the x and y coordinates of where the edge will terminate, and then creates a line from startNode to endNode
 	# will only allow the creation of an edge to happen between two nodes 
 	def createEdge(self, event):
@@ -108,6 +108,11 @@ class FrontendLeft(Frame):
 			self.G.add_edge(self.startNode[0], self.endNode[0])
 			self.systemsCanvas.addtag_withtag(str(self.startNode[0]), item)
 			self.systemsCanvas.addtag_withtag(str(self.endNode[0]), item)
+
+			self.G.edge[self.startNode[0]][self.endNode[0]]['x1_coord'] = self.startNodeX
+			self.G.edge[self.startNode[0]][self.endNode[0]]['y1_coord'] = self.startNodeY
+			self.G.edge[self.startNode[0]][self.endNode[0]]['x2_coord'] = self.endNodeX
+			self.G.edge[self.startNode[0]][self.endNode[0]]['y2_coord'] = self.endNodeY
 
 			self.undoStack.append(item)
 			
@@ -163,7 +168,8 @@ class FrontendLeft(Frame):
 
 	# deletes selected node with radius r and any edges overlapping it in both Tkinter and networkX
 	def deleteNode(self, event):
-		r = 24
+		r = 16
+
 		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 
 		if (len(selected) > 0):
@@ -320,7 +326,7 @@ class FrontendLeft(Frame):
 			
 		else:
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
-				if int(self.G.node[nodeitem][self.v.get()])==0:
+				if self.G.node[nodeitem][self.v.get()] == None:
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
 				else:
 					self.systemsCanvas.itemconfig(nodeitem, state='normal')
