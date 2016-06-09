@@ -3,10 +3,11 @@ import tkSimpleDialog
 import networkx as nx
 
 class NodeInfo(Frame):
-	def __init__(self, parent, index, G, systemList):
+	def __init__(self, parent, leftFrame, index, G, systemList):
 		Frame.__init__(self, parent)
 
 		self.parent = parent
+		self.leftFrame = leftFrame
 		self.index = index
 		self.G = G
 
@@ -94,12 +95,18 @@ class NodeInfo(Frame):
 			# move widgets down to make room for new demand label
 			self.createDemandBtn.grid(row=4+self.numDemands, column=1)
 
-			for label in self.parent.grid_slaves():
-				if int(label.grid_info()["row"]) > (4 + self.numDemands):
-					newRow = int(label.grid_info()["row"]) + self.numDemands + 1
-					label.grid_configure(row=newRow)
+			for item in self.parent.grid_slaves():
+				if int(item.grid_info()["row"]) > (4 + self.numDemands):
+					newRow = int(item.grid_info()["row"]) + self.numDemands + 1
+					item.grid_configure(row=newRow)
 
 			self.numDemands += 1
+
+			self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
+			self.leftFrame.dropdown.destroy()
+			self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, *self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
+			self.leftFrame.dropdown.configure(bg="light blue")
+			self.leftFrame.dropdown.pack(side='left')
 
 	def createGeometryLabel(self):
 		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color)
@@ -151,6 +158,9 @@ class NodeInfo(Frame):
 		self.G.node[self.index]['y'] = int(self.yEntry.get())
 		self.G.node[self.index]['z'] = int(self.zEntry.get())
 		self.G.node[self.index]['Notes'] = self.notes.get('0.0', END)
+
+		if len(self.leftFrame.systemsCanvas.winfo_children()) > 0:
+			self.leftFrame.showLabels()
 
 		# Demands
 		for x in self.systemDict.keys():

@@ -3,10 +3,11 @@ import tkSimpleDialog
 import networkx as nx
 
 class EdgeInfo(Frame):
-	def __init__(self, parent, index, nodes, G, systemList):
+	def __init__(self, parent, leftFrame, index, nodes, G, systemList):
 		Frame.__init__(self, parent)
 
 		self.parent = parent
+		self.leftFrame = leftFrame
 		self.index = index
 		self.nodes = nodes
 		self.G = G
@@ -96,12 +97,18 @@ class EdgeInfo(Frame):
 			# move widgets down to make room for new demand label
 			self.createDemandBtn.grid(row=4+self.numDemands, column=1)
 
-			for label in self.parent.grid_slaves():
-				if int(label.grid_info()["row"]) > (4 + self.numDemands):
-					newRow = int(label.grid_info()["row"]) + self.numDemands + 1
-					label.grid_configure(row=newRow)
+			for item in self.parent.grid_slaves():
+				if int(item.grid_info()["row"]) > (4 + self.numDemands):
+					newRow = int(item.grid_info()["row"]) + self.numDemands + 1
+					item.grid_configure(row=newRow)
 
 			self.numDemands += 1
+
+			self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
+			self.leftFrame.dropdown.destroy()
+			self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, *self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
+			self.leftFrame.dropdown.configure(bg="light blue")
+			self.leftFrame.dropdown.pack(side='left')
 
 	def createGeometryLabel(self):
 		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color)
@@ -164,13 +171,9 @@ class EdgeInfo(Frame):
 				pass
 
 	def initUI(self):
-		# Title
-		self.title = Label(self.parent, text="Edge " + str(self.index), bg=self.color)
-		self.title.grid(row=0, columnspan=3, sticky=N, pady=10)
-
 		# Name
 		self.nameLabel = Label(self.parent, text="Name:", bg=self.color)
-		self.nameLabel.grid(row=1, column=0, padx=5)
+		self.nameLabel.grid(row=1, column=0, padx=5, pady=10)
 
 		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
 		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W, padx=10)
