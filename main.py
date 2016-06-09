@@ -37,6 +37,7 @@ class Window(Frame):
             return
         else:
             self.G = pickle.load(open(str(f)))
+            self.G = nx.convert_node_labels_to_integers(self.G, first_label=1)
             for widget in self.leftFrame.winfo_children():
                 widget.destroy()
             self.geoCanvas = CanvasFrame(self.leftFrame, self.rightFrame, self.G, self.D)
@@ -44,6 +45,24 @@ class Window(Frame):
             for nodeNum in self.G.nodes():
                 r = 8
                 self.geoCanvas.systemsCanvas.create_oval(self.G.node[nodeNum]['x_coord']-r, self.G.node[nodeNum]['y_coord']-r, self.G.node[nodeNum]['x_coord']+r, self.G.node[nodeNum]['y_coord']+r, fill='red', tag='node') 
+            for startNode, endNode in self.G.edges():
+                edgeItem=self.geoCanvas.systemsCanvas.create_line(self.G.edge[startNode][endNode]['x1_coord'], self.G.edge[startNode][endNode]['y1_coord'], self.G.edge[startNode][endNode]['x2_coord'], self.G.edge[startNode][endNode]['y2_coord'], tag='edge')
+                self.geoCanvas.systemsCanvas.addtag_withtag(str(startNode), edgeItem)
+                self.geoCanvas.systemsCanvas.addtag_withtag(str(endNode), edgeItem)
+            for key in self.G.node[1]:
+                if key == 'Name' or key == 'y_coord' or key == 'x_coord' or key == 'x' or key == 'y' or key == 'z' or key == 'Type' or key == 'Notes':
+                    pass
+                else:
+                    self.geoCanvas.optionList.insert(len(self.geoCanvas.optionList)-2, key)
+                    self.geoCanvas.dropdown.destroy()
+                    self.geoCanvas.dropdown = OptionMenu(self.geoCanvas.toolbar, self.geoCanvas.v, *self.geoCanvas.optionList, command=self.geoCanvas.newOptionMenu)
+                    self.geoCanvas.dropdown.configure(bg="light blue")
+                    self.geoCanvas.dropdown.pack(side='left')
+
+
+                
+            
+
 
     def createTabs(self):
         # MAIN MENUBAR
