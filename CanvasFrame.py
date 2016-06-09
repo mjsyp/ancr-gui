@@ -134,7 +134,7 @@ class CanvasFrame(Frame):
 			self.systemsCanvas.itemconfig(selected[0], fill='green')
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
-			self.systemInfo = NodeInfo(self.rightFrame, selected[0], self.G, self.optionList)
+			self.systemInfo = NodeInfo(self.rightFrame, self, selected[0], self.G, self.optionList)
 		else:
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
@@ -158,7 +158,7 @@ class CanvasFrame(Frame):
 				except KeyError:
 					nodes[0], nodes[1] = nodes[1], nodes[0]
 				
-				self.systemInfo = EdgeInfo(self.rightFrame, selected[0], nodes, self.G, self.optionList)
+				self.systemInfo = EdgeInfo(self.rightFrame, self, selected[0], nodes, self.G, self.optionList)
 		else:
 			for widget in self.rightFrame.winfo_children():
 				widget.destroy()
