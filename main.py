@@ -3,7 +3,7 @@ from CanvasFrame import *
 import networkx as nx
 import tkFileDialog
 import pickle
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 class Window(Frame):
   
@@ -125,8 +125,8 @@ def main():
     app = Window(root)
     root.mainloop()  
     #to see the networkx representation of the graph after exiting the gui:
-    nx.draw(app.G)
-    plt.show()
+    #nx.draw(app.G)
+    #plt.show()
 
 
 if __name__ == '__main__':

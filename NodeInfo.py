@@ -163,12 +163,12 @@ class NodeInfo(Frame):
 
 	def initUI(self):
 		# Title
-		self.title = Label(self.parent, text="Node " + str(self.index), bg=self.color)
-		self.title.grid(row=0, columnspan=3, sticky=N, pady=10)
+		#self.title = Label(self.parent, text="", bg=self.color)
+		#self.title.grid(row=0, columnspan=3, sticky=N)
 
 		# Name
 		self.nameLabel = Label(self.parent, text="Name:", bg=self.color)
-		self.nameLabel.grid(row=1, column=0, padx=5)
+		self.nameLabel.grid(row=1, column=0, padx=10, pady=10)
 
 		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
 		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W, padx=10)
