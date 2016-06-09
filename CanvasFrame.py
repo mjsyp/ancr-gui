@@ -147,8 +147,11 @@ class CanvasFrame(Frame):
 					widget.destroy()
 
 				nodes = [int(n) for n in self.systemsCanvas.gettags(selected[0]) if n.isdigit()]
-				if nx.has_path(self.G, nodes[1], nodes[0]): # check if the node order is swapped
+				try:
+					self.G[nodes[0]][nodes[1]]
+				except KeyError:
 					nodes[0], nodes[1] = nodes[1], nodes[0]
+				
 				self.systemInfo = EdgeInfo(self.rightFrame, selected[0], nodes, self.G, self.optionList)
 		else:
 			for widget in self.rightFrame.winfo_children():
@@ -166,22 +169,17 @@ class CanvasFrame(Frame):
 		nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
 
 		try:
-			G_add.add_edge(nodes[0], nodes[1])
-
-			# save all attribute info to G_add
-			for key in G_delete.edge[nodes[0]][nodes[1]]:
-				G_add.edge[nodes[0]][nodes[1]][key] = G_delete.edge[nodes[0]][nodes[1]][key]
-
-			G_delete.remove_edge(nodes[0], nodes[1])
-
+			self.G[nodes[0]][nodes[1]]
 		except KeyError:
-			G_add.add_edge(nodes[1], nodes[0])
+			nodes[0], nodes[1] = nodes[1], nodes[0]
 
-			# save all attribute info to G_add
-			for key in G_delete.edge[nodes[1]][nodes[0]]:
-				G_add.edge[nodes[1]][nodes[0]][key] = G_delete.edge[nodes[1]][nodes[0]][key]
+		G_add.add_edge(nodes[0], nodes[1])
 
-			G_delete.remove_edge(nodes[1], nodes[0])
+		# save all attribute info to G_add
+		for key in G_delete.edge[nodes[0]][nodes[1]]:
+			G_add.edge[nodes[0]][nodes[1]][key] = G_delete.edge[nodes[0]][nodes[1]][key]
+
+		G_delete.remove_edge(nodes[0], nodes[1])
 
 
 	# deletes selected node with radius r and any edges overlapping it in both Tkinter and networkX

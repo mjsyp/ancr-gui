@@ -19,7 +19,8 @@ class EdgeInfo(Frame):
 				self.systemDict[x] = 0
 
 		# delete unwanted keys that result from syncing main optionList with Demand
-		for x in ['x', 'y', 'z', 'Create New', 'All', 'x_coord', 'y_coord', 'Name', 'Type', 'Notes']:
+		for x in ['x', 'y', 'z', 'Create New', 'All', 'Name', 'Type', 'Notes', 
+		'x1_coord', 'y1_coord', 'x2_coord', 'y2_coord']:
 			try:
 				del self.systemDict[x]
  			except KeyError:
