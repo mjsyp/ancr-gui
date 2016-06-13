@@ -3,6 +3,8 @@ from NodeInfo import *
 from EdgeInfo import *
 import tkSimpleDialog
 import networkx as nx
+import matplotlib.pyplot as plt
+import random
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
@@ -374,6 +376,7 @@ class CanvasFrame(Frame):
 			
 		else:
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
+				print self.G.node[nodeitem]
 				if self.G.node[nodeitem][self.v.get()] == None:
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
 				else:
@@ -390,8 +393,33 @@ class CanvasFrame(Frame):
 
 	# shows each nodes degree 
 	def nodeDegrees(self):
-		degrees=nx.degree(self.G)
-				
+		nodeDegrees = nx.degree(self.G)
+		self.nodeDegreePopup = Toplevel(self.parent)
+		self.nodeDegreePopup.title("Node Degrees")
+
+		degrees = []
+		for key in nodeDegrees:
+			degrees.append(nodeDegrees[key])
+
+	
+		# Create a Figure object.
+		fig = plt.figure(figsize=(6, 5))
+		# Create an Axes object.
+		ax = fig.add_subplot(1,1,1) # one row, one column, first plot
+		# Plot the data.
+		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left')
+		# Add some axis labels.
+		ax.set_xlabel("Degrees")
+		ax.set_ylabel("Frequency")
+		ax.axis([-1, max(degrees)+1, 0, len(degrees)])
+		# Produce an image.
+		fig.savefig("histogramplot.gif")
+
+		histogram = PhotoImage(file="histogramplot.gif")
+
+		label = Label(self.nodeDegreePopup, image=histogram)
+		label.image = histogram
+		label.pack()
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
 	def initUI(self):
