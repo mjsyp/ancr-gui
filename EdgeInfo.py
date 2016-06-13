@@ -104,11 +104,12 @@ class EdgeInfo(Frame):
 
 			self.numDemands += 1
 
-			self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
-			self.leftFrame.dropdown.destroy()
-			self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, *self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
-			self.leftFrame.dropdown.configure(bg="light blue")
-			self.leftFrame.dropdown.pack(side='left')
+			if label not in self.LeftFrame.optionList:
+				self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
+				self.leftFrame.dropdown.destroy()
+				self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, *self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
+				self.leftFrame.dropdown.configure(bg="light blue")
+				self.leftFrame.dropdown.pack(side='left')
 
 	def createGeometryLabel(self):
 		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color)
