@@ -85,10 +85,10 @@ class NodeInfo(Frame):
 			newEntry = Entry(self.parent, highlightbackground=self.color, width=9)
 			newEntry.grid(row=3+self.numDemands, column=2, padx=10)
 			
-			# add the label to NetworkX and initialize its value to 0
-			#newEntry.insert(0, '0')
-			if label not in self.G.node[self.index]:
-				self.G.node[self.index][label] = 0
+			# add the label to NetworkX and initialize its value to None
+			for node in self.leftFrame.systemsCanvas.find_withtag('node'):
+				if label not in self.G.node[node]:
+					self.G.node[node][label] = None
 			self.systemDict[label] = newEntry
 
 			# move widgets down to make room for new demand label
@@ -101,11 +101,12 @@ class NodeInfo(Frame):
 
 			self.numDemands += 1
 
-			self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
-			self.leftFrame.dropdown.destroy()
-			self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, *self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
-			self.leftFrame.dropdown.configure(bg="light blue")
-			self.leftFrame.dropdown.pack(side='left')
+			if label not in self.leftFrame.optionList:
+				self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
+				self.leftFrame.dropdown.destroy()
+				self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, *self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
+				self.leftFrame.dropdown.configure(bg="light blue")
+				self.leftFrame.dropdown.pack(side='left')
 
 	def createGeometryLabel(self):
 		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color)

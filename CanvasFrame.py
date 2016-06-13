@@ -222,6 +222,11 @@ class CanvasFrame(Frame):
 				self.G.remove_node(selected[0])
 				self.undoStack.append(selected[0]) # add node to undo stack; want this to be on top
 
+				# remove label of node if 'Show Labels' is active
+				if len(self.systemsCanvas.winfo_children()) > 0:
+					self.hideLabels()
+					self.showLabels()
+
 
 	# deletes selected edge with radius r in both Tkinter and networkX
 	def deleteEdge(self, event):
@@ -289,17 +294,27 @@ class CanvasFrame(Frame):
 			coords = self.systemsCanvas.coords(item)
 			overlapped = self.systemsCanvas.find_overlapping(coords[0]-r, coords[1]-r, coords[0]+r, coords[1]+r)
 
-			for x in overlapped:
-				self.systemsCanvas.addtag_withtag('deleted', x)
-				self.systemsCanvas.itemconfig(x, state='hidden')
 
+			for x in overlapped:
 				if self.systemsCanvas.type(x) == 'line':
+					# add 'deleted' tag to ea. object x, and make it hidden
+
+					self.systemsCanvas.addtag_withtag('deleted', x)
+					self.systemsCanvas.itemconfig(x, state='hidden')
+
 					self.systemsCanvas.dtag(x, 'edge')
 					self.deleteEdgeNX(x, self.G, self.D)
-				else:
-					self.systemsCanvas.dtag(x, 'node')
 
-			self.deleteNodeNX(item, self.G, self.D)
+			self.systemsCanvas.addtag_withtag('deleted', item)
+			self.systemsCanvas.itemconfig(item, state='hidden')
+			self.systemsCanvas.dtag(item, 'node')
+			self.deleteNodeNX(item, self.G, self.D) # delete node from networkX
+
+			# remove label of node if 'Show Labels' is active
+			if len(self.systemsCanvas.winfo_children()) > 0:
+				self.hideLabels()
+				self.showLabels()
+
 
 		elif tag == 'edge': # edge was previously created
 			# remove edge from networkX
