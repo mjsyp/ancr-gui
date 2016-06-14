@@ -89,6 +89,9 @@ class NodeInfo(Frame):
 			for node in self.leftFrame.systemsCanvas.find_withtag('node'):
 				if label not in self.G.node[node]:
 					self.G.node[node][label] = None
+			for deletedItem in self.leftFrame.systemsCanvas.find_withtag('deleted'):
+				if self.leftFrame.systemsCanvas.type(deletedItem) == 'oval' and label not in self.G.node[deletedItem]:
+					self.G.node[deletedItem][label] = None
 			self.systemDict[label] = newEntry
 
 			# move widgets down to make room for new demand label

@@ -4,9 +4,9 @@ from EdgeInfo import *
 import tkSimpleDialog
 import networkx as nx
 import matplotlib
-matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
 import random
+from PIL import Image
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
