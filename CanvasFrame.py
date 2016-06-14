@@ -388,7 +388,8 @@ class CanvasFrame(Frame):
 					self.systemsCanvas.itemconfig(nodeitem, state='normal')
 
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
-				if (self.systemsCanvas.itemcget(int(self.systemsCanvas.gettags(edgeitem)[1]), 'state')=='normal') and (self.systemsCanvas.itemcget(int(self.systemsCanvas.gettags(edgeitem)[2]), 'state')=='normal'):
+				nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
+				if (self.systemsCanvas.itemcget(nodes[0], 'state')=='normal') and (self.systemsCanvas.itemcget(nodes[1], 'state')=='normal'):
 					self.systemsCanvas.itemconfig(edgeitem, state='normal')
 					self.systemsCanvas.itemconfig(edgeitem, arrow='last')
 				else:
