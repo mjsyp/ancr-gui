@@ -17,6 +17,7 @@ class CanvasFrame(Frame):
 		self.G = G
 		self.D = D
 		self.color = "light blue"
+		self.labels = 0
 
 		# stacks keep track of canvas item ID's as they are created/deleted
 		self.undoStack = []
@@ -227,7 +228,7 @@ class CanvasFrame(Frame):
 				self.undoStack.append(selected[0]) # add node to undo stack; want this to be on top
 
 				# remove label of node if 'Show Labels' is active
-				if len(self.systemsCanvas.winfo_children()) > 0:
+				if self.labels == 1:
 					self.hideLabels()
 					self.showLabels()
 
@@ -249,6 +250,7 @@ class CanvasFrame(Frame):
 	
 	# shows all node names when' Show Labels' is clicked
 	def showLabels(self):
+		self.labels = 1
 		for item in self.systemsCanvas.find_withtag('node'):
 			if self.systemsCanvas.itemcget(item, 'state') !='hidden':
 				nodeName = self.G.node[item]['Name']
@@ -258,6 +260,7 @@ class CanvasFrame(Frame):
 
 	# hides all node names when 'Hide Labels' is clicked
 	def hideLabels(self):
+		self.labels = 0
 		for widget in self.systemsCanvas.winfo_children():
 				widget.destroy()
 
@@ -315,12 +318,6 @@ class CanvasFrame(Frame):
 			self.systemsCanvas.dtag(item, 'node')
 			self.deleteNodeNX(item, self.G, self.D) # delete node from networkX
 
-			# remove label of node if 'Show Labels' is active
-			if len(self.systemsCanvas.winfo_children()) > 0:
-				self.hideLabels()
-				self.showLabels()
-
-
 		elif tag == 'edge': # edge was previously created
 			# remove edge from networkX
 			self.deleteEdgeNX(item, self.G, self.D)
@@ -328,6 +325,10 @@ class CanvasFrame(Frame):
 			self.systemsCanvas.dtag(item, 'edge')
 			self.systemsCanvas.addtag_withtag('deleted', item)
 			self.systemsCanvas.itemconfig(item, state='hidden')
+
+		if self.labels == 1:
+			self.hideLabels()
+			self.showLabels()
 
 
 	# undo last action performed on canvas (creation or deletion) using a stack
@@ -391,10 +392,11 @@ class CanvasFrame(Frame):
 					self.systemsCanvas.itemconfig(edgeitem, arrow='last')
 				else:
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
-		
-		if len(self.systemsCanvas.winfo_children()) > 0:
-					self.hideLabels()
-					self.showLabels()
+
+		if self.labels == 1:
+			self.hideLabels()
+			self.showLabels()
+
 
 	# Analysis modules for the networkx graph:
 
