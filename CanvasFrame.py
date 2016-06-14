@@ -84,7 +84,7 @@ class CanvasFrame(Frame):
 	#creates a red circular node of radius r at the location of the mouse click and initilizes node propoerties
 	def createNode(self, event):
 		r = 8
-		item = self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node') 
+		item = self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node', state='normal') 
 		self.G.add_node(item, x=0, y=0, z=0, Name=None, x_coord=event.x, y_coord=event.y)
 
 		self.undoStack.append(item)
@@ -109,7 +109,7 @@ class CanvasFrame(Frame):
 			self.endNodeCoords = self.systemsCanvas.coords(self.endNode[0])
 			self.endNodeX = (self.endNodeCoords[0] + self.endNodeCoords[2]) / 2
 			self.endNodeY = (self.endNodeCoords[1] + self.endNodeCoords[3]) / 2 	
-			item = self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge')
+			item = self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge', state='normal')
 
 			if self.v.get() == 'All':
 				self.systemsCanvas.itemconfig(item, arrow='none')
@@ -348,9 +348,6 @@ class CanvasFrame(Frame):
 
 	# creates new system in option menu and only displays nodes with specific system demands
 	def newOptionMenu(self, event):
-		self.hideLabels()
-		self.showLabels()
-
 		if self.v.get() == "Create New":
 			typeLabel = tkSimpleDialog.askstring(title="New System", prompt="Enter a new system")
 			if typeLabel != None:
@@ -394,7 +391,7 @@ class CanvasFrame(Frame):
 					self.systemsCanvas.itemconfig(edgeitem, arrow='last')
 				else:
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
-
+		
 		if len(self.systemsCanvas.winfo_children()) > 0:
 					self.hideLabels()
 					self.showLabels()
