@@ -250,10 +250,11 @@ class CanvasFrame(Frame):
 	# shows all node names when' Show Labels' is clicked
 	def showLabels(self):
 		for item in self.systemsCanvas.find_withtag('node'):
-			nodeName = self.G.node[item]['Name']
-			if nodeName != None:
-				nodeLabel=Label(self.systemsCanvas, text=nodeName)
-				nodeLabel.place(x=self.G.node[item]['x_coord'], y=self.G.node[item]['y_coord']-20, anchor='center')
+			if self.systemsCanvas.itemcget(item, 'state') !='hidden':
+				nodeName = self.G.node[item]['Name']
+				if nodeName != None:
+					nodeLabel=Label(self.systemsCanvas, text=nodeName)
+					nodeLabel.place(x=self.G.node[item]['x_coord'], y=self.G.node[item]['y_coord']-20, anchor='center')
 
 	# hides all node names when 'Hide Labels' is clicked
 	def hideLabels(self):
@@ -392,6 +393,10 @@ class CanvasFrame(Frame):
 					self.systemsCanvas.itemconfig(edgeitem, arrow='last')
 				else:
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+
+		if len(self.systemsCanvas.winfo_children()) > 0:
+					self.hideLabels()
+					self.showLabels()
 
 	# Analysis modules for the networkx graph:
 
