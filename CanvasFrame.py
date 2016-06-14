@@ -3,7 +3,9 @@ from NodeInfo import *
 from EdgeInfo import *
 import tkSimpleDialog
 import networkx as nx
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
 import random
 
 class CanvasFrame(Frame):
@@ -345,6 +347,9 @@ class CanvasFrame(Frame):
 
 	# creates new system in option menu and only displays nodes with specific system demands
 	def newOptionMenu(self, event):
+		self.hideLabels()
+		self.showLabels()
+
 		if self.v.get() == "Create New":
 			typeLabel = tkSimpleDialog.askstring(title="New System", prompt="Enter a new system")
 			if typeLabel != None:
@@ -376,7 +381,6 @@ class CanvasFrame(Frame):
 			
 		else:
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
-				print self.G.node[nodeitem]
 				if self.G.node[nodeitem][self.v.get()] == None:
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
 				else:
