@@ -4,9 +4,10 @@ from EdgeInfo import *
 import tkSimpleDialog
 import networkx as nx
 import matplotlib
-matplotlib.use("TkAgg")
+#matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
-import random
+import PIL
+from PIL import Image, ImageTk
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
@@ -422,12 +423,13 @@ class CanvasFrame(Frame):
 		ax.set_ylabel("Frequency")
 		ax.axis([-1, max(degrees)+1, 0, len(degrees)])
 		# Produce an image.
-		fig.savefig("histogramplot.gif")
+		fig.savefig("histogramplot.jpg")
 
-		histogram = PhotoImage(file="histogramplot.gif")
+		image = Image.open("histogramplot.jpg")
+		photo = ImageTk.PhotoImage(image)
 
-		label = Label(self.nodeDegreePopup, image=histogram)
-		label.image = histogram
+		label = Label(self.nodeDegreePopup, image=photo)
+		label.image = photo
 		label.pack()
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	

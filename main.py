@@ -123,7 +123,8 @@ class Window(Frame):
 def main():
     root = Tk()
     app = Window(root)
-    root.mainloop()  
+    root.mainloop() 
+    app.quit()
     #to see the networkx representation of the graph after exiting the gui:
     #nx.draw(app.G)
     #plt.show()
