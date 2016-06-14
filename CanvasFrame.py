@@ -3,10 +3,10 @@ from NodeInfo import *
 from EdgeInfo import *
 import tkSimpleDialog
 import networkx as nx
-import matplotlib
-from matplotlib import pyplot as plt
-import PIL
-from PIL import Image, ImageTk
+# import matplotlib
+# from matplotlib import pyplot as plt
+# import PIL
+# from PIL import Image, ImageTk
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
@@ -90,6 +90,11 @@ class CanvasFrame(Frame):
 
 		self.undoStack.append(item)
 
+		if self.v.get() != "All":
+			self.G.node[item][self.v.get()] = 0
+			if len(self.rightFrame.winfo_children()) > 0:
+				self.systemInfo.repopulateData()
+
 	#determines the x and y coordinates of where the edge will start, checks that starting coords are from a node
 	def edgeStart(self, event):
 		r = 24
@@ -128,6 +133,11 @@ class CanvasFrame(Frame):
 			self.G.edge[self.startNode[0]][self.endNode[0]]['y2_coord'] = self.endNodeY
 
 			self.undoStack.append(item)
+
+			if self.v.get() != "All":
+				self.G.edge[self.startNode[0]][self.endNode[0]][self.v.get()] = 0
+				if len(self.rightFrame.winfo_children()) > 0:
+					self.systemInfo.repopulateData()
 			
 			
 	# finds node enclosed by mouse click with a radius of r, changes node color and displays node information
@@ -363,6 +373,13 @@ class CanvasFrame(Frame):
 					self.G.node[nodeitem][typeLabel] = None
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
 				for edgeitem in self.systemsCanvas.find_withtag('edge'):
+					nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
+					try:
+						self.G[nodes[0]][nodes[1]]
+					except KeyError:
+						nodes[0], nodes[1] = nodes[1], nodes[0]
+					self.G.edge[nodes[0]][nodes[1]][typeLabel] = None
+
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
 
 				# refresh right panel to include new Demand if a node is currently selected
@@ -406,30 +423,30 @@ class CanvasFrame(Frame):
 		self.nodeDegreePopup = Toplevel(self.parent)
 		self.nodeDegreePopup.title("Node Degrees")
 
-		degrees = []
-		for key in nodeDegrees:
-			degrees.append(nodeDegrees[key])
+		# degrees = []
+		# for key in nodeDegrees:
+		# 	degrees.append(nodeDegrees[key])
 
 	
-		# Create a Figure object.
-		fig = plt.figure(figsize=(6, 5))
-		# Create an Axes object.
-		ax = fig.add_subplot(1,1,1) # one row, one column, first plot
-		# Plot the data.
-		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left')
-		# Add some axis labels.
-		ax.set_xlabel("Degrees")
-		ax.set_ylabel("Frequency")
-		ax.axis([-1, max(degrees)+1, 0, len(degrees)])
-		# Produce an image.
-		fig.savefig("histogramplot.jpg")
+		# # Create a Figure object.
+		# fig = plt.figure(figsize=(6, 5))
+		# # Create an Axes object.
+		# ax = fig.add_subplot(1,1,1) # one row, one column, first plot
+		# # Plot the data.
+		# ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left')
+		# # Add some axis labels.
+		# ax.set_xlabel("Degrees")
+		# ax.set_ylabel("Frequency")
+		# ax.axis([-1, max(degrees)+1, 0, len(degrees)])
+		# # Produce an image.
+		# fig.savefig("histogramplot.jpg")
 
-		image = Image.open("histogramplot.jpg")
-		photo = ImageTk.PhotoImage(image)
+		# image = Image.open("histogramplot.jpg")
+		# photo = ImageTk.PhotoImage(image)
 
-		label = Label(self.nodeDegreePopup, image=photo)
-		label.image = photo
-		label.pack()
+		# label = Label(self.nodeDegreePopup, image=photo)
+		# label.image = photo
+		# label.pack()
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
 	def initUI(self):

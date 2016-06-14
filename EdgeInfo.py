@@ -91,7 +91,7 @@ class EdgeInfo(Frame):
 			# add the label to NetworkX and initialize its value to 0
 			#newEntry.insert(0, '0')
 			if label not in self.G.edge[self.nodes[0]][self.nodes[1]]:
-				self.G.edge[self.nodes[0]][self.nodes[1]][label] = 0
+				self.G.edge[self.nodes[0]][self.nodes[1]][label] = None
 			self.systemDict[label] = newEntry
 
 			# move widgets down to make room for new demand label
