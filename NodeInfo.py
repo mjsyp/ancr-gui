@@ -162,7 +162,8 @@ class NodeInfo(Frame):
 		self.G.node[self.index]['z'] = int(self.zEntry.get())
 		self.G.node[self.index]['Notes'] = self.notes.get('0.0', END)
 
-		if len(self.leftFrame.systemsCanvas.winfo_children()) > 0:
+		if self.leftFrame.labels == 1:
+			self.leftFrame.hideLabels()
 			self.leftFrame.showLabels()
 
 		# Demands
