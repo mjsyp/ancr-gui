@@ -106,8 +106,8 @@ class Window(Frame):
         self.parent.title("GUI")
 
         # Create left and right frames
-        self.leftFrame = Frame(self.parent, height=600, width=700, bg='light blue') #light colored bg to see panel
-        self.rightFrame = Frame(self.parent, bg="dark gray", height=600, width=300) #dark colored bg to see panel
+        self.leftFrame = Frame(self.parent, bg='light blue', relief=GROOVE, bd=1, height=600, width=700) #light colored bg to see panel
+        self.rightFrame = Frame(self.parent, bg="dark gray", relief=GROOVE, bd=1, height=600, width=300) #dark colored bg to see panel
 
         self.leftFrame.pack(side="left", fill="both", expand=1)
         self.leftFrame.pack_propagate(0)
@@ -123,7 +123,7 @@ class Window(Frame):
 def main():
     root = Tk()
     app = Window(root)
-    root.mainloop() 
+    root.mainloop()
     #to see the networkx representation of the graph after exiting the gui:
     #nx.draw(app.G)
     #plt.show()

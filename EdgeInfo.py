@@ -31,8 +31,8 @@ class EdgeInfo(Frame):
 		self.initUI()
 
 	def createTypeLabel(self):
-		self.typeLabel = Label(self.parent, text="Type:", bg=self.color)
-		self.typeLabel.grid(row=2, column=0)
+		self.typeLabel = Label(self.parent, text="Type:", bg=self.color, anchor=W)
+		self.typeLabel.grid(row=2, column=0, padx=5, sticky=E)
 
 		self.typeMenu = Frame(self.parent, highlightbackground=self.color)
 		self.typeMenu.grid(row=2, column=1, padx=10)
@@ -60,8 +60,8 @@ class EdgeInfo(Frame):
 
 	def createDemandLabel(self):
 		# Demand
- 		self.demandLabel = Label(self.parent, text="Demand:", bg=self.color)
- 		self.demandLabel.grid(row=3, column=0, padx=5)
+ 		self.demandLabel = Label(self.parent, text="Demand:", bg=self.color, anchor=W)
+ 		self.demandLabel.grid(row=3, column=0, padx=5, sticky=E)
 
 		self.createDemandBtn = Button(self.parent, text="Create New", 
 			command=self.createNewDemand, highlightbackground=self.color)
@@ -112,8 +112,8 @@ class EdgeInfo(Frame):
 				self.leftFrame.dropdown.pack(side='left')
 
 	def createGeometryLabel(self):
-		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color)
-		self.geometryLabel.grid(row=5, column=0, padx=5)
+		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color, anchor=W)
+		self.geometryLabel.grid(row=5, column=0, padx=5, sticky=E)
 
 		self.xLabel = Label(self.parent, text="x", bg=self.color)
 		self.xLabel.grid(row=5, column=1, padx=1, pady=1)
@@ -173,15 +173,15 @@ class EdgeInfo(Frame):
 
 	def initUI(self):
 		# Name
-		self.nameLabel = Label(self.parent, text="Name:", bg=self.color)
-		self.nameLabel.grid(row=1, column=0, padx=5, pady=10)
+		self.nameLabel = Label(self.parent, text="Name:", bg=self.color, font='bold')
+		self.nameLabel.grid(row=1, column=0, padx=5, pady=10, sticky=E)
 
 		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
 		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W, padx=10)
 
 		# Notes
 		self.notesLabel = Label(self.parent, text="Notes:", bg=self.color)
-		self.notesLabel.grid(row=8, column=0)
+		self.notesLabel.grid(row=8, column=0, padx=5, sticky=E)
 		self.notes = Text(self.parent, height=8, width=23, font='TkDefaultFont')
 		self.notes.grid(row=8, column=1, columnspan=2, rowspan=8, pady=5, padx=10)
 
