@@ -5,7 +5,7 @@ import tkSimpleDialog
 import networkx as nx
 # import matplotlib
 # from matplotlib import pyplot as plt
-from PIL import Image, ImageTk
+#from PIL import Image, ImageTk
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
@@ -451,8 +451,8 @@ class CanvasFrame(Frame):
 	def initUI(self):
 		# creates toolbar: implemented using a frame with dropdown/buttons placed on it
 		#          referenced from http://zetcode.com/gui/tkinter/menustoolbars/
-		self.toolbar = Frame(self.parent, bg=self.color, relief=GROOVE, bd=1)
-		self.toolbar.pack(fill=X)
+		self.toolbar = Frame(self.parent, bg=self.color)
+		self.toolbar.pack()
 
 		#creates systems dropdown menu
 		self.optionList = ['All', 'Create New']
@@ -464,25 +464,25 @@ class CanvasFrame(Frame):
 		self.dropdown.pack(side='left')
 
 		#creates toolbar buttons, with functionality and binds them to their repsective button click function
-		# self.img = Image.open("node.jpg")
-		# nodeImg = ImageTk.PhotoImage(self.img)
-		# self.createNodeButton = Button(self.toolbar, image=nodeImg, command=self.createNodeButtonClick, 
+		
+		# self.nodeImg = PhotoImage(file="node.gif")
+		# self.createNodeButton = Button(self.toolbar, image=self.nodeImg, command=self.createNodeButtonClick, 
 		# 	highlightbackground=self.color)
 
-		# self.img = Image.open("edge.png")
-		# edgeImg = ImageTk.PhotoImage(self.img)
-		# self.createEdgeButton = Button(self.toolbar, image=edgeImg, command=self.createEdgeButtonClick,
+		
+		# # self.edgeImg = PhotoImage("edge.gif")
+		# # self.createEdgeButton = Button(self.toolbar, image=self.edgeImg, command=self.createEdgeButtonClick,
+		# # 	highlightbackground=self.color)
+		
+		
+		# self.selectImg = PhotoImage(file="select.gif")
+		# self.selectNodeButton = Button(self.toolbar, image=self.selectImg, command=self.selectNodeButtonClick,
 		# 	highlightbackground=self.color)
 		
-		# self.img = Image.open("pointer.png")
-		# selectImg = ImageTk.PhotoImage(self.img)
-		# self.selectNodeButton = Button(self.toolbar, image=selectImg, command=self.selectNodeButtonClick,
-		# 	highlightbackground=self.color)
 		
-		# self.img = Image.open("delete.png")
-		# deleteImg = ImageTk.PhotoImage(self.img)
-		# self.deleteNodeButton = Button(self.toolbar, image=deleteImg, command=self.deleteNodeButtonClick, 
-		# 	highlightbackground=self.color)
+		# # self.deleteImg = PhotoImage('delete.gif')
+		# # self.deleteNodeButton = Button(self.toolbar, image=self.deleteImg, command=self.deleteNodeButtonClick, 
+		# # 	highlightbackground=self.color)
 		
 		self.createNodeButton = Button(self.toolbar, text="create node", command=self.createNodeButtonClick, 
 			highlightbackground=self.color)

@@ -197,5 +197,5 @@ class NodeInfo(Frame):
 		# save button
 		self.saveBtn = Button(self.parent, text="Save", command=self.saveAttributes, 
 			highlightbackground=self.color)
-		self.saveBtn.pack(side="bottom")
+		self.saveBtn.grid(row=16, columnspan=3, padx=5)
 

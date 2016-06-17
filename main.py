@@ -107,17 +107,33 @@ class Window(Frame):
 
         # Create left and right frames
         self.leftFrame = Frame(self.parent, bg='light blue', relief=GROOVE, bd=1, height=600, width=700) #light colored bg to see panel
-        self.rightFrame = Frame(self.parent, bg="dark gray", relief=GROOVE, bd=1, height=600, width=300) #dark colored bg to see panel
+        self.rightFrame = Frame(self.parent, bg="dark gray", relief=GROOVE, bd=1, height=600, width=340) #dark colored bg to see panel
 
         self.leftFrame.pack(side="left", fill="both", expand=1)
         self.leftFrame.pack_propagate(0)
         self.rightFrame.pack(side="right", fill="y", expand=0)
         self.rightFrame.pack_propagate(0)
+        
+        self.rightSideCanvas = Canvas(self.rightFrame, height=600, width=300, bg='dark gray', highlightbackground='dark gray')
+        self.rightCanvasFrame = Frame(self.rightSideCanvas, bg='dark gray')
+        self.vsb = Scrollbar(self.rightFrame, orient="vertical", command=self.rightSideCanvas.yview)
+        self.rightSideCanvas.configure(yscrollcommand=self.vsb.set)
+
+        self.vsb.pack(side="right", fill="y")
+        self.rightSideCanvas.pack(side="left", expand=True)
+        self.rightSideCanvas.create_window((0,0), window=self.rightCanvasFrame, anchor="nw")
+
+
 
         # Use CanvasFrame to fill left frame
-        self.geoCanvas = CanvasFrame(self.leftFrame, self.rightFrame, self.G, self.D)
+        self.geoCanvas = CanvasFrame(self.leftFrame, self.rightCanvasFrame, self.G, self.D)
+
+        self.rightCanvasFrame.bind("<Configure>", self.onFrameConfigure)
 
         self.createTabs()
+
+    def onFrameConfigure(self, event):
+        self.rightSideCanvas.configure(scrollregion=self.rightSideCanvas.bbox("all"), width=300, height=600)
 
 
 def main():
