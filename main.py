@@ -15,15 +15,14 @@ class Window(Frame):
         self.D = nx.DiGraph()
         self.initUI()
 
+    # exits out of gui when clicked on 
     def exit(self):
         self.quit()
 
     def save(self, event=None):
-        outFile=open('gui.txt', 'w')
-        s=str(self.G.nodes(data=True))
-        outFile.write(s)
-        outFile.close()
+        pass
 
+    # can save network x graph (node/edges and attributes) as any type of text file
     def save_as(self):
         f = tkFileDialog.asksaveasfilename(defaultextension=".txt")
         if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
@@ -31,6 +30,7 @@ class Window(Frame):
         else:
             pickle.dump(self.G, open(str(f), 'w'))
 
+    # can open any previously saved network x graph and plot nodes and edges onto the canvas, and resume all gui functionality 
     def open(self):
         f = tkFileDialog.askopenfilename()
         if f is None:
@@ -61,9 +61,7 @@ class Window(Frame):
 
 
                 
-            
-
-
+    # creates the gui menubar
     def createTabs(self):
         # MAIN MENUBAR
         menubar = Menu(self.parent)
@@ -103,9 +101,10 @@ class Window(Frame):
         self.parent.bind('<Command-s>', self.save)
 
     def initUI(self):
+
         self.parent.title("GUI")
 
-        # Create left and right frames
+        # Create left and right frames and packs them within the parent frame
         self.leftFrame = Frame(self.parent, bg='light blue', height=600, width=700) #light colored bg to see panel
         self.rightFrame = Frame(self.parent, bg="dark gray", height=600, width=340) #dark colored bg to see panel
 
@@ -114,6 +113,7 @@ class Window(Frame):
         self.rightFrame.pack(side="right", fill="y", expand=0)
         self.rightFrame.pack_propagate(0)
         
+        # Creates a scrollbar on the right frame and corresponding window which it controls
         self.rightSideCanvas = Canvas(self.rightFrame, height=600, width=300, bg='dark gray', highlightbackground='dark gray')
         self.rightCanvasFrame = Frame(self.rightSideCanvas, bg='dark gray')
         self.vsb = Scrollbar(self.rightFrame, orient="vertical", command=self.rightSideCanvas.yview)
@@ -128,6 +128,7 @@ class Window(Frame):
         # Use CanvasFrame to fill left frame
         self.geoCanvas = CanvasFrame(self.leftFrame, self.rightCanvasFrame, self.G, self.D)
 
+        # enables scrollbar functionality 
         self.rightCanvasFrame.bind("<Configure>", self.onFrameConfigure)
 
         self.createTabs()
