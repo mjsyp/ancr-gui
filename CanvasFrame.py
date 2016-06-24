@@ -464,26 +464,6 @@ class CanvasFrame(Frame):
 		self.dropdown.pack(side='left')
 
 		#creates toolbar buttons, with functionality and binds them to their repsective button click function
-		
-		# self.nodeImg = PhotoImage(file="node.gif")
-		# self.createNodeButton = Button(self.toolbar, image=self.nodeImg, command=self.createNodeButtonClick, 
-		# 	highlightbackground=self.color)
-
-		
-		# # self.edgeImg = PhotoImage("edge.gif")
-		# # self.createEdgeButton = Button(self.toolbar, image=self.edgeImg, command=self.createEdgeButtonClick,
-		# # 	highlightbackground=self.color)
-		
-		
-		# self.selectImg = PhotoImage(file="select.gif")
-		# self.selectNodeButton = Button(self.toolbar, image=self.selectImg, command=self.selectNodeButtonClick,
-		# 	highlightbackground=self.color)
-		
-		
-		# # self.deleteImg = PhotoImage('delete.gif')
-		# # self.deleteNodeButton = Button(self.toolbar, image=self.deleteImg, command=self.deleteNodeButtonClick, 
-		# # 	highlightbackground=self.color)
-		
 		self.createNodeButton = Button(self.toolbar, text="create node", command=self.createNodeButtonClick, 
 			highlightbackground=self.color)
 		self.createEdgeButton = Button(self.toolbar, text="create edge", command=self.createEdgeButtonClick,
@@ -507,4 +487,5 @@ class CanvasFrame(Frame):
 		#creates canvas 
 		self.systemsCanvas = Canvas(self.parent, height=570, width=700, bg='white')
 		self.systemsCanvas.pack(fill="both", expand=1)
+
 

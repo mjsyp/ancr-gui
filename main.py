@@ -40,7 +40,7 @@ class Window(Frame):
             self.G = nx.convert_node_labels_to_integers(self.G, first_label=1)
             for widget in self.leftFrame.winfo_children():
                 widget.destroy()
-            self.geoCanvas = CanvasFrame(self.leftFrame, self.rightFrame, self.G, self.D)
+            self.geoCanvas = CanvasFrame(self.leftFrame, self.rightCanvasFrame, self.G, self.D)
             self.createTabs()
             for nodeNum in self.G.nodes():
                 r = 8
@@ -106,8 +106,8 @@ class Window(Frame):
         self.parent.title("GUI")
 
         # Create left and right frames
-        self.leftFrame = Frame(self.parent, bg='light blue', relief=GROOVE, bd=1, height=600, width=700) #light colored bg to see panel
-        self.rightFrame = Frame(self.parent, bg="dark gray", relief=GROOVE, bd=1, height=600, width=340) #dark colored bg to see panel
+        self.leftFrame = Frame(self.parent, bg='light blue', height=600, width=700) #light colored bg to see panel
+        self.rightFrame = Frame(self.parent, bg="dark gray", height=600, width=340) #dark colored bg to see panel
 
         self.leftFrame.pack(side="left", fill="both", expand=1)
         self.leftFrame.pack_propagate(0)
