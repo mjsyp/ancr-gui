@@ -15,15 +15,14 @@ class Window(Frame):
         self.D = nx.DiGraph()
         self.initUI()
 
+    # exits out of gui when clicked on 
     def exit(self):
         self.quit()
 
     def save(self, event=None):
-        outFile=open('gui.txt', 'w')
-        s=str(self.G.nodes(data=True))
-        outFile.write(s)
-        outFile.close()
+        pass
 
+    # can save network x graph (node/edges and attributes) as any type of text file
     def save_as(self):
         f = tkFileDialog.asksaveasfilename(defaultextension=".txt")
         if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
@@ -31,6 +30,7 @@ class Window(Frame):
         else:
             pickle.dump(self.G, open(str(f), 'w'))
 
+    # can open any previously saved network x graph and plot nodes and edges onto the canvas, and resume all gui functionality 
     def open(self):
         f = tkFileDialog.askopenfilename()
         if f is None:
@@ -40,7 +40,7 @@ class Window(Frame):
             self.G = nx.convert_node_labels_to_integers(self.G, first_label=1)
             for widget in self.leftFrame.winfo_children():
                 widget.destroy()
-            self.geoCanvas = CanvasFrame(self.leftFrame, self.rightFrame, self.G, self.D)
+            self.geoCanvas = CanvasFrame(self.leftFrame, self.rightCanvasFrame, self.G, self.D)
             self.createTabs()
             for nodeNum in self.G.nodes():
                 r = 8
@@ -59,7 +59,8 @@ class Window(Frame):
                     self.geoCanvas.dropdown.configure(bg="light blue")
                     self.geoCanvas.dropdown.pack(side='left')
 
-
+                
+    # creates the gui menubar
     def createTabs(self):
         # MAIN MENUBAR
         menubar = Menu(self.parent)
@@ -99,18 +100,20 @@ class Window(Frame):
         self.parent.bind('<Command-s>', self.save)
 
     def initUI(self):
+
         self.parent.title("GUI")
 
-        # Create left and right frames
-        self.leftFrame = Frame(self.parent, bg='light blue', relief=GROOVE, bd=1, height=600, width=700) #light colored bg to see panel
-        self.rightFrame = Frame(self.parent, bg="dark gray", relief=GROOVE, bd=1, height=600, width=340) #dark colored bg to see panel
+        # Create left and right frames and packs them within the parent frame
+        self.leftFrame = Frame(self.parent, bg='light blue', height=700, width=700) #light colored bg to see panel
+        self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=340) #dark colored bg to see panel
 
         self.leftFrame.pack(side="left", fill="both", expand=1)
         self.leftFrame.pack_propagate(0)
         self.rightFrame.pack(side="right", fill="y", expand=0)
         self.rightFrame.pack_propagate(0)
         
-        self.rightSideCanvas = Canvas(self.rightFrame, height=600, width=300, bg='dark gray', highlightbackground='dark gray')
+        # Creates a scrollbar on the right frame and corresponding window which it controls
+        self.rightSideCanvas = Canvas(self.rightFrame, height=700, width=300, bg='dark gray', highlightbackground='dark gray')
         self.rightCanvasFrame = Frame(self.rightSideCanvas, bg='dark gray')
         self.vsb = Scrollbar(self.rightFrame, orient="vertical", command=self.rightSideCanvas.yview)
         self.rightSideCanvas.configure(yscrollcommand=self.vsb.set)
@@ -124,12 +127,14 @@ class Window(Frame):
         # Use CanvasFrame to fill left frame
         self.geoCanvas = CanvasFrame(self.leftFrame, self.rightCanvasFrame, self.G, self.D)
 
+        # enables scrollbar functionality 
         self.rightCanvasFrame.bind("<Configure>", self.onFrameConfigure)
 
         self.createTabs()
 
+    # set the right frame window to match the scroll bar configure
     def onFrameConfigure(self, event):
-        self.rightSideCanvas.configure(scrollregion=self.rightSideCanvas.bbox("all"), width=300, height=600)
+        self.rightSideCanvas.configure(scrollregion=self.rightSideCanvas.bbox("all"), width=300, height=700)
 
 
 def main():

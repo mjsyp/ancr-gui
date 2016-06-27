@@ -5,7 +5,7 @@ import tkSimpleDialog
 import networkx as nx
 # import matplotlib
 # from matplotlib import pyplot as plt
-#from PIL import Image, ImageTk
+# from PIL import Image, ImageTk
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
@@ -58,6 +58,12 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.bind('<Button-1>', self.delete)
 		self.systemsCanvas.itemconfig('node', fill='red')
 		self.systemsCanvas.itemconfig('edge', fill='black')
+
+	def dragNodeButtonClick(self):
+		self.systemsCanvas.unbind('<Button-1>')
+		self.systemsCanvas.unbind('<ButtonRelease-1>')
+		self.systemsCanvas.bind('<Button-1>', self.dragStart)
+		self.systemsCanvas.bind('<ButtonRelease-1>', self.dragEnd)
 
 
 	
@@ -250,6 +256,47 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.addtag_withtag('deleted', item)
 		self.systemsCanvas.itemconfig(item, state='hidden')
 	
+	def dragStart(self, event):
+		r = 18
+		nodeSelected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
+		if len(nodeSelected) > 0:
+			self.nodeDragItem = nodeSelected[0]
+			self.dragStartX = event.x
+			self.dragStartY = event.y
+		self.edgeItemsDrag = []
+		
+		edgeSelected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
+		if (len(edgeSelected) > 0):
+			for edge in edgeSelected:
+				tag = self.checkTag(edge)
+				if tag == 'edge':
+					self.edgeItemsDrag.append(edge)
+
+
+
+	def dragEnd(self, event):
+		# move node:
+		self.systemsCanvas.move(self.nodeDragItem, event.x-self.dragStartX, event.y-self.dragStartY)
+
+		# move edges:
+		for edge in self.edgeItemsDrag:
+			nodes = [int(n) for n in self.systemsCanvas.gettags(edge) if n.isdigit()]
+			try:
+				self.G[nodes[0]][nodes[1]]
+			except KeyError:
+				nodes[0], nodes[1] = nodes[1], nodes[0]
+			
+			edgeCoords = self.systemsCanvas.coords(edge)
+			if self.nodeDragItem == nodes[0]:
+				self.systemsCanvas.coords(edge, event.x, event.y, edgeCoords[2], edgeCoords[3])
+			else:
+				self.systemsCanvas.coords(edge, edgeCoords[0], edgeCoords[1], event.x, event.y)
+
+
+			
+			
+
+	
 	# shows all node names when' Show Labels' is clicked
 	def showLabels(self):
 		self.labels = 1
@@ -410,9 +457,11 @@ class CanvasFrame(Frame):
 
 	# shows each nodes degree 
 	def nodeDegrees(self):
-		nodeDegrees = nx.degree(self.G)
-		self.nodeDegreePopup = Toplevel(self.parent)
-		self.nodeDegreePopup.title("Node Degrees")
+		# # popout menu to display node degree analysis graph:
+
+		# nodeDegrees = nx.degree(self.G)
+		# self.nodeDegreePopup = Toplevel(self.parent)
+		# self.nodeDegreePopup.title("Node Degrees")
 
 		# degrees = []
 		# for key in nodeDegrees:
@@ -439,6 +488,52 @@ class CanvasFrame(Frame):
 		# label.image = photo
 		# label.pack()
 
+		# # mini frame to display node degree analysis graph:
+		nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=5, relief='sunken')
+		nodeDegreeFrame.pack_propagate(0)
+		nodeDegreeFrame.pack(side='left')
+
+		toolbarFrame = Frame(nodeDegreeFrame, height=25, width=200, bg='light gray')
+		toolbarFrame.pack_propagate(0)
+		toolbarFrame.pack(side='top')
+
+		exitButton = Button(toolbarFrame, text='ex', highlightbackground='light gray')
+		minButton = Button(toolbarFrame, text='min', highlightbackground='light gray')
+		maxButton = Button(toolbarFrame, text='max', highlightbackground='light gray')
+
+		maxButton.pack(side='right')
+		minButton.pack(side='right')
+		exitButton.pack(side='right')
+		
+		
+
+		nodeDegrees = nx.degree(self.G)
+		degrees = []
+		for key in nodeDegrees:
+			degrees.append(nodeDegrees[key])
+
+	
+		# Create a Figure object.
+		fig = plt.figure(figsize=(1.2, 1.2))
+		# Create an Axes object.
+		ax = fig.add_subplot(1,1,1) # one row, one column, first plot
+		# Plot the data.
+		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left')
+		# Add some axis labels.
+		ax.set_xlabel("Degrees")
+		ax.set_ylabel("Frequency")
+		ax.axis([-1, max(degrees)+1, 0, len(degrees)])
+		# Produce an image.
+		fig.savefig("histogramplot.jpg")
+
+		image = Image.open("histogramplot.jpg")
+		photo = ImageTk.PhotoImage(image)
+
+		label = Label(nodeDegreeFrame, image=photo)
+		label.image = photo
+		label.pack()
+
+
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
 	def initUI(self):
 		# creates toolbar: implemented using a frame with dropdown/buttons placed on it
@@ -456,24 +551,27 @@ class CanvasFrame(Frame):
 		self.dropdown.pack(side='left')
 
 		#creates toolbar buttons, with functionality and binds them to their repsective button click function
-		
-		# self.nodeImg = PhotoImage(file="node.gif")
+		# nodeImage = Image.open('node.gif')
+		# nodeImage = nodeImage.resize((50, 50), Image.ANTIALIAS)
+		# self.nodeImg = ImageTk.PhotoImage(nodeImage)
 		# self.createNodeButton = Button(self.toolbar, image=self.nodeImg, command=self.createNodeButtonClick, 
 		# 	highlightbackground=self.color)
 
-		
-		# self.edgeImg = PhotoImage(file="edge.gif")
+		# edgeImage = Image.open('edge.gif')
+		# edgeImage = edgeImage.resize((50, 50), Image.ANTIALIAS)		
+		# self.edgeImg = ImageTk.PhotoImage(edgeImage)
 		# self.createEdgeButton = Button(self.toolbar, image=self.edgeImg, command=self.createEdgeButtonClick,
 		# 	highlightbackground=self.color)
 		
-		
-		# self.selectImg = PhotoImage(file="select.gif")
-		# self.selectNodeButton = Button(self.toolbar, image=self.selectImg, command=self.selectButtonClick,
+		# selectImage = Image.open('select.gif')
+		# selectImage = selectImage.resize((50, 50), Image.ANTIALIAS)		
+		# self.selectImg = ImageTk.PhotoImage(selectImage)
+		# self.selectNodeButton = Button(self.toolbar, image=self.selectImg, command=self.selectNodeButtonClick,
 		# 	highlightbackground=self.color)
 		
-		
-		# self.deleteImg = PhotoImage(file='delete.gif')
-		# #self.dispDeleteImg = self.deleteImg.subsample(15, 15)
+		# deleteImage = Image.open('delete.gif')
+		# deleteImage = deleteImage.resize((50, 50), Image.ANTIALIAS)		
+		# self.deleteImg = ImageTk.PhotoImage(deleteImage)
 		# self.deleteNodeButton = Button(self.toolbar, image=self.deleteImg, command=self.deleteNodeButtonClick, 
 		# 	highlightbackground=self.color)
 		
@@ -481,17 +579,25 @@ class CanvasFrame(Frame):
 			highlightbackground=self.color)
 		self.createEdgeButton = Button(self.toolbar, text="create edge", command=self.createEdgeButtonClick,
 			highlightbackground=self.color)
-		self.selectNodeButton = Button(self.toolbar, text="select", command=self.selectButtonClick, 
+		self.selectButton = Button(self.toolbar, text="select", command=self.selectButtonClick, 
 			highlightbackground=self.color)
-		self.deleteNodeButton = Button(self.toolbar, text='delete', command=self.deleteButtonClick, 
+		self.deleteButton = Button(self.toolbar, text='delete', command=self.deleteButtonClick, 
+			highlightbackground=self.color)
+		self.dragNodeButton = Button(self.toolbar, text='drag node', command=self.dragNodeButtonClick, 
 			highlightbackground=self.color)
 
-		self.deleteNodeButton.pack(side='right')
-		self.selectNodeButton.pack(side='right')
+		self.dragNodeButton.pack(side='right')
+		self.deleteButton.pack(side='right')
+		self.selectButton.pack(side='right')
 		self.createEdgeButton.pack(side='right')
 		self.createNodeButton.pack(side='right')
 
 		#creates canvas 
-		self.systemsCanvas = Canvas(self.parent, height=570, width=700, bg='white')
+		self.systemsCanvas = Canvas(self.parent, height=500, width=700, bg='white')
 		self.systemsCanvas.pack(fill="both", expand=1)
+
+		self.miniFrames = Frame(self.parent, height=200, width=700, bg='white')
+		self.miniFrames.pack_propagate(0)
+		self.miniFrames.pack(side='bottom')
+
 
