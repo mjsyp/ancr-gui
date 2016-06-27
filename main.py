@@ -60,10 +60,6 @@ class Window(Frame):
                     self.geoCanvas.dropdown.pack(side='left')
 
 
-                
-            
-
-
     def createTabs(self):
         # MAIN MENUBAR
         menubar = Menu(self.parent)

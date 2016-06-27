@@ -45,35 +45,17 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.itemconfig('node', fill='red')
 		self.systemsCanvas.itemconfig('edge', fill='black')
 	
-	# binds mouse clicks to the selectNode function when the 'select node' button is pressed 
-	def selectNodeButtonClick(self):
-		self.systemsCanvas.unbind('<Button-1>')
-		self.systemsCanvas.unbind('<ButtonRelease-1>')
-		self.systemsCanvas.bind('<Button-1>', self.selectNode)
-		self.systemsCanvas.itemconfig('node', fill='red')
-		self.systemsCanvas.itemconfig('edge', fill='black')
-	
 	# binds mouse clicks to the selectEdge function when the 'select edge' button is pressed 
-	def selectEdgeButtonClick(self):
+	def selectButtonClick(self):
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
-		self.systemsCanvas.bind('<Button-1>', self.selectEdge)
-		self.systemsCanvas.itemconfig('node', fill='red')
-		self.systemsCanvas.itemconfig('edge', fill='black')
+		self.systemsCanvas.bind('<Button-1>', self.select)
 	
 	# binds mouse clicks to the deleteNode function when the 'delete node' button is pressed 
-	def deleteNodeButtonClick(self):
+	def deleteButtonClick(self):
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
-		self.systemsCanvas.bind('<Button-1>', self.deleteNode)
-		self.systemsCanvas.itemconfig('node', fill='red')
-		self.systemsCanvas.itemconfig('edge', fill='black')
-	
-	# binds mouse clicks to the deleteEdge function when the 'delete edge' button is pressed 
-	def deleteEdgeButtonClick(self):
-		self.systemsCanvas.unbind('<Button-1>')
-		self.systemsCanvas.unbind('<ButtonRelease-1>')
-		self.systemsCanvas.bind('<Button-1>', self.deleteEdge)
+		self.systemsCanvas.bind('<Button-1>', self.delete)
 		self.systemsCanvas.itemconfig('node', fill='red')
 		self.systemsCanvas.itemconfig('edge', fill='black')
 
@@ -138,53 +120,61 @@ class CanvasFrame(Frame):
 				if len(self.rightFrame.winfo_children()) > 0:
 					self.systemInfo.repopulateData()
 			
-			
-	# finds node enclosed by mouse click with a radius of r, changes node color and displays node information
-	def selectNode(self, event):
-		r = 18
-		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
-		self.systemsCanvas.itemconfig('node', fill='red')
-		if (len(selected) > 0):
-			self.systemsCanvas.itemconfig(selected[0], fill='green')
-			for widget in self.rightFrame.winfo_children():
-				widget.destroy()
-			self.systemInfo = NodeInfo(self.rightFrame, self, selected[0], self.G, self.optionList)
-		else:
-			for widget in self.rightFrame.winfo_children():
-				widget.destroy()
 
-	# finds edge overlapping mouse click with a radius of r, changes edge color and displays edge information
-	def selectEdge(self, event):
-		r = 4
-		selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
-		self.systemsCanvas.itemconfig('edge', fill='black')
-		if len(selected) > 0:
-			# if the item selected is a line (edge), make edge green and display right panel
-			if self.systemsCanvas.type(selected[0]) == 'line':
-				self.systemsCanvas.itemconfig(selected[0], fill='green')
-
-				for widget in self.rightFrame.winfo_children():
+	def select(self, event):
+		# clear right pane of any previous info
+		for widget in self.rightFrame.winfo_children():
 					widget.destroy()
 
-				nodes = [int(n) for n in self.systemsCanvas.gettags(selected[0]) if n.isdigit()]
-				try:
-					self.G[nodes[0]][nodes[1]]
-				except KeyError:
-					nodes[0], nodes[1] = nodes[1], nodes[0]
-				
-				self.systemInfo = EdgeInfo(self.rightFrame, self, selected[0], nodes, self.G, self.optionList)
-		else:
-			for widget in self.rightFrame.winfo_children():
-				widget.destroy()
+		r = 18
+		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 
-	# deletes node with ID=item from G_delete; adds node along with attributes to G_add
+		# fill all nodes red and all edges black to reset any previously selected item
+		self.systemsCanvas.itemconfig('node', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black')
+
+		if len(selected) > 0:
+			if self.systemsCanvas.type(selected[0]) == 'oval':
+				self.selectNode(selected[0])
+		else:
+			r = 4
+			selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
+
+			if len(selected) > 0 and self.systemsCanvas.type(selected[0]) == 'line':
+				self.selectEdge(selected[0])
+
+	'''changes node color and displays node information'''
+	def selectNode(self, item):
+		# adjust color of nodes based on selection
+		self.systemsCanvas.itemconfig('node', fill='red')
+		self.systemsCanvas.itemconfig(item, fill='green')
+
+		self.systemInfo = NodeInfo(self.rightFrame, self, item, self.G, self.optionList)
+
+	'''changes edge color and displays edge information'''
+	def selectEdge(self, item):
+		# adjust selection color
+		self.systemsCanvas.itemconfig('edge', fill='black')
+		self.systemsCanvas.itemconfig(item, fill='green')
+
+		# find start and end node of edge
+		nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+		try:
+			self.G[nodes[0]][nodes[1]]
+		except KeyError:
+			nodes[0], nodes[1] = nodes[1], nodes[0]
+		
+		self.systemInfo = EdgeInfo(self.rightFrame, self, item, nodes, self.G, self.optionList)
+
+
+	'''deletes node with ID=item from G_delete; adds node along with attributes to G_add'''
 	def deleteNodeNX(self, item, G_delete, G_add):
 		G_add.add_node(item)
 		for key in G_delete.node[item]:
 			G_add.node[item][key] = G_delete.node[item][key]
 		#G_delete.remove_node(item)
 
-	# deletes edge with ID=item from G_delete; adds edge to G_add
+	'''deletes edge with ID=item from G_delete; adds edge to G_add'''
 	def deleteEdgeNX(self, item, G_delete, G_add):
 		nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
 
@@ -202,60 +192,63 @@ class CanvasFrame(Frame):
 		G_delete.remove_edge(nodes[0], nodes[1])
 
 
-	# deletes selected node with radius r and any edges overlapping it in both Tkinter and networkX
-	def deleteNode(self, event):
-		r = 16
-
+	'''Runs on click of "delete" button; decides whether to call deleteNode or deleteEdge'''
+	def delete(self, event):
+		r = 18
 		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 
-		if (len(selected) > 0):
-			itemTag = self.systemsCanvas.gettags(selected[0])[0]
+		if len(selected) > 0:
+			if self.systemsCanvas.type(selected[0]) == 'oval':
+				self.deleteNode(event, selected[0])
+		else:
+			r = 4
+			selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
 
-			if itemTag == 'node':
-				# remove node and any associated edges from Canvas
-				overlapped = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
-				numEdges = 0
+			if len(selected) > 0 and self.systemsCanvas.type(selected[0]) == 'line':
+				self.deleteEdge(selected[0])
 
-				for x in overlapped:
-					if self.systemsCanvas.type(x) == 'line':
-						# add 'deleted' tag to ea. object x, and make it hidden
 
-						self.systemsCanvas.addtag_withtag('deleted', x)
-						self.systemsCanvas.itemconfig(x, state='hidden')
+	'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
+	def deleteNode(self, event, item):
+		# find edges overlapping with this node
+		r = 16
+		overlapped = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
+		numEdges = 0
 
-						self.undoStack.append(x) # add edge to undo stack
-						self.systemsCanvas.dtag(x, 'edge')
-						self.deleteEdgeNX(x, self.G, self.D)
-						numEdges += 1
+		for x in overlapped:
+			if self.systemsCanvas.type(x) == 'line':
+				# add 'deleted' tag to ea. object x, and make it hidden
+				self.systemsCanvas.addtag_withtag('deleted', x)
+				self.systemsCanvas.itemconfig(x, state='hidden')
 
-				self.systemsCanvas.addtag_withtag('deleted', selected[0])
-				self.systemsCanvas.itemconfig(selected[0], state='hidden')
-				self.systemsCanvas.dtag(selected[0], 'node')
+				self.undoStack.append(x) # add edge to undo stack
+				self.systemsCanvas.dtag(x, 'edge')
+				self.deleteEdgeNX(x, self.G, self.D)
+				numEdges += 1
 
-				self.deleteNodeNX(selected[0], self.G, self.D) # delete node from networkX
-				self.G.remove_node(selected[0])
-				self.undoStack.append(selected[0]) # add node to undo stack; want this to be on top
+		self.systemsCanvas.addtag_withtag('deleted', item)
+		self.systemsCanvas.itemconfig(item, state='hidden')
+		self.systemsCanvas.dtag(item, 'node')
 
-				# remove label of node if 'Show Labels' is active
-				if self.labels == 1:
-					self.hideLabels()
-					self.showLabels()
+		self.deleteNodeNX(item, self.G, self.D) # delete node from networkX
+		self.G.remove_node(item)
+		self.undoStack.append(item) # add node to undo stack; want this to be on top
+
+		# remove label of node if 'Show Labels' is active
+		if self.labels == 1:
+			self.hideLabels()
+			self.showLabels()
 
 
 	# deletes selected edge with radius r in both Tkinter and networkX
-	def deleteEdge(self, event):
-		r = 4
-		selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
-
-		if len(selected) > 0:
-			if self.systemsCanvas.type(selected[0]) == 'line':
-				# remove edge from networkX
-				self.deleteEdgeNX(selected[0], self.G, self.D)
-				
-				self.undoStack.append(selected[0])
-				self.systemsCanvas.dtag(selected[0], 'edge')
-				self.systemsCanvas.addtag_withtag('deleted', selected[0])
-				self.systemsCanvas.itemconfig(selected[0], state='hidden')
+	def deleteEdge(self, item):
+		# remove edge from networkX
+		self.deleteEdgeNX(item, self.G, self.D)
+		
+		self.undoStack.append(item)
+		self.systemsCanvas.dtag(item, 'edge')
+		self.systemsCanvas.addtag_withtag('deleted', item)
+		self.systemsCanvas.itemconfig(item, state='hidden')
 	
 	# shows all node names when' Show Labels' is clicked
 	def showLabels(self):
@@ -282,7 +275,6 @@ class CanvasFrame(Frame):
 				return 'node'
 			elif x == 'edge':
 				return 'edge'
-
 		return 'none'
 
 
@@ -470,36 +462,31 @@ class CanvasFrame(Frame):
 		# 	highlightbackground=self.color)
 
 		
-		# # self.edgeImg = PhotoImage("edge.gif")
-		# # self.createEdgeButton = Button(self.toolbar, image=self.edgeImg, command=self.createEdgeButtonClick,
-		# # 	highlightbackground=self.color)
-		
-		
-		# self.selectImg = PhotoImage(file="select.gif")
-		# self.selectNodeButton = Button(self.toolbar, image=self.selectImg, command=self.selectNodeButtonClick,
+		# self.edgeImg = PhotoImage(file="edge.gif")
+		# self.createEdgeButton = Button(self.toolbar, image=self.edgeImg, command=self.createEdgeButtonClick,
 		# 	highlightbackground=self.color)
 		
 		
-		# # self.deleteImg = PhotoImage('delete.gif')
-		# # self.deleteNodeButton = Button(self.toolbar, image=self.deleteImg, command=self.deleteNodeButtonClick, 
-		# # 	highlightbackground=self.color)
+		# self.selectImg = PhotoImage(file="select.gif")
+		# self.selectNodeButton = Button(self.toolbar, image=self.selectImg, command=self.selectButtonClick,
+		# 	highlightbackground=self.color)
+		
+		
+		# self.deleteImg = PhotoImage(file='delete.gif')
+		# #self.dispDeleteImg = self.deleteImg.subsample(15, 15)
+		# self.deleteNodeButton = Button(self.toolbar, image=self.deleteImg, command=self.deleteNodeButtonClick, 
+		# 	highlightbackground=self.color)
 		
 		self.createNodeButton = Button(self.toolbar, text="create node", command=self.createNodeButtonClick, 
 			highlightbackground=self.color)
 		self.createEdgeButton = Button(self.toolbar, text="create edge", command=self.createEdgeButtonClick,
 			highlightbackground=self.color)
-		self.selectNodeButton = Button(self.toolbar, text="select node", command=self.selectNodeButtonClick,
+		self.selectNodeButton = Button(self.toolbar, text="select", command=self.selectButtonClick, 
 			highlightbackground=self.color)
-		self.selectEdgeButton = Button(self.toolbar, text="select edge", command=self.selectEdgeButtonClick, 
-			highlightbackground=self.color)
-		self.deleteNodeButton = Button(self.toolbar, text='delete node', command=self.deleteNodeButtonClick, 
-			highlightbackground=self.color)
-		self.deleteEdgeButton = Button(self.toolbar, text='delete edge', command=self.deleteEdgeButtonClick, 
+		self.deleteNodeButton = Button(self.toolbar, text='delete', command=self.deleteButtonClick, 
 			highlightbackground=self.color)
 
-		self.deleteEdgeButton.pack(side='right')
 		self.deleteNodeButton.pack(side='right')
-		self.selectEdgeButton.pack(side='right')
 		self.selectNodeButton.pack(side='right')
 		self.createEdgeButton.pack(side='right')
 		self.createNodeButton.pack(side='right')

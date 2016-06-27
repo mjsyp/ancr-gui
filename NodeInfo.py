@@ -174,7 +174,7 @@ class NodeInfo(Frame):
 
 	def initUI(self):
 		# Name
-		self.nameLabel = Label(self.parent, text="Name:", bg=self.color, font='bold')
+		self.nameLabel = Label(self.parent, text="Name:", bg=self.color)
 		self.nameLabel.grid(row=1, column=0, padx=5, pady=10, sticky=E)
 
 		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
@@ -186,6 +186,11 @@ class NodeInfo(Frame):
 		self.notes = Text(self.parent, height=8, width=23, font='TkDefaultFont')
 		self.notes.grid(row=8, column=1, columnspan=2, rowspan=8, pady=5, padx=10)
 
+		# save button
+		self.saveBtn = Button(self.parent, text="Save", command=self.saveAttributes, 
+			highlightbackground=self.color)
+		self.saveBtn.grid(row=16, columnspan=3, padx=5)
+
 		# Type, Demand, Geometry
 		self.createTypeLabel()
 		self.createGeometryLabel()
@@ -194,8 +199,4 @@ class NodeInfo(Frame):
 		# if node attributes have been set previously, populate right pane using the existing data
 		self.repopulateData()
 
-		# save button
-		self.saveBtn = Button(self.parent, text="Save", command=self.saveAttributes, 
-			highlightbackground=self.color)
-		self.saveBtn.grid(row=16, columnspan=3, padx=5)
 
