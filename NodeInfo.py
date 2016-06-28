@@ -104,7 +104,8 @@ class NodeInfo(Frame):
 			if label not in self.leftFrame.optionList:
 				self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
 				self.leftFrame.dropdown.destroy()
-				self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, *self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
+				self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, 
+					*self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
 				self.leftFrame.dropdown.configure(bg="light blue")
 				self.leftFrame.dropdown.pack(side='left')
 
@@ -151,6 +152,24 @@ class NodeInfo(Frame):
 				self.systemDict[x].delete(0, END)
 				self.systemDict[x].insert(0, self.G.node[self.index][x])
 
+	def updateNodeSizes(self):
+		for node in self.leftFrame.systemsCanvas.find_withtag('node'):
+			if self.leftFrame.systemsCanvas.itemcget(node, 'state') == 'normal':
+				# change sizes of nodes back to normal
+				coords = self.leftFrame.systemsCanvas.coords(nodeitem)
+				midpointX = (coords[0] + coords[2]) / 2
+				midpointY = (coords[1] + coords[3]) / 2
+				r = 8
+				self.leftFrame.systemsCanvas.coords(nodeitem, midpointX-8, midpointY-8, midpointX+8, midpointY+8)
+
+				# update size of nodes to reflect magnitude of value for this demand
+				coords = self.leftFrame.systemsCanvas.coords(node)
+				offset = self.G.node[nodeitem][self.leftFrame.v.get()] - self.leftFrame.minDemand
+				self.leftFrame.systemsCanvas.coords(node, coords[0]-offset, coords[1]-offset, 
+					coords[2]+offset, coords[3]+offset)
+
+
+
 	def saveAttributes(self):
 		self.G.node[self.index]['Name'] = self.nameEntry.get()
 		self.G.node[self.index]['Type'] = self.v.get()
@@ -162,6 +181,8 @@ class NodeInfo(Frame):
 		if self.leftFrame.labels == 1:
 			self.leftFrame.hideLabels()
 			self.leftFrame.showLabels()
+
+		self.updateNodeSizes
 
 		# Demands
 		for x in self.systemDict.keys():
