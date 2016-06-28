@@ -295,6 +295,7 @@ class CanvasFrame(Frame):
 	
 	def dragStart(self, event):
 		r = 18
+		self.nodeDragItem = None
 		nodeSelected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 		if len(nodeSelected) > 0:
 			self.nodeDragItem = nodeSelected[0]
@@ -313,21 +314,22 @@ class CanvasFrame(Frame):
 
 	def dragEnd(self, event):
 		# move node:
-		self.systemsCanvas.move(self.nodeDragItem, event.x-self.dragStartX, event.y-self.dragStartY)
+		if self.nodeDragItem != None:
+			self.systemsCanvas.move(self.nodeDragItem, event.x-self.dragStartX, event.y-self.dragStartY)
 
 		# move edges:
-		for edge in self.edgeItemsDrag:
-			nodes = [int(n) for n in self.systemsCanvas.gettags(edge) if n.isdigit()]
-			try:
-				self.G[nodes[0]][nodes[1]]
-			except KeyError:
-				nodes[0], nodes[1] = nodes[1], nodes[0]
-			
-			edgeCoords = self.systemsCanvas.coords(edge)
-			if self.nodeDragItem == nodes[0]:
-				self.systemsCanvas.coords(edge, event.x, event.y, edgeCoords[2], edgeCoords[3])
-			else:
-				self.systemsCanvas.coords(edge, edgeCoords[0], edgeCoords[1], event.x, event.y)
+			for edge in self.edgeItemsDrag:
+				nodes = [int(n) for n in self.systemsCanvas.gettags(edge) if n.isdigit()]
+				try:
+					self.G[nodes[0]][nodes[1]]
+				except KeyError:
+					nodes[0], nodes[1] = nodes[1], nodes[0]
+				
+				edgeCoords = self.systemsCanvas.coords(edge)
+				if self.nodeDragItem == nodes[0]:
+					self.systemsCanvas.coords(edge, event.x, event.y, edgeCoords[2], edgeCoords[3])
+				else:
+					self.systemsCanvas.coords(edge, edgeCoords[0], edgeCoords[1], event.x, event.y)
 
 
 			
