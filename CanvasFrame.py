@@ -132,7 +132,7 @@ class CanvasFrame(Frame):
 		for widget in self.rightFrame.winfo_children():
 					widget.destroy()
 
-		r = 18
+		r = 22
 		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 
 		# fill all nodes red and all edges black to reset any previously selected item
@@ -400,6 +400,7 @@ class CanvasFrame(Frame):
 		if self.v.get() == "Create New":
 			typeLabel = tkSimpleDialog.askstring(title="New System", prompt="Enter a new system")
 			if typeLabel != None:
+				self.prevSystem = typeLabel
 				self.optionList.insert(len(self.optionList)-2, typeLabel)
 				self.v.set(self.optionList[len(self.optionList)-3])
 				self.dropdown.destroy()
@@ -429,16 +430,41 @@ class CanvasFrame(Frame):
 		elif self.v.get() == 'All':
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
 				self.systemsCanvas.itemconfig(nodeitem, state='normal')
+
+				# change sizes of nodes back to normal
+				coords = self.systemsCanvas.coords(nodeitem)
+				midpointX = (coords[0] + coords[2]) / 2
+				midpointY = (coords[1] + coords[3]) / 2
+				r = 8
+				self.systemsCanvas.coords(nodeitem, midpointX-8, midpointY-8, midpointX+8, midpointY+8)
+
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
 				self.systemsCanvas.itemconfig(edgeitem, state='normal')
 				self.systemsCanvas.itemconfig(edgeitem, arrow='none')
-			
+
 		else:
+			self.minDemand = 1000000000
+			self.maxDemand = -1000000000
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
 				if self.G.node[nodeitem][self.v.get()] == None:
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
+
 				else:
 					self.systemsCanvas.itemconfig(nodeitem, state='normal')
+
+					# find minimum and maximum values for this demand
+					if self.G.node[nodeitem][self.v.get()] < self.minDemand:
+						self.minDemand = self.G.node[nodeitem][self.v.get()]
+					if self.G.node[nodeitem][self.v.get()] > self.maxDemand:
+						self.maxDemand = self.G.node[nodeitem][self.v.get()]
+
+			if self.minDemand != self.maxDemand:
+				for nodeitem in self.systemsCanvas.find_withtag('node'):
+					# change size of nodes to reflect magnitude of value for this demand
+					coords = self.systemsCanvas.coords(nodeitem)
+					x = self.G.node[nodeitem][self.v.get()]
+					offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
+					self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
 
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
 				nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
@@ -549,31 +575,6 @@ class CanvasFrame(Frame):
 		self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
 		self.dropdown.configure(bg=self.color)
 		self.dropdown.pack(side='left')
-
-		#creates toolbar buttons, with functionality and binds them to their repsective button click function
-		# nodeImage = Image.open('node.gif')
-		# nodeImage = nodeImage.resize((50, 50), Image.ANTIALIAS)
-		# self.nodeImg = ImageTk.PhotoImage(nodeImage)
-		# self.createNodeButton = Button(self.toolbar, image=self.nodeImg, command=self.createNodeButtonClick, 
-		# 	highlightbackground=self.color)
-
-		# edgeImage = Image.open('edge.gif')
-		# edgeImage = edgeImage.resize((50, 50), Image.ANTIALIAS)		
-		# self.edgeImg = ImageTk.PhotoImage(edgeImage)
-		# self.createEdgeButton = Button(self.toolbar, image=self.edgeImg, command=self.createEdgeButtonClick,
-		# 	highlightbackground=self.color)
-		
-		# selectImage = Image.open('select.gif')
-		# selectImage = selectImage.resize((50, 50), Image.ANTIALIAS)		
-		# self.selectImg = ImageTk.PhotoImage(selectImage)
-		# self.selectNodeButton = Button(self.toolbar, image=self.selectImg, command=self.selectNodeButtonClick,
-		# 	highlightbackground=self.color)
-		
-		# deleteImage = Image.open('delete.gif')
-		# deleteImage = deleteImage.resize((50, 50), Image.ANTIALIAS)		
-		# self.deleteImg = ImageTk.PhotoImage(deleteImage)
-		# self.deleteNodeButton = Button(self.toolbar, image=self.deleteImg, command=self.deleteNodeButtonClick, 
-		# 	highlightbackground=self.color)
 		
 		self.createNodeButton = Button(self.toolbar, text="create node", command=self.createNodeButtonClick, 
 			highlightbackground=self.color)
