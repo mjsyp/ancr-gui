@@ -3,9 +3,9 @@ from NodeInfo import *
 from EdgeInfo import *
 import tkSimpleDialog
 import networkx as nx
-# import matplotlib
-# from matplotlib import pyplot as plt
-# from PIL import Image, ImageTk
+import matplotlib
+from matplotlib import pyplot as plt
+from PIL import Image, ImageTk
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
@@ -18,6 +18,8 @@ class CanvasFrame(Frame):
 		self.color = "light blue"
 		self.labels = 0
 
+		self.prevOption = None
+
 		# stacks keep track of canvas item ID's as they are created/deleted
 		self.undoStack = []
 		self.redoStack = []
@@ -29,6 +31,13 @@ class CanvasFrame(Frame):
 
 	#binds mouse clicks to the createNode function when the 'create node' button is pressed 
 	def createNodeButtonClick(self):
+		# config all buttons as sunken or raised according to what was pressed
+		self.createNodeButton.config(relief=SUNKEN)
+		self.createEdgeButton.config(relief=RAISED)
+		self.selectButton.config(relief=RAISED)
+		self.deleteButton.config(relief=RAISED)
+		self.dragNodeButton.config(relief=RAISED)
+
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.createNode)
@@ -38,6 +47,13 @@ class CanvasFrame(Frame):
 	# binds mouse clicks to the startEdge function and binds mouse click releases to the createEdge
 	# function when the 'create edge' button is pressed  
 	def createEdgeButtonClick(self):
+		# config all buttons as sunken or raised according to what was pressed
+		self.createNodeButton.config(relief=RAISED)
+		self.createEdgeButton.config(relief=SUNKEN)
+		self.selectButton.config(relief=RAISED)
+		self.deleteButton.config(relief=RAISED)
+		self.dragNodeButton.config(relief=RAISED)
+
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<ButtonPress-1>', self.edgeStart)
@@ -47,12 +63,26 @@ class CanvasFrame(Frame):
 	
 	# binds mouse clicks to the selectEdge function when the 'select edge' button is pressed 
 	def selectButtonClick(self):
+		# config all buttons as sunken or raised according to what was pressed
+		self.createNodeButton.config(relief=RAISED)
+		self.createEdgeButton.config(relief=RAISED)
+		self.selectButton.config(relief=SUNKEN)
+		self.deleteButton.config(relief=RAISED)
+		self.dragNodeButton.config(relief=RAISED)
+
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.select)
 	
 	# binds mouse clicks to the deleteNode function when the 'delete node' button is pressed 
 	def deleteButtonClick(self):
+		# config all buttons as sunken or raised according to what was pressed
+		self.createNodeButton.config(relief=RAISED)
+		self.createEdgeButton.config(relief=RAISED)
+		self.selectButton.config(relief=RAISED)
+		self.deleteButton.config(relief=SUNKEN)
+		self.dragNodeButton.config(relief=RAISED)
+
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.delete)
@@ -60,6 +90,13 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.itemconfig('edge', fill='black')
 
 	def dragNodeButtonClick(self):
+		# config all buttons as sunken or raised according to what was pressed
+		self.createNodeButton.config(relief=RAISED)
+		self.createEdgeButton.config(relief=RAISED)
+		self.selectButton.config(relief=RAISED)
+		self.deleteButton.config(relief=RAISED)
+		self.dragNodeButton.config(relief=SUNKEN)
+
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.dragStart)
@@ -405,18 +442,19 @@ class CanvasFrame(Frame):
 				self.v.set(self.optionList[len(self.optionList)-3])
 				self.dropdown.destroy()
 				self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
-				self.dropdown.configure(bg="light blue")
+				self.dropdown.configure(bg="light blue", highlightbackground=self.color)
 				self.dropdown.pack(side='left')
 
+				# add new system to each node in networkx and hide node
 				for nodeitem in self.systemsCanvas.find_withtag('node'):
 					self.G.node[nodeitem][typeLabel] = None
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
+				# add new system to each edge in networkx and hide edge
 				for edgeitem in self.systemsCanvas.find_withtag('edge'):
+					# find start and end node of edge
 					nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
-					try:
-						self.G[nodes[0]][nodes[1]]
-					except KeyError:
-						nodes[0], nodes[1] = nodes[1], nodes[0]
+					try:	self.G[nodes[0]][nodes[1]]
+					except KeyError:	nodes[0], nodes[1] = nodes[1], nodes[0]
 					self.G.edge[nodes[0]][nodes[1]][typeLabel] = None
 
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
@@ -427,52 +465,60 @@ class CanvasFrame(Frame):
 					self.systemInfo.systemDict[typeLabel] = None
 					self.systemInfo.saveAttributes()
 
+				# update prevOption
+				self.prevOption = "Create New"
+
 		elif self.v.get() == 'All':
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
 				self.systemsCanvas.itemconfig(nodeitem, state='normal')
 
 				# change sizes of nodes back to normal
+				r = 8
 				coords = self.systemsCanvas.coords(nodeitem)
 				midpointX = (coords[0] + coords[2]) / 2
 				midpointY = (coords[1] + coords[3]) / 2
-				r = 8
 				self.systemsCanvas.coords(nodeitem, midpointX-8, midpointY-8, midpointX+8, midpointY+8)
 
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
 				self.systemsCanvas.itemconfig(edgeitem, state='normal')
 				self.systemsCanvas.itemconfig(edgeitem, arrow='none')
+			self.prevOption = "All"
 
 		else:
-			self.minDemand = 1000000000
-			self.maxDemand = -1000000000
-			for nodeitem in self.systemsCanvas.find_withtag('node'):
-				if self.G.node[nodeitem][self.v.get()] == None:
-					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
-
-				else:
-					self.systemsCanvas.itemconfig(nodeitem, state='normal')
-
-					# find minimum and maximum values for this demand
-					if self.G.node[nodeitem][self.v.get()] < self.minDemand:
-						self.minDemand = self.G.node[nodeitem][self.v.get()]
-					if self.G.node[nodeitem][self.v.get()] > self.maxDemand:
-						self.maxDemand = self.G.node[nodeitem][self.v.get()]
-
-			if self.minDemand != self.maxDemand:
+			if self.prevOption != self.v.get():
+				self.minDemand = 1000000000
+				self.maxDemand = -1000000000
+				# loop through nodes to show/hide based on the current system
+				# also figure out what the min and max value for the current demand is
 				for nodeitem in self.systemsCanvas.find_withtag('node'):
-					# change size of nodes to reflect magnitude of value for this demand
-					coords = self.systemsCanvas.coords(nodeitem)
-					x = self.G.node[nodeitem][self.v.get()]
-					offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
-					self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
+					if self.G.node[nodeitem][self.v.get()] == None:
+						self.systemsCanvas.itemconfig(nodeitem, state='hidden')
+					else:
+						self.systemsCanvas.itemconfig(nodeitem, state='normal')
 
-			for edgeitem in self.systemsCanvas.find_withtag('edge'):
-				nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
-				if (self.systemsCanvas.itemcget(nodes[0], 'state')=='normal') and (self.systemsCanvas.itemcget(nodes[1], 'state')=='normal'):
-					self.systemsCanvas.itemconfig(edgeitem, state='normal')
-					self.systemsCanvas.itemconfig(edgeitem, arrow='last')
-				else:
-					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+						# find minimum and maximum values for this demand
+						if self.G.node[nodeitem][self.v.get()] < self.minDemand:
+							self.minDemand = self.G.node[nodeitem][self.v.get()]
+						if self.G.node[nodeitem][self.v.get()] > self.maxDemand:
+							self.maxDemand = self.G.node[nodeitem][self.v.get()]
+
+				if self.minDemand != self.maxDemand:
+					for nodeitem in self.systemsCanvas.find_withtag('node'):
+						# change size of nodes to reflect magnitude of value for this demand
+						coords = self.systemsCanvas.coords(nodeitem)
+						x = self.G.node[nodeitem][self.v.get()]
+						offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
+						self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
+
+				for edgeitem in self.systemsCanvas.find_withtag('edge'):
+					nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
+					if (self.systemsCanvas.itemcget(nodes[0], 'state')=='normal') and (self.systemsCanvas.itemcget(nodes[1], 'state')=='normal'):
+						self.systemsCanvas.itemconfig(edgeitem, state='normal')
+						self.systemsCanvas.itemconfig(edgeitem, arrow='last')
+					else:
+						self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+
+				self.prevOption = self.v.get()
 
 		if self.labels == 1:
 			self.hideLabels()
@@ -531,27 +577,22 @@ class CanvasFrame(Frame):
 		minButton.pack(side='right')
 		exitButton.pack(side='right')
 		
-		
 
 		nodeDegrees = nx.degree(self.G)
 		degrees = []
 		for key in nodeDegrees:
 			degrees.append(nodeDegrees[key])
 
-	
-		# Create a Figure object.
-		fig = plt.figure(figsize=(1.2, 1.2))
-		# Create an Axes object.
-		ax = fig.add_subplot(1,1,1) # one row, one column, first plot
-		# Plot the data.
-		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left')
+		fig = plt.figure(figsize=(1.2, 1.2)) # Create a Figure object.
+		ax = fig.add_subplot(1,1,1) # Create an Axes object: one row, one column, first plot
+		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left') # Plot the data.
+
 		# Add some axis labels.
 		ax.set_xlabel("Degrees")
 		ax.set_ylabel("Frequency")
 		ax.axis([-1, max(degrees)+1, 0, len(degrees)])
-		# Produce an image.
-		fig.savefig("histogramplot.jpg")
 
+		fig.savefig("histogramplot.jpg") # Produce an image.
 		image = Image.open("histogramplot.jpg")
 		photo = ImageTk.PhotoImage(image)
 
@@ -573,7 +614,7 @@ class CanvasFrame(Frame):
 		self.v.set(self.optionList[len(self.optionList) - 2])
 
 		self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
-		self.dropdown.configure(bg=self.color)
+		self.dropdown.configure(bg=self.color, highlightbackground=self.color)
 		self.dropdown.pack(side='left')
 		
 		self.createNodeButton = Button(self.toolbar, text="create node", command=self.createNodeButtonClick, 
