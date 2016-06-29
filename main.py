@@ -3,6 +3,7 @@ from CanvasFrame import *
 import networkx as nx
 import tkFileDialog
 import pickle
+from sys import platform as _platform
 #import matplotlib.pyplot as plt
 
 class Window(Frame):
@@ -105,7 +106,11 @@ class Window(Frame):
 
         # Create left and right frames and packs them within the parent frame
         self.leftFrame = Frame(self.parent, bg='light blue', height=700, width=700) #light colored bg to see panel
-        self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=340) #dark colored bg to see panel
+        if _platform == "win32":
+        	self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=290) #dark colored bg to see panel
+        else:
+        	self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=340)
+
 
         self.leftFrame.pack(side="left", fill="both", expand=1)
         self.leftFrame.pack_propagate(0)
