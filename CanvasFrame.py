@@ -3,9 +3,9 @@ from NodeInfo import *
 from EdgeInfo import *
 import tkSimpleDialog
 import networkx as nx
-# import matplotlib
-# from matplotlib import pyplot as plt
-# from PIL import Image, ImageTk
+import matplotlib
+from matplotlib import pyplot as plt
+from PIL import Image, ImageTk
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
@@ -257,15 +257,15 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.itemconfig(item, state='hidden')
 	
 	def dragStart(self, event):
-		r = 18
+		r = 22
 		self.nodeDragItem = None
 		nodeSelected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 		if len(nodeSelected) > 0:
 			self.nodeDragItem = nodeSelected[0]
 			self.dragStartX = event.x
 			self.dragStartY = event.y
-		self.edgeItemsDrag = []
 		
+		self.edgeItemsDrag = []
 		edgeSelected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
 		if (len(edgeSelected) > 0):
 			for edge in edgeSelected:
@@ -277,6 +277,9 @@ class CanvasFrame(Frame):
 
 	def dragEnd(self, event):
 		# move node:
+		if (event.x < 0) or (event.x > 700) or (event.y < 0) or (event.y > 500):
+			return
+
 		if self.nodeDragItem != None:
 			self.systemsCanvas.move(self.nodeDragItem, event.x-self.dragStartX, event.y-self.dragStartY)
 
@@ -294,11 +297,6 @@ class CanvasFrame(Frame):
 				else:
 					self.systemsCanvas.coords(edge, edgeCoords[0], edgeCoords[1], event.x, event.y)
 
-
-			
-			
-
-	
 	# shows all node names when' Show Labels' is clicked
 	def showLabels(self):
 		self.labels = 1
@@ -462,11 +460,12 @@ class CanvasFrame(Frame):
 
 			if self.minDemand != self.maxDemand:
 				for nodeitem in self.systemsCanvas.find_withtag('node'):
-					# change size of nodes to reflect magnitude of value for this demand
-					coords = self.systemsCanvas.coords(nodeitem)
-					x = self.G.node[nodeitem][self.v.get()]
-					offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
-					self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
+					if self.G.node[nodeitem][self.v.get()] != None:
+						# change size of nodes to reflect magnitude of value for this demand
+						coords = self.systemsCanvas.coords(nodeitem)
+						x = self.G.node[nodeitem][self.v.get()]
+						offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
+						self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
 
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
 				nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
@@ -485,55 +484,24 @@ class CanvasFrame(Frame):
 
 	# shows each nodes degree 
 	def nodeDegrees(self):
-		# # popout menu to display node degree analysis graph:
+		
+		# mini frame to display node degree analysis graph:
+		self.frameOrWindow = 0
+		self.nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
+		self.nodeDegreeFrame.pack_propagate(0)
+		self.nodeDegreeFrame.pack(side='left')
 
-		# nodeDegrees = nx.degree(self.G)
-		# self.nodeDegreePopup = Toplevel(self.parent)
-		# self.nodeDegreePopup.title("Node Degrees")
-
-		# degrees = []
-		# for key in nodeDegrees:
-		# 	degrees.append(nodeDegrees[key])
-
-	
-		# # Create a Figure object.
-		# fig = plt.figure(figsize=(6, 5))
-		# # Create an Axes object.
-		# ax = fig.add_subplot(1,1,1) # one row, one column, first plot
-		# # Plot the data.
-		# ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left')
-		# # Add some axis labels.
-		# ax.set_xlabel("Degrees")
-		# ax.set_ylabel("Frequency")
-		# ax.axis([-1, max(degrees)+1, 0, len(degrees)])
-		# # Produce an image.
-		# fig.savefig("histogramplot.jpg")
-
-		# image = Image.open("histogramplot.jpg")
-		# photo = ImageTk.PhotoImage(image)
-
-		# label = Label(self.nodeDegreePopup, image=photo)
-		# label.image = photo
-		# label.pack()
-
-		# # mini frame to display node degree analysis graph:
-		nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=5, relief='sunken')
-		nodeDegreeFrame.pack_propagate(0)
-		nodeDegreeFrame.pack(side='left')
-
-		toolbarFrame = Frame(nodeDegreeFrame, height=25, width=200, bg='light gray')
+		toolbarFrame = Frame(self.nodeDegreeFrame, height=25, width=200, bg='light gray')
 		toolbarFrame.pack_propagate(0)
 		toolbarFrame.pack(side='top')
 
-		exitButton = Button(toolbarFrame, text='ex', highlightbackground='light gray')
-		minButton = Button(toolbarFrame, text='min', highlightbackground='light gray')
-		maxButton = Button(toolbarFrame, text='max', highlightbackground='light gray')
+		exitButton = Button(toolbarFrame, text='ex', highlightbackground='light gray', command=self.analysisExit)
+		minButton = Button(toolbarFrame, text='min', highlightbackground='light gray', command=self.analysisMin)
+		maxButton = Button(toolbarFrame, text='max', highlightbackground='light gray', command=self.analysisMax)
 
 		maxButton.pack(side='right')
 		minButton.pack(side='right')
 		exitButton.pack(side='right')
-		
-		
 
 		nodeDegrees = nx.degree(self.G)
 		degrees = []
@@ -557,9 +525,78 @@ class CanvasFrame(Frame):
 		image = Image.open("histogramplot.jpg")
 		photo = ImageTk.PhotoImage(image)
 
-		label = Label(nodeDegreeFrame, image=photo)
+		label = Label(self.nodeDegreeFrame, image=photo)
 		label.image = photo
 		label.pack()
+
+	def analysisExit(self):
+		if self.frameOrWindow == 0:
+			self.nodeDegreeFrame.destroy()
+		else:
+			self.nodeDegreePopup.destroy()
+	
+	def analysisMin(self, event=None):
+		if self.frameOrWindow == 1:
+			self.nodeDegreePopup.destroy()
+			self.nodeDegrees()
+	
+	def analysisMax(self):
+		self.nodeDegreeFrame.destroy()
+		
+		# popout menu to display node degree analysis graph:
+		nodeDegrees = nx.degree(self.G)
+		self.frameOrWindow = 1
+		self.nodeDegreePopup = Toplevel(self.parent)
+		self.nodeDegreePopup.title("Node Degrees")
+		self.nodeDegreePopup.overrideredirect(1)
+		self.nodeDegreePopup.resizable(1,1)
+
+		analysisToolbar = Frame(self.nodeDegreePopup, bg='light gray')
+		analysisToolbar.pack(side='top', fill='x')
+		analysisToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
+		analysisToolbar.bind('<ButtonRelease-1>', self.dragWindowEnd)
+
+		exitButton = Button(analysisToolbar, text='ex', highlightbackground='light gray', command=self.analysisExit)
+		minButton = Button(analysisToolbar, text='min', highlightbackground='light gray', command=self.analysisMin)
+		maxButton = Button(analysisToolbar, text='max', highlightbackground='light gray')
+
+		maxButton.pack(side='right')
+		minButton.pack(side='right')
+		exitButton.pack(side='right')
+
+
+
+		degrees = []
+		for key in nodeDegrees:
+			degrees.append(nodeDegrees[key])
+
+	
+		# Create a Figure object.
+		fig = plt.figure(figsize=(6, 5))
+		# Create an Axes object.
+		ax = fig.add_subplot(1,1,1) # one row, one column, first plot
+		# Plot the data.
+		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left')
+		# Add some axis labels.
+		ax.set_xlabel("Degrees")
+		ax.set_ylabel("Frequency")
+		ax.axis([-1, max(degrees)+1, 0, len(degrees)])
+		# Produce an image.
+		fig.savefig("histogramplot.jpg")
+
+		image = Image.open("histogramplot.jpg")
+		photo = ImageTk.PhotoImage(image)
+
+		label = Label(self.nodeDegreePopup, image=photo)
+		label.image = photo
+		label.pack()
+
+	def dragWindowStart(self, event):
+		self.startDragX = event.x
+		self.startDragY = event.y
+	
+	def dragWindowEnd(self, event):
+		pass
 
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
@@ -599,7 +636,7 @@ class CanvasFrame(Frame):
 		self.systemsCanvas = Canvas(self.parent, height=500, width=700, bg='white')
 		self.systemsCanvas.pack(fill="both", expand=1)
 
-		self.miniFrames = Frame(self.parent, height=200, width=700, bg='white')
+		self.miniFrames = Frame(self.parent, height=200, width=700, bg='white', borderwidth=1, relief='sunken')
 		self.miniFrames.pack_propagate(0)
 		self.miniFrames.pack(side='bottom')
 
