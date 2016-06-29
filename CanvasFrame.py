@@ -301,6 +301,8 @@ class CanvasFrame(Frame):
 					self.edgeItemsDrag.append(edge)
 
 	def dragEnd(self, event):
+
+		
 		# move node:
 		if (event.x < 0) or (event.x > 700) or (event.y < 0) or (event.y > 500):
 			return
@@ -319,6 +321,11 @@ class CanvasFrame(Frame):
 					self.systemsCanvas.coords(edge, event.x, event.y, edgeCoords[2], edgeCoords[3])
 				else:
 					self.systemsCanvas.coords(edge, edgeCoords[0], edgeCoords[1], event.x, event.y)
+		self.G.node[self.nodeDragItem]['x_coord'] = event.x
+		self.G.node[self.nodeDragItem]['y_coord'] = event.y
+		if self.labels == 1:
+			self.hideLabels()
+			self.showLabels()
 
 
 	# shows all node names when' Show Labels' is clicked
@@ -507,20 +514,19 @@ class CanvasFrame(Frame):
 
 	# shows each nodes degree 
 	def nodeDegrees(self):
-		
 		# mini frame to display node degree analysis graph:
 		self.frameOrWindow = 0
 		self.nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
 		self.nodeDegreeFrame.pack_propagate(0)
 		self.nodeDegreeFrame.pack(side='left')
 
-		toolbarFrame = Frame(self.nodeDegreeFrame, height=25, width=200, bg='light gray')
-		toolbarFrame.pack_propagate(0)
-		toolbarFrame.pack(side='top')
+		self.toolbarFrame = Frame(self.nodeDegreeFrame, height=25, width=200, bg='light gray')
+		self.toolbarFrame.pack_propagate(0)
+		self.toolbarFrame.pack(side='top')
 
-		exitButton = Button(toolbarFrame, text='ex', highlightbackground='light gray', command=self.analysisExit)
-		minButton = Button(toolbarFrame, text='min', highlightbackground='light gray', command=self.analysisMin)
-		maxButton = Button(toolbarFrame, text='max', highlightbackground='light gray', command=self.analysisMax)
+		exitButton = Button(self.toolbarFrame, text='ex', highlightbackground='light gray', command=self.analysisExit)
+		minButton = Button(self.toolbarFrame, text='min', highlightbackground='light gray', command=self.analysisMin)
+		maxButton = Button(self.toolbarFrame, text='max', highlightbackground='light gray', command=self.analysisMax)
 
 		maxButton.pack(side='right')
 		minButton.pack(side='right')
@@ -558,6 +564,9 @@ class CanvasFrame(Frame):
 		if self.frameOrWindow == 1:
 			self.nodeDegreePopup.destroy()
 			self.nodeDegrees()
+		else:
+			self.nodeDegreeFrame.config(height='30')
+			self.nodeDegreeFrame.place(x=0, y=160, anchor='sw')
 	
 	def analysisMax(self):
 		self.nodeDegreeFrame.destroy()
@@ -568,7 +577,7 @@ class CanvasFrame(Frame):
 		self.nodeDegreePopup = Toplevel(self.parent)
 		self.nodeDegreePopup.title("Node Degrees")
 		self.nodeDegreePopup.overrideredirect(1)
-		self.nodeDegreePopup.resizable(1,1)
+		self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
 
 		analysisToolbar = Frame(self.nodeDegreePopup, bg='light gray')
 		analysisToolbar.pack(side='top', fill='x')
@@ -583,12 +592,9 @@ class CanvasFrame(Frame):
 		minButton.pack(side='right')
 		exitButton.pack(side='right')
 
-
-
 		degrees = []
 		for key in nodeDegrees:
 			degrees.append(nodeDegrees[key])
-
 	
 		# Create a Figure object.
 		fig = plt.figure(figsize=(6, 5))
@@ -615,7 +621,18 @@ class CanvasFrame(Frame):
 		self.startDragY = event.y
 	
 	def dragWindowEnd(self, event):
-		pass
+		s = self.nodeDegreePopup.geometry()
+		geometry = s.split('+')
+		x = int(geometry[1])+event.x-self.startDragX
+		y = int(geometry[2])+event.y-self.startDragY
+		if x>0 and y>0:
+			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, x, y)))
+		elif x>0 and y<0:
+			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, x, 0)))
+		elif x<0 and y>0:
+			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 0, y)))
+		else:
+			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
 
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
