@@ -3,7 +3,7 @@ import tkSimpleDialog
 import networkx as nx
 
 class EdgeInfo(Frame):
-	def __init__(self, parent, leftFrame, index, nodes, G, systemList):
+	def __init__(self, parent, leftFrame, index, nodes, G, manager):
 		Frame.__init__(self, parent)
 
 		self.parent = parent
@@ -11,38 +11,34 @@ class EdgeInfo(Frame):
 		self.index = index
 		self.nodes = nodes
 		self.G = G
+		self.manager = manager
 
 		self.systemDict = {}
-		for x in systemList:
-			self.systemDict[x] = 0
-		for x in self.G.edge[self.nodes[0]][self.nodes[1]]:
-			if x not in self.systemDict.keys():
-				self.systemDict[x] = 0
-
-		# delete unwanted keys that result from syncing main optionList with Demand
-		for x in ['x', 'y', 'z', 'Create New', 'All', 'Name', 'Type', 'Notes', 
-		'x1_coord', 'y1_coord', 'x2_coord', 'y2_coord']:
-			try:
-				del self.systemDict[x]
- 			except KeyError:
- 				pass
-
  		self.color = "dark gray"
 		self.initUI()
 
 	def createTypeLabel(self):
+
 		self.typeLabel = Label(self.parent, text="Type:", bg=self.color, anchor=W)
 		self.typeLabel.grid(row=2, column=0, padx=5, pady=5, sticky=E)
 
+		# initialize default options in dropdown to the list in our Manager
+		self.optionList = self.manager.types
+
+		# Create frame to hold the OptionMenu
 		self.typeMenu = Frame(self.parent, highlightbackground=self.color)
 		self.typeMenu.grid(row=2, column=1, padx=10)
-		self.optionList = ['Hello', 'World']
+
+		# create a StringVar that holds the selected option in the dropdown
 		self.v = StringVar()
 		self.v.set(self.optionList[0])
+
+		# actual dropdown
 		self.dropdown = OptionMenu(self.typeMenu, self.v, *self.optionList)
 		self.dropdown.config(bg=self.color, highlightbackground=self.color)
 		self.dropdown.grid(row=2, column=1)
 
+		# 'Create New' button
 		self.createTypeBtn = Button(self.parent, text="Create New", 
 			command=self.createNewType, highlightbackground=self.color)
 		self.createTypeBtn.grid(row=2, column=2)
@@ -51,8 +47,13 @@ class EdgeInfo(Frame):
 		typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
 
 		if typeLabel != None:
-			self.optionList.append(typeLabel)
+			# add to manager and to list in dropdown
+			self.manager.addType(typeLabel)
+
+			# select new 'type' in dropdown
 			self.v.set(self.optionList[len(self.optionList)-1])
+
+			# redraw dropdown
 			self.dropdown.grid_forget()
 			self.dropdown = OptionMenu(self.typeMenu, self.v, *self.optionList)
 			self.dropdown.configure(bg=self.color, highlightbackground=self.color)
@@ -69,47 +70,43 @@ class EdgeInfo(Frame):
 
 		self.numDemands = 0
 
-		for x in self.systemDict.keys():
+		for x in self.manager.systems:
 			self.createNewDemand(x)
 
 	def createNewDemand(self, label=None):
 		# If no label was provided as a parameter, prompt for a label
 		if label == None:
 			label = tkSimpleDialog.askstring(title="Label", prompt="Enter a Label Name") # Prompt for label
-			# If user didn't hit Cancel dialog window, add new key to systemDict
+			# If user didn't hit 'Cancel' in dialog window, add new key to manager's systems
 			if label != None: 
-				self.systemDict[label] = None
+				self.manager.addSystem(label)
+			else:
+				return
 
-		# If user didn't hit Cancel in dialog window, continue
-		if label != None:
-			# Create new label and corresponding entry
-			self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
-			self.newDemandLabel.grid(row=3+self.numDemands, column=1)
-			newEntry = Entry(self.parent, highlightbackground=self.color, width=9)
-			newEntry.grid(row=3+self.numDemands, column=2, padx=10)
-			
-			# add the label to NetworkX and initialize its value to 0
-			#newEntry.insert(0, '0')
-			if label not in self.G.edge[self.nodes[0]][self.nodes[1]]:
-				self.G.edge[self.nodes[0]][self.nodes[1]][label] = None
-			self.systemDict[label] = newEntry
+		# Create new label and corresponding entry
+		self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
+		self.newDemandLabel.grid(row=3+self.numDemands, column=1)
+		newEntry = Entry(self.parent, highlightbackground=self.color, width=9)
+		newEntry.grid(row=3+self.numDemands, column=2, padx=10)
+		self.systemDict[label] = newEntry
 
-			# move widgets down to make room for new demand label
-			self.createDemandBtn.grid(row=4+self.numDemands, column=1)
+		# move widgets down to make room for new demand label
+		self.createDemandBtn.grid(row=4+self.numDemands, column=1)
 
-			for item in self.parent.grid_slaves():
-				if int(item.grid_info()["row"]) > (4 + self.numDemands):
-					newRow = int(item.grid_info()["row"]) + self.numDemands + 1
-					item.grid_configure(row=newRow)
+		for item in self.parent.grid_slaves():
+			if int(item.grid_info()["row"]) > (4 + self.numDemands):
+				newRow = int(item.grid_info()["row"]) + self.numDemands + 1
+				item.grid_configure(row=newRow)
 
-			self.numDemands += 1
+		self.numDemands += 1
 
-			if label not in self.leftFrame.optionList:
-				self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
-				self.leftFrame.dropdown.destroy()
-				self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, *self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
-				self.leftFrame.dropdown.configure(bg="light blue")
-				self.leftFrame.dropdown.pack(side='left')
+		if label not in self.leftFrame.optionList:
+			self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
+			self.leftFrame.dropdown.destroy()
+			self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, 
+				*self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
+			self.leftFrame.dropdown.configure(bg="light blue")
+			self.leftFrame.dropdown.pack(side='left')
 
 	def createGeometryLabel(self):
 		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color, anchor=W)
@@ -131,10 +128,10 @@ class EdgeInfo(Frame):
 		self.zEntry.grid(row=7, column=2)
 
 	def repopulateData(self):
-		if 'Name' in self.G.edge[self.nodes[0]][self.nodes[1]] and self.G.edge[self.nodes[0]][self.nodes[1]]['Name'] != None:
+		if ('Name' in self.G.edge[self.nodes[0]][self.nodes[1]]) and (self.G.edge[self.nodes[0]][self.nodes[1]]['Name'] != None):
 			self.nameEntry.delete(0, END)
 			self.nameEntry.insert(0, self.G.edge[self.nodes[0]][self.nodes[1]]['Name'])
-		if 'Type' in self.G.edge[self.nodes[0]][self.nodes[1]] and self.G.edge[self.nodes[0]][self.nodes[1]]['Type'] != None:
+		if ('Type' in self.G.edge[self.nodes[0]][self.nodes[1]]) and (self.G.edge[self.nodes[0]][self.nodes[1]]['Type'] != None):
 			self.v.set(self.G.edge[self.nodes[0]][self.nodes[1]]['Type'])
 		if 'x' in self.G.edge[self.nodes[0]][self.nodes[1]]:
 			self.xEntry.delete(0, END)
@@ -149,8 +146,8 @@ class EdgeInfo(Frame):
 			self.notes.delete('0.0', END)
 			self.notes.insert('0.0', self.G.edge[self.nodes[0]][self.nodes[1]]['Notes'])
         
-		for x in self.systemDict.keys():
-			if self.G.edge[self.nodes[0]][self.nodes[1]][x] != None:
+		for x in self.manager.systems:
+			if x in self.G.edge[self.nodes[0]][self.nodes[1]]:
 				self.systemDict[x].delete(0, END)
 				self.systemDict[x].insert(0, self.G.edge[self.nodes[0]][self.nodes[1]][x])
 
@@ -163,13 +160,9 @@ class EdgeInfo(Frame):
 		self.G.edge[self.nodes[0]][self.nodes[1]]['Notes'] = self.notes.get('0.0', END)
 
 		# Demands
-		for x in self.systemDict.keys():
-			try:
+		for x in self.manager.systems:
+			if self.systemDict[x].get() != None:
 				self.G.edge[self.nodes[0]][self.nodes[1]][x] = int(self.systemDict[x].get())
-			except AttributeError:
-				pass
-			except ValueError:
-				pass
 
 	def initUI(self):
 		# Name

@@ -3,27 +3,16 @@ import tkSimpleDialog
 import networkx as nx
 
 class NodeInfo(Frame):
-	def __init__(self, parent, leftFrame, index, G, systemList):
+	def __init__(self, parent, leftFrame, index, G, manager):
 		Frame.__init__(self, parent)
 
 		self.parent = parent
 		self.leftFrame = leftFrame
 		self.index = index
 		self.G = G
+		self.manager = manager
+
 		self.systemDict = {}
-		for x in systemList:
-			self.systemDict[x] = 0
-		for x in self.G.node[self.index]:
-			if x not in self.systemDict.keys():
-				self.systemDict[x] = 0
-
-		# delete unwanted keys that result from syncing main optionList with Demand
-		for x in ['x', 'y', 'z', 'Create New', 'All', 'x_coord', 'y_coord', 'Name', 'Type', 'Notes']:
-			try:
-				del self.systemDict[x]
- 			except KeyError:
- 				pass
-
  		self.color = "dark gray"
 		self.initUI()
 
@@ -31,15 +20,23 @@ class NodeInfo(Frame):
 		self.typeLabel = Label(self.parent, text="Type:", bg=self.color)
 		self.typeLabel.grid(row=2, column=0, padx=5, pady=5, sticky=E)
 
+		# initialize default options in dropdown to the list in our Manager
+		self.optionList = self.manager.types
+
+		# Create frame to hold the OptionMenu
 		self.typeMenu = Frame(self.parent, highlightbackground=self.color)
 		self.typeMenu.grid(row=2, column=1, padx=10)
-		self.optionList = ['Hello', 'World']
+
+		# create a StringVar that holds the selected option in the dropdown
 		self.v = StringVar()
 		self.v.set(self.optionList[0])
+
+		# actual dropdown
 		self.dropdown = OptionMenu(self.typeMenu, self.v, *self.optionList)
 		self.dropdown.config(bg=self.color, highlightbackground=self.color)
 		self.dropdown.grid(row=2, column=1)
 
+		# 'Create New' button
 		self.createTypeBtn = Button(self.parent, text="Create New", 
 			command=self.createNewType, highlightbackground=self.color)
 		self.createTypeBtn.grid(row=2, column=2)
@@ -48,8 +45,13 @@ class NodeInfo(Frame):
 		typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
 
 		if typeLabel != None:
-			self.optionList.append(typeLabel)
+			# add to manager and to list in dropdown
+			self.manager.addType(typeLabel)
+
+			# select new 'type' in dropdown
 			self.v.set(self.optionList[len(self.optionList)-1])
+
+			# redraw dropdown
 			self.dropdown.grid_forget()
 			self.dropdown = OptionMenu(self.typeMenu, self.v, *self.optionList)
 			self.dropdown.configure(bg=self.color, highlightbackground=self.color)
@@ -66,48 +68,43 @@ class NodeInfo(Frame):
 
 		self.numDemands = 0
 
-		for x in self.systemDict.keys():
+		for x in self.manager.systems:
 			self.createNewDemand(x)
 
 	def createNewDemand(self, label=None):
 		# If no label was provided as a parameter, prompt for a label
 		if label == None:
 			label = tkSimpleDialog.askstring(title="Label", prompt="Enter a Label Name") # Prompt for label
-			# If user didn't hit Cancel dialog window, add new key to systemDict
+			# If user didn't hit 'Cancel' in dialog window, add new key to manager's systems
 			if label != None: 
-				self.systemDict[label] = None
+				self.manager.addSystem(label)
+			else:
+				return
+		
+		# Create new label and corresponding entry
+		self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
+		self.newDemandLabel.grid(row=3+self.numDemands, column=1)
+		newEntry = Entry(self.parent, highlightbackground=self.color, width=9)
+		newEntry.grid(row=3+self.numDemands, column=2, padx=10)
+		self.systemDict[label] = newEntry
 
-		# If user didn't hit Cancel in dialog window, continue
-		if label != None:
-			# Create new label and corresponding entry
-			self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
-			self.newDemandLabel.grid(row=3+self.numDemands, column=1)
-			newEntry = Entry(self.parent, highlightbackground=self.color, width=9)
-			newEntry.grid(row=3+self.numDemands, column=2, padx=10)
-			
-			# add the label to NetworkX and initialize its value to None
-			for node in self.leftFrame.systemsCanvas.find_withtag('node'):
-				if label not in self.G.node[node]:
-					self.G.node[node][label] = None
-			self.systemDict[label] = newEntry
+		# move widgets down to make room for new demand label
+		self.createDemandBtn.grid(row=4+self.numDemands, column=1)
+		for item in self.parent.grid_slaves():
+			if int(item.grid_info()["row"]) > (4 + self.numDemands):
+				newRow = int(item.grid_info()["row"]) + self.numDemands + 1
+				item.grid_configure(row=newRow)
 
-			# move widgets down to make room for new demand label
-			self.createDemandBtn.grid(row=4+self.numDemands, column=1)
+		self.numDemands += 1
 
-			for item in self.parent.grid_slaves():
-				if int(item.grid_info()["row"]) > (4 + self.numDemands):
-					newRow = int(item.grid_info()["row"]) + self.numDemands + 1
-					item.grid_configure(row=newRow)
-
-			self.numDemands += 1
-
-			if label not in self.leftFrame.optionList:
-				self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
-				self.leftFrame.dropdown.destroy()
-				self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, 
-					*self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
-				self.leftFrame.dropdown.configure(bg="light blue")
-				self.leftFrame.dropdown.pack(side='left')
+		# add new demand to the main toolbar dropdown
+		if label not in self.leftFrame.optionList:
+			self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
+			self.leftFrame.dropdown.destroy()
+			self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, 
+				*self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
+			self.leftFrame.dropdown.configure(bg="light blue")
+			self.leftFrame.dropdown.pack(side='left')
 
 	def createGeometryLabel(self):
 		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color)
@@ -147,26 +144,34 @@ class NodeInfo(Frame):
 			self.notes.delete('0.0', END)
 			self.notes.insert('0.0', self.G.node[self.index]['Notes'])
         
-		for x in self.systemDict.keys():
-			if self.G.node[self.index][x] != None:
+		for x in self.manager.systems:
+			if x in self.G.node[self.index]:
 				self.systemDict[x].delete(0, END)
 				self.systemDict[x].insert(0, self.G.node[self.index][x])
 
 	def updateNodeSizes(self):
-		for node in self.leftFrame.systemsCanvas.find_withtag('node'):
-			if self.leftFrame.systemsCanvas.itemcget(node, 'state') == 'normal':
-				# change sizes of nodes back to normal
-				coords = self.leftFrame.systemsCanvas.coords(nodeitem)
-				midpointX = (coords[0] + coords[2]) / 2
-				midpointY = (coords[1] + coords[3]) / 2
-				r = 8
-				self.leftFrame.systemsCanvas.coords(nodeitem, midpointX-8, midpointY-8, midpointX+8, midpointY+8)
+		if self.leftFrame.v.get() != 'All' and self.leftFrame.v.get() != 'Create New':
+			# update min and max vals
+			if self.G.node[self.index][self.leftFrame.v.get()] < self.leftFrame.minDemand:
+				self.leftFrame.minDemand = self.G.node[self.index][self.leftFrame.v.get()]
+			if self.G.node[self.index][self.leftFrame.v.get()] > self.leftFrame.maxDemand:
+				self.leftFrame.maxDemand = self.G.node[self.index][self.leftFrame.v.get()]
 
-				# update size of nodes to reflect magnitude of value for this demand
-				coords = self.leftFrame.systemsCanvas.coords(node)
-				offset = self.G.node[nodeitem][self.leftFrame.v.get()] - self.leftFrame.minDemand
-				self.leftFrame.systemsCanvas.coords(node, coords[0]-offset, coords[1]-offset, 
-					coords[2]+offset, coords[3]+offset)
+			for node in self.leftFrame.systemsCanvas.find_withtag('node'):
+				if self.leftFrame.systemsCanvas.itemcget(node, 'state') == 'normal':
+					# change sizes of nodes back to normal
+					coords = self.leftFrame.systemsCanvas.coords(node)
+					midpointX = (coords[0] + coords[2]) / 2
+					midpointY = (coords[1] + coords[3]) / 2
+					r = 8
+					self.leftFrame.systemsCanvas.coords(node, midpointX-8, midpointY-8, midpointX+8, midpointY+8)
+
+					# update size of nodes to reflect magnitude of value for this demand
+					coords = self.leftFrame.systemsCanvas.coords(node)
+					x = self.G.node[node][self.leftFrame.v.get()]
+					offset = 10 * (x - self.leftFrame.minDemand) / (self.leftFrame.maxDemand - self.leftFrame.minDemand)
+					self.leftFrame.systemsCanvas.coords(node, coords[0]-offset, coords[1]-offset, 
+						coords[2]+offset, coords[3]+offset)
 
 
 
@@ -182,16 +187,13 @@ class NodeInfo(Frame):
 			self.leftFrame.hideLabels()
 			self.leftFrame.showLabels()
 
-		self.updateNodeSizes
-
 		# Demands
-		for x in self.systemDict.keys():
-			try:
+		for x in self.manager.systems: # for each system
+			if self.systemDict[x].get() != None and self.systemDict[x].get() != '': # if there is a value for this node
 				self.G.node[self.index][x] = int(self.systemDict[x].get())
-			except AttributeError:
-				pass
-			except ValueError:
-				pass
+
+		self.updateNodeSizes()
+
 
 	def initUI(self):
 		# Name
@@ -219,5 +221,3 @@ class NodeInfo(Frame):
 
 		# if node attributes have been set previously, populate right pane using the existing data
 		self.repopulateData()
-
-

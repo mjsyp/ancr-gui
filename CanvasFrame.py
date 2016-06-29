@@ -1,4 +1,5 @@
 from Tkinter import *
+from Manager import *
 from NodeInfo import *
 from EdgeInfo import *
 import tkSimpleDialog
@@ -15,14 +16,6 @@ class CanvasFrame(Frame):
 		self.rightFrame = rightFrame
 		self.G = G
 		self.D = D
-		self.color = "light blue"
-		self.labels = 0
-
-		self.prevOption = None
-
-		# stacks keep track of canvas item ID's as they are created/deleted
-		self.undoStack = []
-		self.redoStack = []
 
 		self.initUI()
 
@@ -114,6 +107,7 @@ class CanvasFrame(Frame):
 
 		self.undoStack.append(item)
 
+		# if an node isn't created in 'All', initialize the system demand for this node to 0 instead of None
 		if self.v.get() != "All":
 			self.G.node[item][self.v.get()] = 0
 			if len(self.rightFrame.winfo_children()) > 0:
@@ -158,6 +152,7 @@ class CanvasFrame(Frame):
 
 			self.undoStack.append(item)
 
+			# if an edge isn't created in 'All', initialize the system demand for this edge to 0 instead of None
 			if self.v.get() != "All":
 				self.G.edge[self.startNode[0]][self.endNode[0]][self.v.get()] = 0
 				if len(self.rightFrame.winfo_children()) > 0:
@@ -192,7 +187,7 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.itemconfig('node', fill='red')
 		self.systemsCanvas.itemconfig(item, fill='green')
 
-		self.systemInfo = NodeInfo(self.rightFrame, self, item, self.G, self.optionList)
+		self.systemInfo = NodeInfo(self.rightFrame, self, item, self.G, self.manager)
 
 	'''changes edge color and displays edge information'''
 	def selectEdge(self, item):
@@ -202,12 +197,10 @@ class CanvasFrame(Frame):
 
 		# find start and end node of edge
 		nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-		try:
-			self.G[nodes[0]][nodes[1]]
-		except KeyError:
-			nodes[0], nodes[1] = nodes[1], nodes[0]
+		try:				self.G[nodes[0]][nodes[1]]
+		except KeyError:	nodes[0], nodes[1] = nodes[1], nodes[0]
 		
-		self.systemInfo = EdgeInfo(self.rightFrame, self, item, nodes, self.G, self.optionList)
+		self.systemInfo = EdgeInfo(self.rightFrame, self, item, nodes, self.G, self.manager)
 
 
 	'''deletes node with ID=item from G_delete; adds node along with attributes to G_add'''
@@ -220,11 +213,8 @@ class CanvasFrame(Frame):
 	'''deletes edge with ID=item from G_delete; adds edge to G_add'''
 	def deleteEdgeNX(self, item, G_delete, G_add):
 		nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-
-		try:
-			self.G[nodes[0]][nodes[1]]
-		except KeyError:
-			nodes[0], nodes[1] = nodes[1], nodes[0]
+		try:				self.G[nodes[0]][nodes[1]]
+		except KeyError:	nodes[0], nodes[1] = nodes[1], nodes[0]
 
 		G_add.add_edge(nodes[0], nodes[1])
 
@@ -310,8 +300,6 @@ class CanvasFrame(Frame):
 				if tag == 'edge':
 					self.edgeItemsDrag.append(edge)
 
-
-
 	def dragEnd(self, event):
 		# move node:
 		if self.nodeDragItem != None:
@@ -320,20 +308,14 @@ class CanvasFrame(Frame):
 		# move edges:
 			for edge in self.edgeItemsDrag:
 				nodes = [int(n) for n in self.systemsCanvas.gettags(edge) if n.isdigit()]
-				try:
-					self.G[nodes[0]][nodes[1]]
-				except KeyError:
-					nodes[0], nodes[1] = nodes[1], nodes[0]
+				try:				self.G[nodes[0]][nodes[1]]
+				except KeyError:	nodes[0], nodes[1] = nodes[1], nodes[0]
 				
 				edgeCoords = self.systemsCanvas.coords(edge)
 				if self.nodeDragItem == nodes[0]:
 					self.systemsCanvas.coords(edge, event.x, event.y, edgeCoords[2], edgeCoords[3])
 				else:
 					self.systemsCanvas.coords(edge, edgeCoords[0], edgeCoords[1], event.x, event.y)
-
-
-			
-			
 
 	
 	# shows all node names when' Show Labels' is clicked
@@ -447,19 +429,8 @@ class CanvasFrame(Frame):
 				self.dropdown.configure(bg="light blue", highlightbackground=self.color)
 				self.dropdown.pack(side='left')
 
-				# add new system to each node in networkx and hide node
-				for nodeitem in self.systemsCanvas.find_withtag('node'):
-					self.G.node[nodeitem][typeLabel] = None
-					self.systemsCanvas.itemconfig(nodeitem, state='hidden')
-				# add new system to each edge in networkx and hide edge
-				for edgeitem in self.systemsCanvas.find_withtag('edge'):
-					# find start and end node of edge
-					nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
-					try:	self.G[nodes[0]][nodes[1]]
-					except KeyError:	nodes[0], nodes[1] = nodes[1], nodes[0]
-					self.G.edge[nodes[0]][nodes[1]][typeLabel] = None
-
-					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+				# add new system to the list in the Manager class
+				self.manager.addSystem(typeLabel)
 
 				# refresh right panel to include new Demand if a node is currently selected
 				if len(self.rightFrame.winfo_children()) > 0:
@@ -467,8 +438,9 @@ class CanvasFrame(Frame):
 					self.systemInfo.systemDict[typeLabel] = None
 					self.systemInfo.saveAttributes()
 
-				# update prevOption
-				self.prevOption = "Create New"
+				# set current selection to prev selection (before 'Create New' was pressed) and update prevOption
+				self.v.set(self.prevOption)
+				self.prevOption = self.v.get()
 
 		elif self.v.get() == 'All':
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
@@ -493,9 +465,7 @@ class CanvasFrame(Frame):
 				# loop through nodes to show/hide based on the current system
 				# also figure out what the min and max value for the current demand is
 				for nodeitem in self.systemsCanvas.find_withtag('node'):
-					if self.G.node[nodeitem][self.v.get()] == None:
-						self.systemsCanvas.itemconfig(nodeitem, state='hidden')
-					else:
+					if self.v.get() in self.G.node[nodeitem]:
 						self.systemsCanvas.itemconfig(nodeitem, state='normal')
 
 						# find minimum and maximum values for this demand
@@ -503,18 +473,21 @@ class CanvasFrame(Frame):
 							self.minDemand = self.G.node[nodeitem][self.v.get()]
 						if self.G.node[nodeitem][self.v.get()] > self.maxDemand:
 							self.maxDemand = self.G.node[nodeitem][self.v.get()]
-
+					else:
+						self.systemsCanvas.itemconfig(nodeitem, state='hidden')
+						
 				if self.minDemand != self.maxDemand:
 					for nodeitem in self.systemsCanvas.find_withtag('node'):
-						# change size of nodes to reflect magnitude of value for this demand
-						coords = self.systemsCanvas.coords(nodeitem)
-						x = self.G.node[nodeitem][self.v.get()]
-						offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
-						self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
+						if self.v.get() in self.G.node[nodeitem]:
+							# change size of nodes to reflect magnitude of value for this demand
+							coords = self.systemsCanvas.coords(nodeitem)
+							x = self.G.node[nodeitem][self.v.get()]
+							offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
+							self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
 
 				for edgeitem in self.systemsCanvas.find_withtag('edge'):
 					nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
-					if (self.systemsCanvas.itemcget(nodes[0], 'state')=='normal') and (self.systemsCanvas.itemcget(nodes[1], 'state')=='normal'):
+					if (self.systemsCanvas.itemcget(nodes[0], 'state') == 'normal') and (self.systemsCanvas.itemcget(nodes[1], 'state') == 'normal'):
 						self.systemsCanvas.itemconfig(edgeitem, state='normal')
 						self.systemsCanvas.itemconfig(edgeitem, arrow='last')
 					else:
@@ -605,6 +578,16 @@ class CanvasFrame(Frame):
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
 	def initUI(self):
+		# Create manager object that keeps track of all active systems
+		self.manager = Manager(self)
+
+		# initialize some variables
+		self.color = "light blue"
+		self.labels = 0
+		self.prevOption = "All"
+		self.undoStack = []
+		self.redoStack = []
+
 		# creates toolbar: implemented using a frame with dropdown/buttons placed on it
 		#          referenced from http://zetcode.com/gui/tkinter/menustoolbars/
 		self.toolbar = Frame(self.parent, bg=self.color)
