@@ -530,7 +530,7 @@ class CanvasFrame(Frame):
 	''' Functions for Node degree frame: '''
 	# shows each nodes degree
 	def nodeDegrees(self):
-		if not hasattr(self, 'nodeDegreeFrame') or self.frameOrWindow == 1:
+		if not hasattr(self, 'nodeDegreeFrame') or self.nodeDegreeFrame.winfo_exists() == 0:
 			# mini frame to display node degree analysis graph:
 			self.frameOrWindow = 0
 			self.nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
@@ -569,8 +569,8 @@ class CanvasFrame(Frame):
 			ax.set_ylabel("Frequency", fontsize=10)
 			ax.axis([min(degrees)-1, max(degrees)+1, 0, len(degrees)])
 
-			fig.savefig("histogramplot.jpg") # Produce an image.
-			image = Image.open("histogramplot.jpg", bbox_inches='tight')
+			fig.savefig("histogramplot.png", bbox_inches='tight') # Produce an image.
+			image = Image.open("histogramplot.png")
 			photo = ImageTk.PhotoImage(image)
 
 			label = Label(self.nodeDegreeFrame, image=photo)
@@ -584,7 +584,7 @@ class CanvasFrame(Frame):
 		else:
 			self.nodeDegreePopup.destroy()
 	
-	def analysisMin(self, event=None):
+	def analysisMin(self):
 		if self.frameOrWindow == 1:
 			self.nodeDegreePopup.destroy()
 			self.nodeDegrees()
@@ -638,9 +638,9 @@ class CanvasFrame(Frame):
 			ax.set_ylabel("Frequency", fontsize=19)
 			ax.axis([min(degrees)-1, max(degrees)+1, 0, len(degrees)])
 			# Produce an image.
-			fig.savefig("histogramplot.jpg")
+			fig.savefig("histogramplot.png", bbox_inches='tight')
 
-			image = Image.open("histogramplot.jpg")
+			image = Image.open("histogramplot.png")
 			photo = ImageTk.PhotoImage(image)
 
 			label = Label(self.nodeDegreePopup, image=photo)
@@ -683,6 +683,13 @@ class CanvasFrame(Frame):
 		maxButton.pack(side='right')
 		minButton.pack(side='right')
 		exitButton.pack(side='right')
+
+		self.logScroll = Scrollbar(self.logFrame)
+		self.logScroll.pack(side='right', fill='y')
+		self.logListBox = Listbox(self.logFrame, yscrollcommand=self.logScroll.set, bg='white', borderwidth=0)
+		self.logListBox.pack(expand=1, fill='both')
+		self.logScroll.config(command=self.logListBox.yview)
+
 	
 	def logExit(self):
 		self.logFrame.destroy()
