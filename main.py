@@ -85,6 +85,7 @@ class Window(Frame):
         viewTab = Menu(menubar)
         viewTab.add_command(label="Show Labels", command=self.geoCanvas.showLabels)
         viewTab.add_command(label="Hide Labels", command=self.geoCanvas.hideLabels)
+        viewTab.add_command(label='Log Window', command=self.geoCanvas.logWindow)
         menubar.add_cascade(label="View", menu=viewTab)
 
         #Analysis Tab

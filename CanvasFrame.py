@@ -512,47 +512,49 @@ class CanvasFrame(Frame):
 
 	# Analysis modules for the networkx graph:
 
-	# shows each nodes degree 
+	''' Functions for Node degree frame: '''
+	# shows each nodes degree
 	def nodeDegrees(self):
-		# mini frame to display node degree analysis graph:
-		self.frameOrWindow = 0
-		self.nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
-		self.nodeDegreeFrame.pack_propagate(0)
-		self.nodeDegreeFrame.pack(side='left')
+		if not hasattr(self, 'nodeDegreeFrame') or self.frameOrWindow == 1:
+			# mini frame to display node degree analysis graph:
+			self.frameOrWindow = 0
+			self.nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
+			self.nodeDegreeFrame.pack_propagate(0)
+			self.nodeDegreeFrame.pack(side='left')
 
-		self.toolbarFrame = Frame(self.nodeDegreeFrame, height=25, width=200, bg='light gray')
-		self.toolbarFrame.pack_propagate(0)
-		self.toolbarFrame.pack(side='top')
+			self.toolbarFrame = Frame(self.nodeDegreeFrame, height=25, width=200, bg='light gray')
+			self.toolbarFrame.pack_propagate(0)
+			self.toolbarFrame.pack(side='top')
 
-		exitButton = Button(self.toolbarFrame, text='ex', highlightbackground='light gray', command=self.analysisExit)
-		minButton = Button(self.toolbarFrame, text='min', highlightbackground='light gray', command=self.analysisMin)
-		maxButton = Button(self.toolbarFrame, text='max', highlightbackground='light gray', command=self.analysisMax)
+			exitButton = Button(self.toolbarFrame, text='ex', highlightbackground='light gray', command=self.analysisExit)
+			minButton = Button(self.toolbarFrame, text='min', highlightbackground='light gray', command=self.analysisMin)
+			maxButton = Button(self.toolbarFrame, text='max', highlightbackground='light gray', command=self.analysisMax)
 
-		maxButton.pack(side='right')
-		minButton.pack(side='right')
-		exitButton.pack(side='right')
+			maxButton.pack(side='right')
+			minButton.pack(side='right')
+			exitButton.pack(side='right')
 
-		nodeDegrees = nx.degree(self.G)
-		degrees = []
-		for key in nodeDegrees:
-			degrees.append(nodeDegrees[key])
+			nodeDegrees = nx.degree(self.G)
+			degrees = []
+			for key in nodeDegrees:
+				degrees.append(nodeDegrees[key])
 
-		fig = plt.figure(figsize=(1.2, 1.2)) # Create a Figure object.
-		ax = fig.add_subplot(1,1,1) # Create an Axes object: one row, one column, first plot
-		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left') # Plot the data.
+			fig = plt.figure(figsize=(1.2, 1.2)) # Create a Figure object.
+			ax = fig.add_subplot(1,1,1) # Create an Axes object: one row, one column, first plot
+			ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left') # Plot the data.
 
-		# Add some axis labels.
-		ax.set_xlabel("Degrees")
-		ax.set_ylabel("Frequency")
-		ax.axis([-1, max(degrees)+1, 0, len(degrees)])
+			# Add some axis labels.
+			ax.set_xlabel("Degrees")
+			ax.set_ylabel("Frequency")
+			ax.axis([-1, max(degrees)+1, 0, len(degrees)])
 
-		fig.savefig("histogramplot.jpg") # Produce an image.
-		image = Image.open("histogramplot.jpg")
-		photo = ImageTk.PhotoImage(image)
+			fig.savefig("histogramplot.jpg") # Produce an image.
+			image = Image.open("histogramplot.jpg")
+			photo = ImageTk.PhotoImage(image)
 
-		label = Label(self.nodeDegreeFrame, image=photo)
-		label.image = photo
-		label.pack()
+			label = Label(self.nodeDegreeFrame, image=photo)
+			label.image = photo
+			label.pack()
 
 	def analysisExit(self):
 		if self.frameOrWindow == 0:
@@ -566,55 +568,57 @@ class CanvasFrame(Frame):
 			self.nodeDegrees()
 		else:
 			self.nodeDegreeFrame.config(height='30')
-			self.nodeDegreeFrame.place(x=0, y=160, anchor='sw')
+			self.nodeDegreeFrame.place(x=self.nodeDegreeFrame.winfo_x(), y=160, anchor='sw')
 	
 	def analysisMax(self):
-		self.nodeDegreeFrame.destroy()
+		if self.frameOrWindow == 0:
+			self.nodeDegreeFrame.destroy()
+			
+			# popout menu to display node degree analysis graph:
+			nodeDegrees = nx.degree(self.G)
+			self.frameOrWindow = 1
+			self.nodeDegreePopup = Toplevel(self.parent)
+			self.nodeDegreePopup.title("Node Degrees")
+			self.nodeDegreePopup.overrideredirect(1)
+			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
+
+			analysisToolbar = Frame(self.nodeDegreePopup, bg='light gray')
+			analysisToolbar.pack(side='top', fill='x')
+			analysisToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
+			analysisToolbar.bind('<ButtonRelease-1>', self.dragWindowEnd)
+
+			exitButton = Button(analysisToolbar, text='ex', highlightbackground='light gray', command=self.analysisExit)
+			minButton = Button(analysisToolbar, text='min', highlightbackground='light gray', command=self.analysisMin)
+			maxButton = Button(analysisToolbar, text='max', highlightbackground='light gray', command=self.analysisMax)
+
+			maxButton.pack(side='right')
+			minButton.pack(side='right')
+			exitButton.pack(side='right')
+
+			degrees = []
+			for key in nodeDegrees:
+				degrees.append(nodeDegrees[key])
 		
-		# popout menu to display node degree analysis graph:
-		nodeDegrees = nx.degree(self.G)
-		self.frameOrWindow = 1
-		self.nodeDegreePopup = Toplevel(self.parent)
-		self.nodeDegreePopup.title("Node Degrees")
-		self.nodeDegreePopup.overrideredirect(1)
-		self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
+			# Create a Figure object.
+			fig = plt.figure(figsize=(6, 5))
+			# Create an Axes object.
+			ax = fig.add_subplot(1,1,1) # one row, one column, first plot
+			# Plot the data.
+			ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left')
+			# Add some axis labels.
+			ax.set_xlabel("Degrees")
+			ax.set_ylabel("Frequency")
+			ax.axis([-1, max(degrees)+1, 0, len(degrees)])
+			# Produce an image.
+			fig.savefig("histogramplot.jpg")
 
-		analysisToolbar = Frame(self.nodeDegreePopup, bg='light gray')
-		analysisToolbar.pack(side='top', fill='x')
-		analysisToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
-		analysisToolbar.bind('<ButtonRelease-1>', self.dragWindowEnd)
+			image = Image.open("histogramplot.jpg")
+			photo = ImageTk.PhotoImage(image)
 
-		exitButton = Button(analysisToolbar, text='ex', highlightbackground='light gray', command=self.analysisExit)
-		minButton = Button(analysisToolbar, text='min', highlightbackground='light gray', command=self.analysisMin)
-		maxButton = Button(analysisToolbar, text='max', highlightbackground='light gray')
-
-		maxButton.pack(side='right')
-		minButton.pack(side='right')
-		exitButton.pack(side='right')
-
-		degrees = []
-		for key in nodeDegrees:
-			degrees.append(nodeDegrees[key])
-	
-		# Create a Figure object.
-		fig = plt.figure(figsize=(6, 5))
-		# Create an Axes object.
-		ax = fig.add_subplot(1,1,1) # one row, one column, first plot
-		# Plot the data.
-		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left')
-		# Add some axis labels.
-		ax.set_xlabel("Degrees")
-		ax.set_ylabel("Frequency")
-		ax.axis([-1, max(degrees)+1, 0, len(degrees)])
-		# Produce an image.
-		fig.savefig("histogramplot.jpg")
-
-		image = Image.open("histogramplot.jpg")
-		photo = ImageTk.PhotoImage(image)
-
-		label = Label(self.nodeDegreePopup, image=photo)
-		label.image = photo
-		label.pack()
+			label = Label(self.nodeDegreePopup, image=photo)
+			label.image = photo
+			label.pack()
+		
 
 	def dragWindowStart(self, event):
 		self.startDragX = event.x
@@ -633,6 +637,32 @@ class CanvasFrame(Frame):
 			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 0, y)))
 		else:
 			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
+
+	# log window to display all actions done on gui	
+	def logWindow(self):
+		self.logFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
+		self.logFrame.pack_propagate(0)
+		self.logFrame.pack(side='left')
+
+		self.logToolbar = Frame(self.logFrame, height=25, width=200, bg='light gray')
+		self.logToolbar.pack_propagate(0)
+		self.logToolbar.pack(side='top')
+
+		exitButton = Button(self.logToolbar, text='ex', highlightbackground='light gray', command=self.logExit)
+		minButton = Button(self.logToolbar, text='min', highlightbackground='light gray', command=self.logMin)
+		maxButton = Button(self.logToolbar, text='max', highlightbackground='light gray', command=self.logMax)
+
+		maxButton.pack(side='right')
+		minButton.pack(side='right')
+		exitButton.pack(side='right')
+	
+	def logExit(self):
+		self.logFrame.destroy()
+
+	def logMin(self):
+		pass
+	def logMax(self):
+		pass
 
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
@@ -682,8 +712,12 @@ class CanvasFrame(Frame):
 		self.systemsCanvas = Canvas(self.parent, height=500, width=700, bg='white')
 		self.systemsCanvas.pack(fill="both", expand=1)
 
+		# creates frame for docked windows
 		self.miniFrames = Frame(self.parent, height=200, width=700, bg='white', borderwidth=1, relief='sunken')
 		self.miniFrames.pack_propagate(0)
 		self.miniFrames.pack(side='bottom')
+
+		# calls log window function
+		self.logWindow()
 
 
