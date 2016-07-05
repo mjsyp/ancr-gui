@@ -6,6 +6,7 @@ import tkSimpleDialog
 import networkx as nx
 import matplotlib
 from matplotlib import pyplot as plt
+import numpy as np
 from PIL import Image, ImageTk
 
 class CanvasFrame(Frame):
@@ -24,6 +25,11 @@ class CanvasFrame(Frame):
 
 	#binds mouse clicks to the createNode function when the 'create node' button is pressed 
 	def createNodeButtonClick(self):
+		# undo activefill if 'select' button was last pressed
+		if self.selectButton.cget('relief') == SUNKEN:
+			for node in self.systemsCanvas.find_withtag('node'):
+				self.systemsCanvas.itemconfig(node, activefill='red')
+
 		# config all buttons as sunken or raised according to what was pressed
 		self.createNodeButton.config(relief=SUNKEN)
 		self.createEdgeButton.config(relief=RAISED)
@@ -40,6 +46,11 @@ class CanvasFrame(Frame):
 	# binds mouse clicks to the startEdge function and binds mouse click releases to the createEdge
 	# function when the 'create edge' button is pressed  
 	def createEdgeButtonClick(self):
+		# undo activefill if 'select' button was last pressed
+		if self.selectButton.cget('relief') == SUNKEN:
+			for node in self.systemsCanvas.find_withtag('node'):
+				self.systemsCanvas.itemconfig(node, activefill='red')
+
 		# config all buttons as sunken or raised according to what was pressed
 		self.createNodeButton.config(relief=RAISED)
 		self.createEdgeButton.config(relief=SUNKEN)
@@ -62,6 +73,10 @@ class CanvasFrame(Frame):
 		self.selectButton.config(relief=SUNKEN)
 		self.deleteButton.config(relief=RAISED)
 		self.dragNodeButton.config(relief=RAISED)
+
+		# make nodes green when your cursor scrolls over them
+		for node in self.systemsCanvas.find_withtag('node'):
+			self.systemsCanvas.itemconfig(node, activefill='green')
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
@@ -227,7 +242,7 @@ class CanvasFrame(Frame):
 
 	'''Runs on click of "delete" button; decides whether to call deleteNode or deleteEdge'''
 	def delete(self, event):
-		r = 18
+		r = 22
 		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 
 		if len(selected) > 0:
@@ -328,7 +343,7 @@ class CanvasFrame(Frame):
 			if self.systemsCanvas.itemcget(item, 'state') !='hidden':
 				nodeName = self.G.node[item]['Name']
 				if nodeName != None:
-					nodeLabel=Label(self.systemsCanvas, text=nodeName)
+					nodeLabel=Label(self.systemsCanvas, text=nodeName, background="white")
 					nodeLabel.place(x=self.G.node[item]['x_coord'], y=self.G.node[item]['y_coord']-20, anchor='center')
 
 	# hides all node names when 'Hide Labels' is clicked
@@ -507,7 +522,6 @@ class CanvasFrame(Frame):
 
 	# shows each nodes degree 
 	def nodeDegrees(self):
-		
 		# mini frame to display node degree analysis graph:
 		self.frameOrWindow = 0
 		self.nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
@@ -531,22 +545,28 @@ class CanvasFrame(Frame):
 		for key in nodeDegrees:
 			degrees.append(nodeDegrees[key])
 
-		fig = plt.figure(figsize=(1.2, 1.2)) # Create a Figure object.
-		ax = fig.add_subplot(1,1,1) # Create an Axes object: one row, one column, first plot
+		fig = plt.figure(figsize=(1.2, 0.9)) 
+		ax = fig.add_subplot(1,1,1) # one row, one column, first plot
 		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left') # Plot the data.
+		ax.tick_params(axis='both', which='major', labelsize=8)
+		ax.tick_params(axis='both', which='minor', labelsize=8)
+		ya = ax.get_yaxis()
+		ya.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
+		xa = ax.get_xaxis()
+		xa.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
 
 		# Add some axis labels.
-		ax.set_xlabel("Degrees")
-		ax.set_ylabel("Frequency")
-		ax.axis([-1, max(degrees)+1, 0, len(degrees)])
+		ax.set_xlabel("Degree", fontsize=10)
+		ax.set_ylabel("Frequency", fontsize=10)
+		ax.axis([min(degrees)-1, max(degrees)+1, 0, len(degrees)])
 
-		fig.savefig("histogramplot.jpg") # Produce an image.
+		fig.savefig("histogramplot.jpg", bbox_inches='tight') # Produce an image.
 		image = Image.open("histogramplot.jpg")
 		photo = ImageTk.PhotoImage(image)
 
 		label = Label(self.nodeDegreeFrame, image=photo)
 		label.image = photo
-		label.pack()
+		label.pack(expand=1, fill=BOTH)
 
 	def analysisExit(self):
 		if self.frameOrWindow == 0:
@@ -589,17 +609,23 @@ class CanvasFrame(Frame):
 		for key in nodeDegrees:
 			degrees.append(nodeDegrees[key])
 
-	
-		# Create a Figure object.
+		# Create figure object and axes object
 		fig = plt.figure(figsize=(6, 5))
-		# Create an Axes object.
 		ax = fig.add_subplot(1,1,1) # one row, one column, first plot
-		# Plot the data.
-		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left')
+
+		# plot data and set axis info
+		ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left') # Plot the data.
+		ax.tick_params(axis='both', which='major', labelsize=12)
+		ax.tick_params(axis='both', which='minor', labelsize=12)
+		ya = ax.get_yaxis()
+		ya.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
+		xa = ax.get_xaxis()
+		xa.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
+
 		# Add some axis labels.
-		ax.set_xlabel("Degrees")
-		ax.set_ylabel("Frequency")
-		ax.axis([-1, max(degrees)+1, 0, len(degrees)])
+		ax.set_xlabel("Degree", fontsize=18)
+		ax.set_ylabel("Frequency", fontsize=19)
+		ax.axis([min(degrees)-1, max(degrees)+1, 0, len(degrees)])
 		# Produce an image.
 		fig.savefig("histogramplot.jpg")
 
@@ -667,6 +693,6 @@ class CanvasFrame(Frame):
 
 		self.miniFrames = Frame(self.parent, height=200, width=700, bg='white', borderwidth=1, relief='sunken')
 		self.miniFrames.pack_propagate(0)
-		self.miniFrames.pack(side='bottom')
+		self.miniFrames.pack(side='bottom', fill="both", expand=1)
 
 
