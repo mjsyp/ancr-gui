@@ -130,10 +130,7 @@ class CanvasFrame(Frame):
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Created new node (ID = " + str(item) + ")"
-		self.logText.config(state=NORMAL)
-		self.logText.insert(END, "\n" + log)
-		self.logText.config(state=DISABLED)
-		self.logText.see("end")
+		self.appendLog(log)
 
 	#determines the x and y coordinates of where the edge will start, checks that starting coords are from a node
 	def edgeStart(self, event):
@@ -183,10 +180,7 @@ class CanvasFrame(Frame):
 			# add to log file
 			log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Created new edge between node " + str(self.startNode[0])
 			log = log + " and node " + str(self.endNode[0]) + " (ID = " + str(item) + ")"
-			self.logText.config(state=NORMAL)
-			self.logText.insert(END, "\n" + log)
-			self.logText.config(state=DISABLED)
-			self.logText.see("end")
+			self.appendLog(log)
 			
 
 	def select(self, event):
@@ -304,10 +298,7 @@ class CanvasFrame(Frame):
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted node " + str(item) + " and associated edges"
-		self.logText.config(state=NORMAL)
-		self.logText.insert(END, "\n" + log)
-		self.logText.config(state=DISABLED)
-		self.logText.see("end")
+		self.appendLog(log)
 
 
 	# deletes selected edge with radius r in both Tkinter and networkX
@@ -324,10 +315,7 @@ class CanvasFrame(Frame):
 		nodes = [str(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted edge between node " + nodes[0] + " and node " + nodes[1]
 		log = log + " (ID = " + str(item) + ")"
-		self.logText.config(state=NORMAL)
-		self.logText.insert(END, "\n" + log)
-		self.logText.config(state=DISABLED)
-		self.logText.see("end")
+		self.appendLog(log)
 
 	
 	def dragStart(self, event):
@@ -413,42 +401,34 @@ class CanvasFrame(Frame):
 			if self.systemsCanvas.type(item) == 'oval': # node
 				self.systemsCanvas.addtag_withtag('node', item)
 				self.deleteNodeNX(item, self.D, self.G) # re-add node to networkX
+				self.undoLog = self.undoLog + "deletion of node " + str(item) + ")" # log message
 
 			elif self.systemsCanvas.type(item) == 'line': # edge
 				self.systemsCanvas.addtag_withtag('edge', item)
 				self.deleteEdgeNX(item, self.D, self.G) # re-add edge to networkX
+				self.undoLog = self.undoLog + "deletion of edge " + str(item) + ")" # log message
 				
 		elif tag == 'node': # node was previously created
 			self.deleteNodeNX(item, self.G, self.D) # remove node from networkX
 
-			# remove node and any associated edges from Canvas
-			r=4
-			coords = self.systemsCanvas.coords(item)
-			overlapped = self.systemsCanvas.find_overlapping(coords[0]-r, coords[1]-r, coords[0]+r, coords[1]+r)
-
-
-			for x in overlapped:
-				if self.systemsCanvas.type(x) == 'line':
-					# add 'deleted' tag to ea. object x, and make it hidden
-
-					self.systemsCanvas.addtag_withtag('deleted', x)
-					self.systemsCanvas.itemconfig(x, state='hidden')
-
-					self.systemsCanvas.dtag(x, 'edge')
-					self.deleteEdgeNX(x, self.G, self.D)
-
 			self.systemsCanvas.addtag_withtag('deleted', item)
 			self.systemsCanvas.itemconfig(item, state='hidden')
 			self.systemsCanvas.dtag(item, 'node')
-			self.deleteNodeNX(item, self.G, self.D) # delete node from networkX
+
+			# log message
+			self.undoLog = self.undoLog + "creation of node " + str(item) + ")"
 
 		elif tag == 'edge': # edge was previously created
 			# remove edge from networkX
 			self.deleteEdgeNX(item, self.G, self.D)
 
+			# delete from Canvas
 			self.systemsCanvas.dtag(item, 'edge')
 			self.systemsCanvas.addtag_withtag('deleted', item)
 			self.systemsCanvas.itemconfig(item, state='hidden')
+
+			# log message
+			self.undoLog = self.undoLog + "creation of edge " + str(item) + ")"
 
 		if self.labels == 1:
 			self.hideLabels()
@@ -458,17 +438,21 @@ class CanvasFrame(Frame):
 	# undo last action performed on canvas (creation or deletion) using a stack
 	def undo(self, event=None):
 		if len(self.undoStack) > 0:
+			self.undoLog = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Undo last action (" # log message
 			item = self.undoStack[len(self.undoStack)-1] # save last item on stack
 			self.undoStack.pop() # pop last item from stack
 			self.redoStack.append(item) # add to redoStack
 			self.undoRedoAction(item)
+			self.appendLog(self.undoLog) # append log message
 
 	def redo(self, event=None):
 		if len(self.redoStack) > 0:
+			log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Redo last undo" # log message
 			item = self.redoStack[len(self.redoStack)-1]
 			self.redoStack.pop()
 			self.undoStack.append(item)
 			self.undoRedoAction(item)
+			self.appendLog(log) # append log message
 
 
 	# creates new system in option menu and only displays nodes with specific system demands
@@ -499,10 +483,7 @@ class CanvasFrame(Frame):
 
 				# add to log file
 				log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Added new system called '" + typeLabel + "'" 
-				self.logText.config(state=NORMAL)
-				self.logText.insert(END, "\n" + log)
-				self.logText.config(state=DISABLED)
-				self.logText.see("end")
+				self.appendLog(log)
 
 		elif self.v.get() == 'All':
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
@@ -636,7 +617,6 @@ class CanvasFrame(Frame):
 			self.nodeDegrees()
 		else:
 			self.nodeDegreeFrame.config(height='30')
-			#self.nodeDegreeFrame.place(x=self.nodeDegreeFrame.winfo_x(), y=160, anchor='sw')
 	
 	def analysisMax(self):
 		if self.frameOrWindow == 0 and self.nodeDegreeFrame.winfo_height() > 30:
@@ -714,6 +694,17 @@ class CanvasFrame(Frame):
 		else:
 			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
 
+	def appendLog(self, text):
+		#TODO
+		self.logFrameOrWindow = 0
+		if self.logFrameOrWindow == 0:
+			self.logText.config(state=NORMAL)
+			self.logText.insert(END, "\n" + text)
+			self.logText.config(state=DISABLED)
+			self.logText.see("end")
+		else:
+			pass
+
 	# log window to display all actions done on gui	
 	def logWindow(self):
 		if (not hasattr(self, 'logFrame') or self.logFrame.winfo_exists() == 0) and (not hasattr(self, 'logPopUp') or self.logPopUp.winfo_exists() == 0) :
@@ -750,7 +741,6 @@ class CanvasFrame(Frame):
 	def logMin(self):
 		if self.logFrameOrWindow == 0:
 			self.logFrame.config(height='30')
-			#self.logFrame.place(x=self.logFrame.winfo_x(), y=160, anchor='sw')
 		else:
 			self.logPopUp.destroy()
 			self.logWindow()

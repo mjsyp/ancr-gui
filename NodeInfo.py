@@ -177,12 +177,19 @@ class NodeInfo(Frame):
 
 
 	def saveAttributes(self):
-		self.G.node[self.index]['Name'] = self.nameEntry.get()
-		self.G.node[self.index]['Type'] = self.v.get()
-		self.G.node[self.index]['x'] = int(self.xEntry.get())
-		self.G.node[self.index]['y'] = int(self.yEntry.get())
-		self.G.node[self.index]['z'] = int(self.zEntry.get())
-		self.G.node[self.index]['Notes'] = self.notes.get('0.0', END)
+		titles = ['Name', 'Type', 'x', 'y', 'z', 'Notes']
+		values = [self.nameEntry.get(), self.v.get(), int(self.xEntry.get()), 
+			int(self.yEntry.get()), int(self.zEntry.get()), self.notes.get('0.0', END)]
+		updated = []
+
+		# for each field, check if value is updated in NetworkX; if not, save and add to 'updated'
+		for i in range(0, len(titles)):
+			if (titles[i] not in self.G.node[self.index]) or (self.G.node[self.index][titles[i]] != values[i]):
+				self.G.node[self.index][titles[i]] = values[i]
+
+				# make sure we don't log a save when the value is empty string or endl
+				if values[i] != '' and values[i] != '\n':
+					updated.append(titles[i])
 
 		if self.leftFrame.labels == 1:
 			self.leftFrame.hideLabels()
@@ -191,16 +198,21 @@ class NodeInfo(Frame):
 		# Demands
 		for x in self.manager.systems: # for each system
 			if self.systemDict[x].get() != None and self.systemDict[x].get() != '': # if there is a value for this node
-				self.G.node[self.index][x] = int(self.systemDict[x].get())
+				# if system doesn't exist in NetworkX already OR if the curr value in NetworkX isn't updated
+				if (x not in self.G.node[self.index]) or (self.G.node[self.index][x] != int(self.systemDict[x].get())):
+					updated.append(x)
+					self.G.node[self.index][x] = int(self.systemDict[x].get())
 
 		self.updateNodeSizes()
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of node " + str(self.index)
-		self.leftFrame.logText.config(state=NORMAL)
-		self.leftFrame.logText.insert(END, "\n" + log)
-		self.leftFrame.logText.config(state=DISABLED)
-		self.leftFrame.logText.see("end")
+		log = log + " in the following fields: "
+		for field in updated:
+			log = log + str(field) + ", "
+		log = log[:-2]
+
+		self.leftFrame.appendLog(log)
 
 
 	def initUI(self):

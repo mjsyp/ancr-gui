@@ -153,25 +153,36 @@ class EdgeInfo(Frame):
 				self.systemDict[x].insert(0, self.G.edge[self.nodes[0]][self.nodes[1]][x])
 
 	def saveAttributes(self):
-		self.G.edge[self.nodes[0]][self.nodes[1]]['Name'] = self.nameEntry.get()
-		self.G.edge[self.nodes[0]][self.nodes[1]]['Type'] = self.v.get()
-		self.G.edge[self.nodes[0]][self.nodes[1]]['x'] = int(self.xEntry.get())
-		self.G.edge[self.nodes[0]][self.nodes[1]]['y'] = int(self.yEntry.get())
-		self.G.edge[self.nodes[0]][self.nodes[1]]['z'] = int(self.zEntry.get())
-		self.G.edge[self.nodes[0]][self.nodes[1]]['Notes'] = self.notes.get('0.0', END)
+		titles = ['Name', 'Type', 'x', 'y', 'z', 'Notes']
+		values = [self.nameEntry.get(), self.v.get(), int(self.xEntry.get()), 
+			int(self.yEntry.get()), int(self.zEntry.get()), self.notes.get('0.0', END)]
+		updated = []
+
+		# for each field, check if value is updated in NetworkX; if not, save and add to 'updated'
+		for i in range(0, len(titles)):
+			if (titles[i] not in self.G.edge[self.nodes[0]][self.nodes[1]]) or (self.G.edge[self.nodes[0]][self.nodes[1]][titles[i]] != values[i]):
+				self.G.edge[self.nodes[0]][self.nodes[1]][titles[i]] = values[i]
+
+				# make sure we don't log a save when the value is empty string or endl
+				if values[i] != '' and values[i] != '\n':
+					updated.append(titles[i])
 
 		# Demands
-		for x in self.manager.systems:
-			if self.systemDict[x].get() != None:
-				self.G.edge[self.nodes[0]][self.nodes[1]][x] = int(self.systemDict[x].get())
+		for x in self.manager.systems: # for each system
+			if self.systemDict[x].get() != None and self.systemDict[x].get() != '': # if there is a value for this demand
+				# if system doesn't exist in NetworkX already OR if the curr value in NetworkX isn't updated
+				if (x not in self.G.edge[self.nodes[0]][self.nodes[1]]) or (self.G.edge[self.nodes[0]][self.nodes[1]][x] != int(self.systemDict[x].get())):
+					updated.append(x)
+					self.G.edge[self.nodes[0]][self.nodes[1]][x] = int(self.systemDict[x].get())
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of edge between node " 
-		log = log + str(self.nodes[0]) + " and node " + str(self.nodes[1]) + " (ID = " + str(self.index) + ")"
-		self.leftFrame.logText.config(state=NORMAL)
-		self.leftFrame.logText.insert(END, "\n" + log)
-		self.leftFrame.logText.config(state=DISABLED)
-		self.leftFrame.logText.see("end")
+ 		log = log + str(self.nodes[0]) + " and node " + str(self.nodes[1]) + " (ID = " + str(self.index) + ")"
+		log = log + " in the following fields: "
+		for field in updated:
+			log = log + str(field) + ", "
+		log = log[:-2]
+		self.leftFrame.appendLog(log)
 
 	def initUI(self):
 		# Name
