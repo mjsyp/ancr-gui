@@ -1,6 +1,7 @@
 from Tkinter import *
 import tkSimpleDialog
 import networkx as nx
+from datetime import datetime
 
 class NodeInfo(Frame):
 	def __init__(self, parent, leftFrame, index, G, manager):
@@ -13,7 +14,7 @@ class NodeInfo(Frame):
 		self.manager = manager
 
 		self.systemDict = {}
- 		self.color = "dark gray"
+ 		self.color = "dark gray" 
 		self.initUI()
 
 	def createTypeLabel(self):
@@ -193,6 +194,13 @@ class NodeInfo(Frame):
 				self.G.node[self.index][x] = int(self.systemDict[x].get())
 
 		self.updateNodeSizes()
+
+		# add to log file
+		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of node " + str(self.index)
+		self.leftFrame.logText.config(state=NORMAL)
+		self.leftFrame.logText.insert(END, "\n" + log)
+		self.leftFrame.logText.config(state=DISABLED)
+		self.leftFrame.logText.see("end")
 
 
 	def initUI(self):

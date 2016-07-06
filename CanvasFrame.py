@@ -6,8 +6,8 @@ import tkSimpleDialog
 import networkx as nx
 import matplotlib
 from matplotlib import pyplot as plt
-import numpy as np
 from PIL import Image, ImageTk
+from datetime import datetime
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
@@ -128,6 +128,13 @@ class CanvasFrame(Frame):
 			if len(self.rightFrame.winfo_children()) > 0:
 				self.systemInfo.repopulateData()
 
+		# add to log file
+		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Created new node (ID = " + str(item) + ")"
+		self.logText.config(state=NORMAL)
+		self.logText.insert(END, "\n" + log)
+		self.logText.config(state=DISABLED)
+		self.logText.see("end")
+
 	#determines the x and y coordinates of where the edge will start, checks that starting coords are from a node
 	def edgeStart(self, event):
 		r = 24
@@ -172,6 +179,14 @@ class CanvasFrame(Frame):
 				self.G.edge[self.startNode[0]][self.endNode[0]][self.v.get()] = 0
 				if len(self.rightFrame.winfo_children()) > 0:
 					self.systemInfo.repopulateData()
+
+			# add to log file
+			log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Created new edge between node " + str(self.startNode[0])
+			log = log + " and node " + str(self.endNode[0]) + " (ID = " + str(item) + ")"
+			self.logText.config(state=NORMAL)
+			self.logText.insert(END, "\n" + log)
+			self.logText.config(state=DISABLED)
+			self.logText.see("end")
 			
 
 	def select(self, event):
@@ -287,6 +302,13 @@ class CanvasFrame(Frame):
 			self.hideLabels()
 			self.showLabels()
 
+		# add to log file
+		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted node " + str(item) + " and associated edges"
+		self.logText.config(state=NORMAL)
+		self.logText.insert(END, "\n" + log)
+		self.logText.config(state=DISABLED)
+		self.logText.see("end")
+
 
 	# deletes selected edge with radius r in both Tkinter and networkX
 	def deleteEdge(self, item):
@@ -297,6 +319,16 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.dtag(item, 'edge')
 		self.systemsCanvas.addtag_withtag('deleted', item)
 		self.systemsCanvas.itemconfig(item, state='hidden')
+
+		# add to log file
+		nodes = [str(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted edge between node " + nodes[0] + " and node " + nodes[1]
+		log = log + " (ID = " + str(item) + ")"
+		self.logText.config(state=NORMAL)
+		self.logText.insert(END, "\n" + log)
+		self.logText.config(state=DISABLED)
+		self.logText.see("end")
+
 	
 	def dragStart(self, event):
 		r = 22
@@ -316,9 +348,7 @@ class CanvasFrame(Frame):
 					self.edgeItemsDrag.append(edge)
 
 	def dragEnd(self, event):
-
-		
-		# move node:
+	# move node:
 		if (event.x < 0) or (event.x > 700) or (event.y < 0) or (event.y > 500):
 			return
 
@@ -467,6 +497,13 @@ class CanvasFrame(Frame):
 				self.v.set(self.prevOption)
 				self.prevOption = self.v.get()
 
+				# add to log file
+				log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Added new system called '" + typeLabel + "'" 
+				self.logText.config(state=NORMAL)
+				self.logText.insert(END, "\n" + log)
+				self.logText.config(state=DISABLED)
+				self.logText.see("end")
+
 		elif self.v.get() == 'All':
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
 				self.systemsCanvas.itemconfig(nodeitem, state='normal')
@@ -573,7 +610,7 @@ class CanvasFrame(Frame):
 			image = Image.open("histogramplot.png")
 			photo = ImageTk.PhotoImage(image)
 
-			label = Label(self.nodeDegreeFrame, image=photo)
+			label = Label(self.nodeDegreeFrame, image=photo, bg="white")
 			label.image = photo
 			label.pack(expand=1, fill=BOTH)
 
@@ -599,7 +636,7 @@ class CanvasFrame(Frame):
 			# popout menu to display node degree analysis graph:
 			nodeDegrees = nx.degree(self.G)
 			self.frameOrWindow = 1
-			self.nodeDegreePopup = Toplevel(self.parent)
+			self.nodeDegreePopup = Toplevel(self.parent, bg='white')
 			self.nodeDegreePopup.title("Node Degrees")
 			self.nodeDegreePopup.overrideredirect(1)
 			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
@@ -643,7 +680,7 @@ class CanvasFrame(Frame):
 			image = Image.open("histogramplot.png")
 			photo = ImageTk.PhotoImage(image)
 
-			label = Label(self.nodeDegreePopup, image=photo)
+			label = Label(self.nodeDegreePopup, image=photo, bg="white")
 			label.image = photo
 			label.pack()
 
@@ -686,9 +723,9 @@ class CanvasFrame(Frame):
 
 		self.logScroll = Scrollbar(self.logFrame)
 		self.logScroll.pack(side='right', fill='y')
-		self.logListBox = Listbox(self.logFrame, yscrollcommand=self.logScroll.set, bg='white', borderwidth=0)
-		self.logListBox.pack(expand=1, fill='both')
-		self.logScroll.config(command=self.logListBox.yview)
+		self.logText = Text(self.logFrame, wrap='word', state=DISABLED, yscrollcommand=self.logScroll.set, bg='white', borderwidth=0)
+		self.logText.pack(expand=1, fill='both')
+		self.logScroll.config(command=self.logText.yview)
 
 	
 	def logExit(self):

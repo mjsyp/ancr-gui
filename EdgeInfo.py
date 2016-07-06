@@ -1,6 +1,7 @@
 from Tkinter import *
 import tkSimpleDialog
 import networkx as nx
+from datetime import datetime
 
 class EdgeInfo(Frame):
 	def __init__(self, parent, leftFrame, index, nodes, G, manager):
@@ -163,6 +164,14 @@ class EdgeInfo(Frame):
 		for x in self.manager.systems:
 			if self.systemDict[x].get() != None:
 				self.G.edge[self.nodes[0]][self.nodes[1]][x] = int(self.systemDict[x].get())
+
+		# add to log file
+		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of edge between node " 
+		log = log + str(self.nodes[0]) + " and node " + str(self.nodes[1]) + " (ID = " + str(self.index) + ")"
+		self.leftFrame.logText.config(state=NORMAL)
+		self.leftFrame.logText.insert(END, "\n" + log)
+		self.leftFrame.logText.config(state=DISABLED)
+		self.leftFrame.logText.see("end")
 
 	def initUI(self):
 		# Name
