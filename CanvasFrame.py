@@ -179,7 +179,7 @@ class CanvasFrame(Frame):
 
 			# add to log file
 			log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Created new edge between node " + str(self.startNode[0])
-			log = log + " and node " + str(self.endNode[0]) + " (ID = " + str(item) + ")"
+			log += " and node " + str(self.endNode[0]) + " (ID = " + str(item) + ")"
 			self.appendLog(log)
 			
 
@@ -314,7 +314,7 @@ class CanvasFrame(Frame):
 		# add to log file
 		nodes = [str(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted edge between node " + nodes[0] + " and node " + nodes[1]
-		log = log + " (ID = " + str(item) + ")"
+		log += " (ID = " + str(item) + ")"
 		self.appendLog(log)
 
 	
@@ -695,19 +695,25 @@ class CanvasFrame(Frame):
 			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
 
 	def appendLog(self, text):
-		#TODO
-		self.logFrameOrWindow = 0
-		if self.logFrameOrWindow == 0:
-			self.logText.config(state=NORMAL)
-			self.logText.insert(END, "\n" + text)
-			self.logText.config(state=DISABLED)
-			self.logText.see("end")
+		if not hasattr(self, 'logFrame') or not self.logFrame.winfo_exists():
+			self.logContents += text
+
+		elif self.logFrameOrWindow == 0:
+			if self.logFrame.winfo_height() > 30:
+				self.logText.config(state=NORMAL)
+				self.logText.insert(END, "\n" + text)
+				self.logText.config(state=DISABLED)
+				self.logText.see("end")
+
 		else:
-			pass
+			self.logPopUpText.config(state=NORMAL)
+			self.logPopUpText.insert(END, "\n" + text)
+			self.logPopUpText.config(state=DISABLED)
+			self.logPopUpText.see("end")
 
 	# log window to display all actions done on gui	
 	def logWindow(self):
-		if (not hasattr(self, 'logFrame') or self.logFrame.winfo_exists() == 0) and (not hasattr(self, 'logPopUp') or self.logPopUp.winfo_exists() == 0) :
+		if (not hasattr(self, 'logFrame') or  not self.logFrame.winfo_exists()) and (not hasattr(self, 'logPopUp') or self.logPopUp.winfo_exists() == 0) :
 			self.logFrameOrWindow = 0
 			self.logFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
 			self.logFrame.pack_propagate(0)
@@ -727,13 +733,21 @@ class CanvasFrame(Frame):
 
 			self.logScroll = Scrollbar(self.logFrame)
 			self.logScroll.pack(side='right', fill='y')
-			self.logText = Text(self.logFrame, wrap='word', state=DISABLED, yscrollcommand=self.logScroll.set, bg='white', borderwidth=0)
+			self.logText = Text(self.logFrame, wrap='word', yscrollcommand=self.logScroll.set, bg='white', borderwidth=0)
 			self.logText.pack(expand=1, fill='both')
 			self.logScroll.config(command=self.logText.yview)
+
+			# if there is a log file already started, repopulate that text
+			if hasattr(self, 'logContents'):
+				self.logText.insert(END, self.logContents)
+				self.logText.see("end")
+
+			self.logText.config(state=DISABLED)
 
 	
 	def logExit(self):
 		if self.logFrameOrWindow == 0:
+			self.logContents = self.logText.get('1.0', END)
 			self.logFrame.destroy()
 		else:
 			self.logPopUp.destroy()
@@ -742,15 +756,23 @@ class CanvasFrame(Frame):
 		if self.logFrameOrWindow == 0:
 			self.logFrame.config(height='30')
 		else:
+			contents = self.logPopUpText.get('1.0', END)
 			self.logPopUp.destroy()
 			self.logWindow()
 
+			self.logText.config(state=NORMAL)
+			self.logText.insert(END, contents)
+			self.logText.config(state=DISABLED)
+			self.logText.see("end")
+
 	def logMax(self):
 		if self.logFrameOrWindow == 0 and self.logFrame.winfo_height() > 30:
+			contents = self.logText.get('1.0', END)
+			print contents
 			self.logFrame.destroy()
 			
 			self.logFrameOrWindow = 1
-			self.logPopUp = Toplevel(self.parent, bg='white')
+			self.logPopUp = Toplevel(self.parent, bg='white', bd=2, relief=RIDGE)
 			self.logPopUp.overrideredirect(1)
 			self.logPopUp.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
 
@@ -768,7 +790,10 @@ class CanvasFrame(Frame):
 
 			self.logPopUpScroll = Scrollbar(self.logPopUp)
 			self.logPopUpScroll.pack(side='right', fill='y')
-			self.logPopUpText = Text(self.logPopUp, wrap='word', state=DISABLED, yscrollcommand=self.logPopUpScroll.set, bg='white', borderwidth=0)
+			self.logPopUpText = Text(self.logPopUp, wrap='word', yscrollcommand=self.logPopUpScroll.set, bg='white', borderwidth=0)
+			self.logPopUpText.insert(END, contents)
+			self.logPopUpText.config(state=DISABLED)
+			self.logPopUpText.see("end")
 			self.logPopUpText.pack(expand=1, fill='both')
 			self.logPopUpScroll.config(command=self.logPopUpText.yview)
 
