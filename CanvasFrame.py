@@ -567,12 +567,12 @@ class CanvasFrame(Frame):
 	''' Functions for Node degree frame: '''
 	# shows each nodes degree
 	def nodeDegrees(self):
-		if not hasattr(self, 'nodeDegreeFrame') or self.nodeDegreeFrame.winfo_exists() == 0:
+		if (not hasattr(self, 'nodeDegreeFrame') or self.nodeDegreeFrame.winfo_exists() == 0) and (not hasattr(self, 'nodeDegreePopup') or self.nodeDegreePopup.winfo_exists() == 0):
 			# mini frame to display node degree analysis graph:
 			self.frameOrWindow = 0
 			self.nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
 			self.nodeDegreeFrame.pack_propagate(0)
-			self.nodeDegreeFrame.pack(side='left')
+			self.nodeDegreeFrame.pack(side='left', anchor='sw')
 
 			self.toolbarFrame = Frame(self.nodeDegreeFrame, height=25, width=200, bg='light gray')
 			self.toolbarFrame.pack_propagate(0)
@@ -614,6 +614,15 @@ class CanvasFrame(Frame):
 			label.image = photo
 			label.pack(expand=1, fill=BOTH)
 
+		elif self.frameOrWindow == 0:
+			self.nodeDegreeFrame.destroy()
+			self.nodeDegrees()
+		
+		elif self.frameOrWindow == 1:
+			self.nodeDegreePopup.destroy()
+			self.nodeDegrees()
+
+
 
 	def analysisExit(self):
 		if self.frameOrWindow == 0:
@@ -627,10 +636,10 @@ class CanvasFrame(Frame):
 			self.nodeDegrees()
 		else:
 			self.nodeDegreeFrame.config(height='30')
-			self.nodeDegreeFrame.place(x=self.nodeDegreeFrame.winfo_x(), y=160, anchor='sw')
+			#self.nodeDegreeFrame.place(x=self.nodeDegreeFrame.winfo_x(), y=160, anchor='sw')
 	
 	def analysisMax(self):
-		if self.frameOrWindow == 0:
+		if self.frameOrWindow == 0 and self.nodeDegreeFrame.winfo_height() > 30:
 			self.nodeDegreeFrame.destroy()		
 
 			# popout menu to display node degree analysis graph:
@@ -644,13 +653,11 @@ class CanvasFrame(Frame):
 			analysisToolbar = Frame(self.nodeDegreePopup, bg='light gray')
 			analysisToolbar.pack(side='top', fill='x')
 			analysisToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
-			analysisToolbar.bind('<ButtonRelease-1>', self.dragWindowEnd)
+			analysisToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.nodeDegreePopup))
 
 			exitButton = Button(analysisToolbar, text='ex', highlightbackground='light gray', command=self.analysisExit)
 			minButton = Button(analysisToolbar, text='min', highlightbackground='light gray', command=self.analysisMin)
-			maxButton = Button(analysisToolbar, text='max', highlightbackground='light gray')
 
-			maxButton.pack(side='right')
 			minButton.pack(side='right')
 			exitButton.pack(side='right')
 
@@ -684,57 +691,99 @@ class CanvasFrame(Frame):
 			label.image = photo
 			label.pack()
 
+		elif self.nodeDegreeFrame.winfo_height() == 30:
+			self.nodeDegreeFrame.config(height=200)
+
 
 	def dragWindowStart(self, event):
 		self.startDragX = event.x
 		self.startDragY = event.y
 	
-	def dragWindowEnd(self, event):
-		s = self.nodeDegreePopup.geometry()
+	def dragWindowEnd(self, event, window):
+		w = window
+		s = w.geometry()
 		geometry = s.split('+')
 		x = int(geometry[1])+event.x-self.startDragX
 		y = int(geometry[2])+event.y-self.startDragY
 		if x>0 and y>0:
-			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, x, y)))
+			w.geometry(("%dx%d%+d%+d" % (600, 550, x, y)))
 		elif x>0 and y<0:
-			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, x, 0)))
+			w.geometry(("%dx%d%+d%+d" % (600, 550, x, 0)))
 		elif x<0 and y>0:
-			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 0, y)))
+			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, y)))
 		else:
-			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
+			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
 
 	# log window to display all actions done on gui	
 	def logWindow(self):
-		self.logFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
-		self.logFrame.pack_propagate(0)
-		self.logFrame.pack(side='left')
+		if (not hasattr(self, 'logFrame') or self.logFrame.winfo_exists() == 0) and (not hasattr(self, 'logPopUp') or self.logPopUp.winfo_exists() == 0) :
+			self.logFrameOrWindow = 0
+			self.logFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
+			self.logFrame.pack_propagate(0)
+			self.logFrame.pack(side='left', anchor='sw')
 
-		self.logToolbar = Frame(self.logFrame, height=25, width=200, bg='light gray')
-		self.logToolbar.pack_propagate(0)
-		self.logToolbar.pack(side='top')
+			self.logToolbar = Frame(self.logFrame, height=25, width=200, bg='light gray')
+			self.logToolbar.pack_propagate(0)
+			self.logToolbar.pack(side='top')
 
-		exitButton = Button(self.logToolbar, text='ex', highlightbackground='light gray', command=self.logExit)
-		minButton = Button(self.logToolbar, text='min', highlightbackground='light gray', command=self.logMin)
-		maxButton = Button(self.logToolbar, text='max', highlightbackground='light gray', command=self.logMax)
+			exitButton = Button(self.logToolbar, text='ex', highlightbackground='light gray', command=self.logExit)
+			minButton = Button(self.logToolbar, text='min', highlightbackground='light gray', command=self.logMin)
+			maxButton = Button(self.logToolbar, text='max', highlightbackground='light gray', command=self.logMax)
 
-		maxButton.pack(side='right')
-		minButton.pack(side='right')
-		exitButton.pack(side='right')
+			maxButton.pack(side='right')
+			minButton.pack(side='right')
+			exitButton.pack(side='right')
 
-		self.logScroll = Scrollbar(self.logFrame)
-		self.logScroll.pack(side='right', fill='y')
-		self.logText = Text(self.logFrame, wrap='word', state=DISABLED, yscrollcommand=self.logScroll.set, bg='white', borderwidth=0)
-		self.logText.pack(expand=1, fill='both')
-		self.logScroll.config(command=self.logText.yview)
+			self.logScroll = Scrollbar(self.logFrame)
+			self.logScroll.pack(side='right', fill='y')
+			self.logText = Text(self.logFrame, wrap='word', state=DISABLED, yscrollcommand=self.logScroll.set, bg='white', borderwidth=0)
+			self.logText.pack(expand=1, fill='both')
+			self.logScroll.config(command=self.logText.yview)
 
 	
 	def logExit(self):
-		self.logFrame.destroy()
+		if self.logFrameOrWindow == 0:
+			self.logFrame.destroy()
+		else:
+			self.logPopUp.destroy()
 
 	def logMin(self):
-		pass
+		if self.logFrameOrWindow == 0:
+			self.logFrame.config(height='30')
+			#self.logFrame.place(x=self.logFrame.winfo_x(), y=160, anchor='sw')
+		else:
+			self.logPopUp.destroy()
+			self.logWindow()
+
 	def logMax(self):
-		pass
+		if self.logFrameOrWindow == 0 and self.logFrame.winfo_height() > 30:
+			self.logFrame.destroy()
+			
+			self.logFrameOrWindow = 1
+			self.logPopUp = Toplevel(self.parent, bg='white')
+			self.logPopUp.overrideredirect(1)
+			self.logPopUp.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
+
+			self.logPopUpToolbar = Frame(self.logPopUp, height=25, width=600, bg='light gray')
+			self.logPopUpToolbar.pack_propagate(0)
+			self.logPopUpToolbar.pack(side='top')
+			self.logPopUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
+			self.logPopUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.logPopUp))
+
+			exitButton = Button(self.logPopUpToolbar, text='ex', highlightbackground='light gray', command=self.logExit)
+			minButton = Button(self.logPopUpToolbar, text='min', highlightbackground='light gray', command=self.logMin)
+
+			minButton.pack(side='right')
+			exitButton.pack(side='right')
+
+			self.logPopUpScroll = Scrollbar(self.logPopUp)
+			self.logPopUpScroll.pack(side='right', fill='y')
+			self.logPopUpText = Text(self.logPopUp, wrap='word', state=DISABLED, yscrollcommand=self.logPopUpScroll.set, bg='white', borderwidth=0)
+			self.logPopUpText.pack(expand=1, fill='both')
+			self.logPopUpScroll.config(command=self.logPopUpText.yview)
+
+		elif self.logFrame.winfo_height() == 30:
+			self.logFrame.config(height=200)
 
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
