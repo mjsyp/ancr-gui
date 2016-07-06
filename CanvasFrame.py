@@ -686,10 +686,14 @@ class CanvasFrame(Frame):
 
 	def appendLog(self, text):
 		#TODO
-		self.logText.config(state=NORMAL)
-		self.logText.insert(END, "\n" + text)
-		self.logText.config(state=DISABLED)
-		self.logText.see("end")
+		self.logFrameOrWindow = 0
+		if self.logFrameOrWindow == 0:
+			self.logText.config(state=NORMAL)
+			self.logText.insert(END, "\n" + text)
+			self.logText.config(state=DISABLED)
+			self.logText.see("end")
+		else:
+			pass
 
 	# log window to display all actions done on gui	
 	def logWindow(self):
@@ -721,6 +725,7 @@ class CanvasFrame(Frame):
 
 	def logMin(self):
 		pass
+
 	def logMax(self):
 		pass
 
