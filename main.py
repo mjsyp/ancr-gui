@@ -25,6 +25,8 @@ class Window(Frame):
 
     # can save network x graph (node/edges and attributes) as any type of text file
     def save_as(self):
+        for node in self.G.nodes():
+            self.G.node[node]['systems'] = self.geoCanvas.manager.systems
         f = tkFileDialog.asksaveasfilename(defaultextension=".txt")
         if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
             return
@@ -50,15 +52,13 @@ class Window(Frame):
                 edgeItem=self.geoCanvas.systemsCanvas.create_line(self.G.edge[startNode][endNode]['x1_coord'], self.G.edge[startNode][endNode]['y1_coord'], self.G.edge[startNode][endNode]['x2_coord'], self.G.edge[startNode][endNode]['y2_coord'], tag='edge')
                 self.geoCanvas.systemsCanvas.addtag_withtag(str(startNode), edgeItem)
                 self.geoCanvas.systemsCanvas.addtag_withtag(str(endNode), edgeItem)
-            for key in self.G.node[1]:
-                if key == 'Name' or key == 'y_coord' or key == 'x_coord' or key == 'x' or key == 'y' or key == 'z' or key == 'Type' or key == 'Notes':
-                    pass
-                else:
-                    self.geoCanvas.optionList.insert(len(self.geoCanvas.optionList)-2, key)
-                    self.geoCanvas.dropdown.destroy()
-                    self.geoCanvas.dropdown = OptionMenu(self.geoCanvas.toolbar, self.geoCanvas.v, *self.geoCanvas.optionList, command=self.geoCanvas.newOptionMenu)
-                    self.geoCanvas.dropdown.configure(bg="light blue")
-                    self.geoCanvas.dropdown.pack(side='left')
+            self.geoCanvas.manager.systems = self.G.node[1]['systems']
+            for key in self.geoCanvas.manager.systems:
+                self.geoCanvas.optionList.insert(len(self.geoCanvas.optionList)-2, key)
+                self.geoCanvas.dropdown.destroy()
+                self.geoCanvas.dropdown = OptionMenu(self.geoCanvas.toolbar, self.geoCanvas.v, *self.geoCanvas.optionList, command=self.geoCanvas.newOptionMenu)
+                self.geoCanvas.dropdown.configure(bg="light blue")
+                self.geoCanvas.dropdown.pack(side='left')
 
                 
     # creates the gui menubar
