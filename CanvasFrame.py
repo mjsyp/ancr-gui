@@ -153,7 +153,7 @@ class CanvasFrame(Frame):
 			self.endNodeX = (self.endNodeCoords[0] + self.endNodeCoords[2]) / 2
 			self.endNodeY = (self.endNodeCoords[1] + self.endNodeCoords[3]) / 2 	
 			item = self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge', state='normal')
-
+			
 			if self.v.get() == 'All':
 				self.systemsCanvas.itemconfig(item, arrow='none')
 			else:
@@ -168,6 +168,7 @@ class CanvasFrame(Frame):
 			self.G.edge[self.startNode[0]][self.endNode[0]]['y1_coord'] = self.startNodeY
 			self.G.edge[self.startNode[0]][self.endNode[0]]['x2_coord'] = self.endNodeX
 			self.G.edge[self.startNode[0]][self.endNode[0]]['y2_coord'] = self.endNodeY
+			self.G.edge[self.startNode[0]][self.endNode[0]]['edgeID'] = item
 
 			self.undoStack.append(item)
 
@@ -319,43 +320,48 @@ class CanvasFrame(Frame):
 
 	
 	def dragStart(self, event):
-		r = 22
+		r = 16
 		self.nodeDragItem = None
 		nodeSelected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
 		if len(nodeSelected) > 0:
 			self.nodeDragItem = nodeSelected[0]
-			self.dragStartX = event.x
-			self.dragStartY = event.y
-		
-		self.edgeItemsDrag = []
-		edgeSelected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
-		if (len(edgeSelected) > 0):
-			for edge in edgeSelected:
-				tag = self.checkTag(edge)
-				if tag == 'edge':
-					self.edgeItemsDrag.append(edge)
 
 	def dragEnd(self, event):
-	# move node:
+		r = 8
+		
+		# move node:
 		if (event.x < 0) or (event.x > 700) or (event.y < 0) or (event.y > 500):
 			return
 
 		if self.nodeDragItem != None:
-			self.systemsCanvas.move(self.nodeDragItem, event.x-self.dragStartX, event.y-self.dragStartY)
+			self.systemsCanvas.coords(self.nodeDragItem, event.x-r, event.y-r, event.x+r, event.y+r)
 
-		# move edges:
-			for edge in self.edgeItemsDrag:
-				nodes = [int(n) for n in self.systemsCanvas.gettags(edge) if n.isdigit()]
-				try:				self.G[nodes[0]][nodes[1]]
-				except KeyError:	nodes[0], nodes[1] = nodes[1], nodes[0]
-				
-				edgeCoords = self.systemsCanvas.coords(edge)
-				if self.nodeDragItem == nodes[0]:
-					self.systemsCanvas.coords(edge, event.x, event.y, edgeCoords[2], edgeCoords[3])
-				else:
-					self.systemsCanvas.coords(edge, edgeCoords[0], edgeCoords[1], event.x, event.y)
-		self.G.node[self.nodeDragItem]['x_coord'] = event.x
-		self.G.node[self.nodeDragItem]['y_coord'] = event.y
+			# move edges:
+			for startNode, endNode in self.G.out_edges([self.nodeDragItem]):
+				edge = self.G.edge[startNode][endNode]['edgeID']
+				edgeCoordsInt = self.systemsCanvas.coords(edge)
+				self.systemsCanvas.coords(edge, event.x, event.y, edgeCoordsInt[2], edgeCoordsInt[3])
+				edgeCoordsFin = self.systemsCanvas.coords(edge)
+				self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
+				self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
+				self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
+				self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
+			
+			for startNode, endNode in self.G.in_edges([self.nodeDragItem]): 
+				edge = self.G.edge[startNode][endNode]['edgeID']
+				edgeCoordsInt = self.systemsCanvas.coords(edge)				
+				self.systemsCanvas.coords(edge, edgeCoordsInt[0], edgeCoordsInt[1], event.x, event.y)
+				edgeCoordsFin = self.systemsCanvas.coords(edge)
+				self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
+				self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
+				self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
+				self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
+
+			
+			self.G.node[self.nodeDragItem]['x_coord'] = event.x
+			self.G.node[self.nodeDragItem]['y_coord'] = event.y
+
+		
 		if self.labels == 1:
 			self.hideLabels()
 			self.showLabels()

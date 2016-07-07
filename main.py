@@ -20,23 +20,27 @@ class Window(Frame):
     def exit(self):
         self.quit()
 
+    # will update saved file if 
     def save(self, event=None):
-        pass
+        if hasattr(self, 'filename'):
+            pickle.dump(self.G, open(str(self.filename), 'w'))
+        else:
+            self.save_as()
 
     # can save network x graph (node/edges and attributes) as any type of text file
     def save_as(self):
         for node in self.G.nodes():
             self.G.node[node]['systems'] = self.geoCanvas.manager.systems
-        f = tkFileDialog.asksaveasfilename(defaultextension=".txt")
-        if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
+        self.filename = tkFileDialog.asksaveasfilename(defaultextension=".txt")
+        if self.filename == '': # asksaveasfile return `None` if dialog closed with "cancel".
             return
         else:
-			pickle.dump(self.G, open(str(f), 'w'))
+			pickle.dump(self.G, open(str(self.filename), 'w'))
 
     # can open any previously saved network x graph and plot nodes and edges onto the canvas, and resume all gui functionality 
     def open(self):
         f = tkFileDialog.askopenfilename()
-        if f is None:
+        if f == '':
             return
         else:
             self.G = pickle.load(open(str(f)))
@@ -56,6 +60,7 @@ class Window(Frame):
                 edgeItem=self.geoCanvas.systemsCanvas.create_line(self.G.edge[startNode][endNode]['x1_coord'], self.G.edge[startNode][endNode]['y1_coord'], self.G.edge[startNode][endNode]['x2_coord'], self.G.edge[startNode][endNode]['y2_coord'], tag='edge')
                 self.geoCanvas.systemsCanvas.addtag_withtag(str(startNode), edgeItem)
                 self.geoCanvas.systemsCanvas.addtag_withtag(str(endNode), edgeItem)
+                self.G.edge[startNode][endNode]['edgeID'] = edgeItem
             
             # reload demands
             self.geoCanvas.manager.systems = self.G.node[1]['systems']
