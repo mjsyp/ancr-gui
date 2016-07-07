@@ -695,15 +695,14 @@ class CanvasFrame(Frame):
 			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
 
 	def appendLog(self, text):
-		if not hasattr(self, 'logFrame') or not self.logFrame.winfo_exists():
+		if (not hasattr(self, 'logFrame') or  not self.logFrame.winfo_exists()) and (not hasattr(self, 'logPopUp') or self.logPopUp.winfo_exists() == 0) :
 			self.logContents += text
 
 		elif self.logFrameOrWindow == 0:
-			if self.logFrame.winfo_height() > 30:
-				self.logText.config(state=NORMAL)
-				self.logText.insert(END, "\n" + text)
-				self.logText.config(state=DISABLED)
-				self.logText.see("end")
+			self.logText.config(state=NORMAL)
+			self.logText.insert(END, "\n" + text)
+			self.logText.config(state=DISABLED)
+			self.logText.see("end")
 
 		else:
 			self.logPopUpText.config(state=NORMAL)
@@ -768,7 +767,6 @@ class CanvasFrame(Frame):
 	def logMax(self):
 		if self.logFrameOrWindow == 0 and self.logFrame.winfo_height() > 30:
 			contents = self.logText.get('1.0', END)
-			print contents
 			self.logFrame.destroy()
 			
 			self.logFrameOrWindow = 1
