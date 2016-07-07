@@ -25,6 +25,8 @@ class Window(Frame):
 
     # can save network x graph (node/edges and attributes) as any type of text file
     def save_as(self):
+        for node in self.G.nodes():
+            self.G.node[node]['systems'] = self.geoCanvas.manager.systems
         f = tkFileDialog.asksaveasfilename(defaultextension=".txt")
         if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
             return
@@ -33,41 +35,36 @@ class Window(Frame):
 
     # can open any previously saved network x graph and plot nodes and edges onto the canvas, and resume all gui functionality 
     def open(self):
-		f = tkFileDialog.askopenfilename()
-		if f is None:
-			return
-		else:
-			self.G = pickle.load(open(str(f)))
-			self.G = nx.convert_node_labels_to_integers(self.G, first_label=1)
-			for widget in self.leftFrame.winfo_children():
-				widget.destroy()
-			self.geoCanvas = CanvasFrame(self.leftFrame, self.rightCanvasFrame, self.G, self.D)
-			self.createTabs()
+        f = tkFileDialog.askopenfilename()
+        if f is None:
+            return
+        else:
+            self.G = pickle.load(open(str(f)))
+            self.G = nx.convert_node_labels_to_integers(self.G, first_label=1)
+            for widget in self.leftFrame.winfo_children():
+                widget.destroy()
+            self.geoCanvas = CanvasFrame(self.leftFrame, self.rightCanvasFrame, self.G, self.D)
+            self.createTabs()
 
-			# redraw all nodes
-			for nodeNum in self.G.nodes():
-				r = 8
-				self.geoCanvas.systemsCanvas.create_oval(self.G.node[nodeNum]['x_coord']-r, self.G.node[nodeNum]['y_coord']-r, 
-					self.G.node[nodeNum]['x_coord']+r, self.G.node[nodeNum]['y_coord']+r, fill='red', tag='node') 
-			# redraw all edges
-			for startNode, endNode in self.G.edges():
-				edgeItem=self.geoCanvas.systemsCanvas.create_line(self.G.edge[startNode][endNode]['x1_coord'], self.G.edge[startNode][endNode]['y1_coord'], self.G.edge[startNode][endNode]['x2_coord'], self.G.edge[startNode][endNode]['y2_coord'], tag='edge')
-				self.geoCanvas.systemsCanvas.addtag_withtag(str(startNode), edgeItem)
-				self.geoCanvas.systemsCanvas.addtag_withtag(str(endNode), edgeItem)
-			# re-add demands
-			for key in self.G.node[1]:
-				if key == 'Name' or key == 'y_coord' or key == 'x_coord' or key == 'x' or key == 'y' or key == 'z' or key == 'Type' or key == 'Notes':
-					pass
-				else:
-					# update manager class
-					self.geoCanvas.manager.addSystem(key)
-
-					# update dropdown menu
-					self.geoCanvas.optionList.insert(len(self.geoCanvas.optionList)-2, key)
-					self.geoCanvas.dropdown.destroy()
-					self.geoCanvas.dropdown = OptionMenu(self.geoCanvas.toolbar, self.geoCanvas.v, *self.geoCanvas.optionList, command=self.geoCanvas.newOptionMenu)
-					self.geoCanvas.dropdown.configure(bg="light blue")
-					self.geoCanvas.dropdown.pack(side='left')
+            # redraw nodes
+            for nodeNum in self.G.nodes():
+                r = 8
+                self.geoCanvas.systemsCanvas.create_oval(self.G.node[nodeNum]['x_coord']-r, self.G.node[nodeNum]['y_coord']-r, self.G.node[nodeNum]['x_coord']+r, self.G.node[nodeNum]['y_coord']+r, fill='red', tag='node') 
+            
+            # redraw edges
+            for startNode, endNode in self.G.edges():
+                edgeItem=self.geoCanvas.systemsCanvas.create_line(self.G.edge[startNode][endNode]['x1_coord'], self.G.edge[startNode][endNode]['y1_coord'], self.G.edge[startNode][endNode]['x2_coord'], self.G.edge[startNode][endNode]['y2_coord'], tag='edge')
+                self.geoCanvas.systemsCanvas.addtag_withtag(str(startNode), edgeItem)
+                self.geoCanvas.systemsCanvas.addtag_withtag(str(endNode), edgeItem)
+            
+            # reload demands
+            self.geoCanvas.manager.systems = self.G.node[1]['systems']
+            for key in self.geoCanvas.manager.systems:
+                self.geoCanvas.optionList.insert(len(self.geoCanvas.optionList)-2, key)
+                self.geoCanvas.dropdown.destroy()
+                self.geoCanvas.dropdown = OptionMenu(self.geoCanvas.toolbar, self.geoCanvas.v, *self.geoCanvas.optionList, command=self.geoCanvas.newOptionMenu)
+                self.geoCanvas.dropdown.configure(bg="light blue")
+                self.geoCanvas.dropdown.pack(side='left')
 
                 
     # creates the gui menubar
