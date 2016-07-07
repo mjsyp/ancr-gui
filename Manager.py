@@ -10,19 +10,7 @@ class Manager:
 	def addSystem(self, system):
 		self.systems.append(system)
 
-	def searchSystems(self, system):
-		for x in self.systems:
-			if x == system:
-				return true
-		return false
-
 	def addType(self, typeIn):
 		self.types.append(typeIn)
-
-	def searchTypes(self, typeIn):
-		for x in self.types:
-			if x == typeIn:
-				return true
-		return false
 
 

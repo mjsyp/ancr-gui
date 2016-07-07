@@ -20,9 +20,7 @@ class CanvasFrame(Frame):
 
 		self.initUI()
 
-	#toolbar button click events:
-	#ALL: first unbinds the old mouse click events 
-
+	"""---------------------------------------------------BUTTON BINDINGS----------------------------------------------------------"""
 	def buttonRelief(self, widget):
 		buttons = [self.createNodeButton, self.createEdgeButton, self.selectButton, self.deleteButton, self.dragNodeButton]
 
@@ -96,11 +94,10 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.dragStart)
 		self.systemsCanvas.bind('<ButtonRelease-1>', self.dragEnd)
-
+	"""--------------------------------------------------END BUTTON BINDINGS----------------------------------------------------"""
 
 	
-	"""---------------creation, selection, and deletion of nodes/edges events:---------------"""
-
+	"""----------------------------------------------------CREATE NODE/EDGE------------------------------------------------------------"""
 	#creates a red circular node of radius r at the location of the mouse click and initilizes node propoerties
 	def createNode(self, event):
 		r = 8
@@ -146,7 +143,6 @@ class CanvasFrame(Frame):
 			else:
 				self.systemsCanvas.itemconfig(item, arrow='last')
 
-
 			self.G.add_edge(self.startNode[0], self.endNode[0], x=0, y=0, z=0, Name=None)
 			self.systemsCanvas.addtag_withtag(str(self.startNode[0]), item)
 			self.systemsCanvas.addtag_withtag(str(self.endNode[0]), item)
@@ -169,8 +165,10 @@ class CanvasFrame(Frame):
 			log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Created new edge between node " + str(self.startNode[0])
 			log += " and node " + str(self.endNode[0]) + " (ID = " + str(item) + ")"
 			self.appendLog(log)
-			
+	"""---------------------------------------------------END CREATE NODE/EDGE--------------------------------------------------------"""
 
+
+	"""----------------------------------------------------------SELECT-------------------------------------------------------------------"""
 	def select(self, event):
 		# clear right pane of any previous info
 		for widget in self.rightFrame.winfo_children():
@@ -213,8 +211,10 @@ class CanvasFrame(Frame):
 		except KeyError:	nodes[0], nodes[1] = nodes[1], nodes[0]
 		
 		self.systemInfo = EdgeInfo(self.rightFrame, self, item, nodes, self.G, self.manager)
+	"""-------------------------------------------------------END SELECT-----------------------------------------------------------"""
 
-	"""----------------------------------------------------------DELETE-------------------------------------------------------------------"""
+
+	"""---------------------------------------------------------DELETE-------------------------------------------------------------------"""
 	'''deletes node with ID=item from G_delete; adds node along with attributes to G_add'''
 	def deleteNodeNX(self, item, G_delete, G_add):
 		G_add.add_node(item)
