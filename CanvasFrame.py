@@ -23,6 +23,13 @@ class CanvasFrame(Frame):
 	#toolbar button click events:
 	#ALL: first unbinds the old mouse click events 
 
+	def buttonRelief(self, widget):
+		buttons = [self.createNodeButton, self.createEdgeButton, self.selectButton, self.deleteButton, self.dragNodeButton]
+
+		for button in buttons:
+			button.config(relief=RAISED)
+		widget.config(relief=SUNKEN)
+
 	#binds mouse clicks to the createNode function when the 'create node' button is pressed 
 	def createNodeButtonClick(self):
 		# undo activefill if 'select' button was last pressed
@@ -31,11 +38,7 @@ class CanvasFrame(Frame):
 				self.systemsCanvas.itemconfig(node, activefill='red')
 
 		# config all buttons as sunken or raised according to what was pressed
-		self.createNodeButton.config(relief=SUNKEN)
-		self.createEdgeButton.config(relief=RAISED)
-		self.selectButton.config(relief=RAISED)
-		self.deleteButton.config(relief=RAISED)
-		self.dragNodeButton.config(relief=RAISED)
+		self.buttonRelief(self.createNodeButton)
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
@@ -52,11 +55,7 @@ class CanvasFrame(Frame):
 				self.systemsCanvas.itemconfig(node, activefill='red')
 
 		# config all buttons as sunken or raised according to what was pressed
-		self.createNodeButton.config(relief=RAISED)
-		self.createEdgeButton.config(relief=SUNKEN)
-		self.selectButton.config(relief=RAISED)
-		self.deleteButton.config(relief=RAISED)
-		self.dragNodeButton.config(relief=RAISED)
+		self.buttonRelief(self.createEdgeButton)
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
@@ -68,11 +67,7 @@ class CanvasFrame(Frame):
 	# binds mouse clicks to the selectEdge function when the 'select edge' button is pressed 
 	def selectButtonClick(self):
 		# config all buttons as sunken or raised according to what was pressed
-		self.createNodeButton.config(relief=RAISED)
-		self.createEdgeButton.config(relief=RAISED)
-		self.selectButton.config(relief=SUNKEN)
-		self.deleteButton.config(relief=RAISED)
-		self.dragNodeButton.config(relief=RAISED)
+		self.buttonRelief(self.selectButton)
 
 		# make nodes green when your cursor scrolls over them
 		for node in self.systemsCanvas.find_withtag('node'):
@@ -85,11 +80,7 @@ class CanvasFrame(Frame):
 	# binds mouse clicks to the deleteNode function when the 'delete node' button is pressed 
 	def deleteButtonClick(self):
 		# config all buttons as sunken or raised according to what was pressed
-		self.createNodeButton.config(relief=RAISED)
-		self.createEdgeButton.config(relief=RAISED)
-		self.selectButton.config(relief=RAISED)
-		self.deleteButton.config(relief=SUNKEN)
-		self.dragNodeButton.config(relief=RAISED)
+		self.buttonRelief(self.deleteButton)
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
@@ -99,11 +90,7 @@ class CanvasFrame(Frame):
 
 	def dragNodeButtonClick(self):
 		# config all buttons as sunken or raised according to what was pressed
-		self.createNodeButton.config(relief=RAISED)
-		self.createEdgeButton.config(relief=RAISED)
-		self.selectButton.config(relief=RAISED)
-		self.deleteButton.config(relief=RAISED)
-		self.dragNodeButton.config(relief=SUNKEN)
+		self.buttonRelief(self.dragNodeButton)
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
@@ -148,10 +135,10 @@ class CanvasFrame(Frame):
 		r = 24
 		self.endNode = ()
 		self.endNode = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
-		if (len(self.startNode) > 0) and (len(self.endNode) > 0):
+		if (len(self.startNode) > 0) and (len(self.endNode) > 0) and (self.startNode[0] != self.endNode[0]):
 			self.endNodeCoords = self.systemsCanvas.coords(self.endNode[0])
 			self.endNodeX = (self.endNodeCoords[0] + self.endNodeCoords[2]) / 2
-			self.endNodeY = (self.endNodeCoords[1] + self.endNodeCoords[3]) / 2 	
+			self.endNodeY = (self.endNodeCoords[1] + self.endNodeCoords[3]) / 2
 			item = self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge', state='normal')
 
 			if self.v.get() == 'All':
@@ -226,13 +213,12 @@ class CanvasFrame(Frame):
 		
 		self.systemInfo = EdgeInfo(self.rightFrame, self, item, nodes, self.G, self.manager)
 
-
+	"""----------------------------------------------------------DELETE-------------------------------------------------------------------"""
 	'''deletes node with ID=item from G_delete; adds node along with attributes to G_add'''
 	def deleteNodeNX(self, item, G_delete, G_add):
 		G_add.add_node(item)
 		for key in G_delete.node[item]:
 			G_add.node[item][key] = G_delete.node[item][key]
-		#G_delete.remove_node(item)
 
 	'''deletes edge with ID=item from G_delete; adds edge to G_add'''
 	def deleteEdgeNX(self, item, G_delete, G_add):
@@ -248,7 +234,6 @@ class CanvasFrame(Frame):
 
 		G_delete.remove_edge(nodes[0], nodes[1])
 
-
 	'''Runs on click of "delete" button; decides whether to call deleteNode or deleteEdge'''
 	def delete(self, event):
 		r = 22
@@ -263,7 +248,6 @@ class CanvasFrame(Frame):
 
 			if len(selected) > 0 and self.systemsCanvas.type(selected[0]) == 'line':
 				self.deleteEdge(selected[0])
-
 
 	'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
 	def deleteNode(self, event, item):
@@ -300,7 +284,6 @@ class CanvasFrame(Frame):
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted node " + str(item) + " and associated edges"
 		self.appendLog(log)
 
-
 	# deletes selected edge with radius r in both Tkinter and networkX
 	def deleteEdge(self, item):
 		# remove edge from networkX
@@ -316,6 +299,7 @@ class CanvasFrame(Frame):
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted edge between node " + nodes[0] + " and node " + nodes[1]
 		log += " (ID = " + str(item) + ")"
 		self.appendLog(log)
+	"""--------------------------------------------------------END DELETE-----------------------------------------------------------------"""
 
 	
 	def dragStart(self, event):
@@ -388,7 +372,7 @@ class CanvasFrame(Frame):
 				return 'edge'
 		return 'none'
 
-
+	"""----------------------------------------------------------UNDO/REDO-------------------------------------------------------------------"""
 	def undoRedoAction(self, item):
 		tag = self.checkTag(item)
 
@@ -409,8 +393,11 @@ class CanvasFrame(Frame):
 				self.undoLog = self.undoLog + "deletion of edge " + str(item) + ")" # log message
 				
 		elif tag == 'node': # node was previously created
-			self.deleteNodeNX(item, self.G, self.D) # remove node from networkX
+			# remove node from networkX
+			self.deleteNodeNX(item, self.G, self.D)
+			self.G.remove_node(item)
 
+			# remove node from Canvas
 			self.systemsCanvas.addtag_withtag('deleted', item)
 			self.systemsCanvas.itemconfig(item, state='hidden')
 			self.systemsCanvas.dtag(item, 'node')
@@ -434,7 +421,6 @@ class CanvasFrame(Frame):
 			self.hideLabels()
 			self.showLabels()
 
-
 	# undo last action performed on canvas (creation or deletion) using a stack
 	def undo(self, event=None):
 		if len(self.undoStack) > 0:
@@ -453,14 +439,23 @@ class CanvasFrame(Frame):
 			self.undoStack.append(item)
 			self.undoRedoAction(item)
 			self.appendLog(log) # append log message
+	"""------------------------------------------------------END UNDO/REDO---------------------------------------------------------------"""
 
+
+	# changes radius of item back to 8
+	def normalNodeSize(self, item):
+		coords = self.systemsCanvas.coords(item)
+		midpointX = (coords[0] + coords[2]) / 2
+		midpointY = (coords[1] + coords[3]) / 2
+		self.systemsCanvas.coords(item, midpointX-8, midpointY-8, midpointX+8, midpointY+8)
 
 	# creates new system in option menu and only displays nodes with specific system demands
 	def newOptionMenu(self, event):
 		if self.v.get() == "Create New":
 			typeLabel = tkSimpleDialog.askstring(title="New System", prompt="Enter a new system")
+			# if user didn't hit 'Cancel'
 			if typeLabel != None:
-				self.prevSystem = typeLabel
+				# Update dropdown menu
 				self.optionList.insert(len(self.optionList)-2, typeLabel)
 				self.v.set(self.optionList[len(self.optionList)-3])
 				self.dropdown.destroy()
@@ -475,7 +470,6 @@ class CanvasFrame(Frame):
 				if len(self.rightFrame.winfo_children()) > 0:
 					self.systemInfo.createNewDemand(typeLabel)
 					self.systemInfo.systemDict[typeLabel] = None
-					self.systemInfo.saveAttributes()
 
 				# set current selection to prev selection (before 'Create New' was pressed) and update prevOption
 				self.v.set(self.prevOption)
@@ -486,67 +480,68 @@ class CanvasFrame(Frame):
 				self.appendLog(log)
 
 		elif self.v.get() == 'All':
+			# make all nodes visible and change size back to normal
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
 				self.systemsCanvas.itemconfig(nodeitem, state='normal')
+				self.normalNodeSize(nodeitem)
 
-				# change sizes of nodes back to normal
-				r = 8
-				coords = self.systemsCanvas.coords(nodeitem)
-				midpointX = (coords[0] + coords[2]) / 2
-				midpointY = (coords[1] + coords[3]) / 2
-				self.systemsCanvas.coords(nodeitem, midpointX-8, midpointY-8, midpointX+8, midpointY+8)
-
+			# make all edges visible and remove arrows
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
 				self.systemsCanvas.itemconfig(edgeitem, state='normal')
 				self.systemsCanvas.itemconfig(edgeitem, arrow='none')
+
 			self.prevOption = "All"
 
+		# switched to a specific system
 		else:
-			if self.prevOption != self.v.get():
-				self.minDemand = 1000000000
-				self.maxDemand = -1000000000
-				# loop through nodes to show/hide based on the current system
-				# also figure out what the min and max value for the current demand is
-				for nodeitem in self.systemsCanvas.find_withtag('node'):
-					if self.v.get() in self.G.node[nodeitem]:
-						self.systemsCanvas.itemconfig(nodeitem, state='normal')
+			self.minDemand = 1000000000
+			self.maxDemand = -1000000000
+			visibleNodes = []
 
-						# find minimum and maximum values for this demand
-						if self.G.node[nodeitem][self.v.get()] < self.minDemand:
-							self.minDemand = self.G.node[nodeitem][self.v.get()]
-						if self.G.node[nodeitem][self.v.get()] > self.maxDemand:
-							self.maxDemand = self.G.node[nodeitem][self.v.get()]
-					else:
-						self.systemsCanvas.itemconfig(nodeitem, state='hidden')
-						
-				if self.minDemand != self.maxDemand:
-					for nodeitem in self.systemsCanvas.find_withtag('node'):
-						if self.v.get() in self.G.node[nodeitem]:
-							# change size of nodes to reflect magnitude of value for this demand
-							coords = self.systemsCanvas.coords(nodeitem)
-							x = self.G.node[nodeitem][self.v.get()]
-							offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
-							self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
+			# loop through nodes to show/hide based on the current system
+			# also change sizes of nodes back to normal so they don't keep growing
+			# also figure out what the min and max value for the current demand is
+			for nodeitem in self.systemsCanvas.find_withtag('node'):
+				self.normalNodeSize(nodeitem) # change size of each node back to normal
 
-				for edgeitem in self.systemsCanvas.find_withtag('edge'):
-					nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
-					if (self.systemsCanvas.itemcget(nodes[0], 'state') == 'normal') and (self.systemsCanvas.itemcget(nodes[1], 'state') == 'normal'):
-						self.systemsCanvas.itemconfig(edgeitem, state='normal')
-						self.systemsCanvas.itemconfig(edgeitem, arrow='last')
-					else:
-						self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+				# if nodeitem has a value for this demand (self.v.get())
+				if self.v.get() in self.G.node[nodeitem]:
+					visibleNodes.append(nodeitem) # add to a list of visible nodes
+					self.systemsCanvas.itemconfig(nodeitem, state='normal') # change state back to normal
 
-				self.prevOption = self.v.get()
+					# find minimum and maximum values for this demand
+					if self.G.node[nodeitem][self.v.get()] < self.minDemand:
+						self.minDemand = self.G.node[nodeitem][self.v.get()]
+					if self.G.node[nodeitem][self.v.get()] > self.maxDemand:
+						self.maxDemand = self.G.node[nodeitem][self.v.get()]
+				else:
+					self.systemsCanvas.itemconfig(nodeitem, state='hidden') # make node hidden
+			
+			if self.minDemand != self.maxDemand:
+				for nodeitem in visibleNodes:
+					# change size of nodes to reflect magnitude of value for this demand
+					coords = self.systemsCanvas.coords(nodeitem)
+					x = self.G.node[nodeitem][self.v.get()]
+					offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
+					self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
+
+			# loop through edges to show/hide based on whether the nodes are showing or not
+			for edgeitem in self.systemsCanvas.find_withtag('edge'):
+				nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
+				if (self.systemsCanvas.itemcget(nodes[0], 'state') == 'normal') and (self.systemsCanvas.itemcget(nodes[1], 'state') == 'normal'):
+					self.systemsCanvas.itemconfig(edgeitem, state='normal')
+					self.systemsCanvas.itemconfig(edgeitem, arrow='last')
+				else:
+					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+
+			self.prevOption = self.v.get()
 
 		if self.labels == 1:
 			self.hideLabels()
 			self.showLabels()
 
 
-	# Analysis modules for the networkx graph:
-
-	''' Functions for Node degree frame: '''
-	# shows each nodes degree
+	"""----------------------------------------------------NODE DEGREE ANALYSIS------------------------------------------------------------"""
 	def nodeDegrees(self):
 		if (not hasattr(self, 'nodeDegreeFrame') or self.nodeDegreeFrame.winfo_exists() == 0) and (not hasattr(self, 'nodeDegreePopup') or self.nodeDegreePopup.winfo_exists() == 0):
 			# mini frame to display node degree analysis graph:
@@ -602,8 +597,6 @@ class CanvasFrame(Frame):
 		elif self.frameOrWindow == 1:
 			self.nodeDegreePopup.destroy()
 			self.nodeDegrees()
-
-
 
 	def analysisExit(self):
 		if self.frameOrWindow == 0:
@@ -673,7 +666,7 @@ class CanvasFrame(Frame):
 
 		elif self.nodeDegreeFrame.winfo_height() == 30:
 			self.nodeDegreeFrame.config(height=200)
-
+	"""----------------------------------------------------END NODE DEGREE ANALYSIS-------------------------------------------------------"""
 
 	def dragWindowStart(self, event):
 		self.startDragX = event.x
@@ -694,6 +687,7 @@ class CanvasFrame(Frame):
 		else:
 			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
 
+	"""---------------------------------------------------------LOG WINDOW----------------------------------------------------------------"""
 	def appendLog(self, text):
 		if (not hasattr(self, 'logFrame') or  not self.logFrame.winfo_exists()) and (not hasattr(self, 'logPopUp') or self.logPopUp.winfo_exists() == 0) :
 			self.logContents += text
@@ -742,7 +736,6 @@ class CanvasFrame(Frame):
 				self.logText.see("end")
 
 			self.logText.config(state=DISABLED)
-
 	
 	def logExit(self):
 		if self.logFrameOrWindow == 0:
@@ -797,6 +790,7 @@ class CanvasFrame(Frame):
 
 		elif self.logFrame.winfo_height() == 30:
 			self.logFrame.config(height=200)
+	"""--------------------------------------------------END LOG WINDOW-----------------------------------------------------------"""
 
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	

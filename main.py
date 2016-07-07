@@ -17,26 +17,26 @@ class Window(Frame):
         self.initUI()
 
     # exits out of gui when clicked on 
-    def exit(self):
+    def exit(self, event=None):
         self.quit()
 
     def save(self, event=None):
         pass
 
     # can save network x graph (node/edges and attributes) as any type of text file
-    def save_as(self):
+    def save_as(self, event=None):
         for node in self.G.nodes():
             self.G.node[node]['systems'] = self.geoCanvas.manager.systems
         f = tkFileDialog.asksaveasfilename(defaultextension=".txt")
-        if f is None: # asksaveasfile return `None` if dialog closed with "cancel".
+        if f is None or f == '': # asksaveasfile return `None` if dialog closed with "cancel".
             return
         else:
 			pickle.dump(self.G, open(str(f), 'w'))
 
     # can open any previously saved network x graph and plot nodes and edges onto the canvas, and resume all gui functionality 
-    def open(self):
+    def open(self, event=None):
         f = tkFileDialog.askopenfilename()
-        if f is None:
+        if f == None or f == '':
             return
         else:
             self.G = pickle.load(open(str(f)))
@@ -69,22 +69,40 @@ class Window(Frame):
                 
     # creates the gui menubar
     def createTabs(self):
+    	# Binds submenus to their shortcut key; use ctrl for windows and cmd for OS X
+        if _platform == "win32":
+        	self.parent.bind('<Control-z>', self.geoCanvas.undo)
+	        self.parent.bind('<Control-Z>', self.geoCanvas.redo)
+	        self.parent.bind('<Control-s>', self.save)
+	        self.parent.bind('<Control-S>', self.save_as)
+	        self.parent.bind('<Control-o>', self.open)
+	        self.parent.bind('<Control-q>', self.exit)
+	        accelPrefix = "Ctrl-"
+        else:
+	        self.parent.bind('<Command-z>', self.geoCanvas.undo)
+	        self.parent.bind('<Command-Z>', self.geoCanvas.redo)
+	        self.parent.bind('<Command-s>', self.save)
+	        self.parent.bind('<Command-S>', self.save_as)
+	        self.parent.bind('<Command-o>', self.open)
+	        self.parent.bind('<Command-q>', self.exit)
+	        accelPrefix = "Cmd-"
+
         # MAIN MENUBAR
         menubar = Menu(self.parent)
         self.parent.config(menu=menubar)
 
         # File Tab
         fileTab = Menu(menubar)
-        fileTab.add_command(label="Open...", accelerator="Command-O", command=self.open)
-        fileTab.add_command(label="Save", command=self.save, accelerator="Command-S")
-        fileTab.add_command(label="Save As...", command=self.save_as)
-        fileTab.add_command(label="Exit", command=self.exit)
+        fileTab.add_command(label="Open...", command=self.open, accelerator=accelPrefix+"O", )
+        fileTab.add_command(label="Save", command=self.save, accelerator=accelPrefix+"S")
+        fileTab.add_command(label="Save As...", command=self.save_as, accelerator=accelPrefix+"Shift-S")
+        fileTab.add_command(label="Exit", command=self.exit, accelerator=accelPrefix+"Q")
         menubar.add_cascade(label="File", menu=fileTab)
 
         # Edit Tab
         editTab = Menu(menubar)
-        editTab.add_command(label="Undo", command=self.geoCanvas.undo, accelerator="Command-Z")
-        editTab.add_command(label="Redo", command=self.geoCanvas.redo, accelerator="Command-Shift-Z")
+        editTab.add_command(label="Undo", command=self.geoCanvas.undo, accelerator=accelPrefix+"Z")
+        editTab.add_command(label="Redo", command=self.geoCanvas.redo, accelerator=accelPrefix+"Shift-Z")
         menubar.add_cascade(label="Edit", menu=editTab)
 
         #View Tab
@@ -98,14 +116,6 @@ class Window(Frame):
         analysisTab = Menu(menubar)
         analysisTab.add_command(label="Node Degrees", command=self.geoCanvas.nodeDegrees)
         menubar.add_cascade(label="Analysis", menu=analysisTab)
-
-        #Binds submenus to their shortcut key
-        self.parent.bind('<Control-z>', self.geoCanvas.undo)
-        self.parent.bind('<Command-z>', self.geoCanvas.undo)
-        self.parent.bind('<Control-Z>', self.geoCanvas.redo)
-        self.parent.bind('<Command-Z>', self.geoCanvas.redo)
-        self.parent.bind('<Control-s>', self.save)
-        self.parent.bind('<Command-s>', self.save)
 
     def initUI(self):
 
