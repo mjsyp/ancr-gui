@@ -71,6 +71,9 @@ class CanvasFrame(Frame):
 		for node in self.systemsCanvas.find_withtag('node'):
 			self.systemsCanvas.itemconfig(node, activefill='green')
 
+		for edge in self.systemsCanvas.find_withtag('edge'):
+			self.systemsCanvas.itemconfig(edge, activefill='green')
+
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.select)
@@ -79,6 +82,12 @@ class CanvasFrame(Frame):
 	def deleteButtonClick(self):
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.deleteButton)
+
+		for node in self.systemsCanvas.find_withtag('node'):
+			self.systemsCanvas.itemconfig(node, activefill='green')
+
+		for edge in self.systemsCanvas.find_withtag('edge'):
+			self.systemsCanvas.itemconfig(edge, activefill='green')
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
@@ -174,43 +183,23 @@ class CanvasFrame(Frame):
 		for widget in self.rightFrame.winfo_children():
 					widget.destroy()
 
-		r = 22
-		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
-
 		# fill all nodes red and all edges black to reset any previously selected item
 		self.systemsCanvas.itemconfig('node', fill='red')
 		self.systemsCanvas.itemconfig('edge', fill='black')
-
-		if len(selected) > 0:
-			if self.systemsCanvas.type(selected[0]) == 'oval':
-				self.selectNode(selected[0])
-		else:
-			r = 4
-			selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
-
-			if len(selected) > 0 and self.systemsCanvas.type(selected[0]) == 'line':
-				self.selectEdge(selected[0])
-
-	'''changes node color and displays node information'''
-	def selectNode(self, item):
-		# adjust color of nodes based on selection
-		self.systemsCanvas.itemconfig('node', fill='red')
-		self.systemsCanvas.itemconfig(item, fill='green')
-
-		self.systemInfo = NodeInfo(self.rightFrame, self, item, self.G, self.manager)
-
-	'''changes edge color and displays edge information'''
-	def selectEdge(self, item):
-		# adjust selection color
-		self.systemsCanvas.itemconfig('edge', fill='black')
-		self.systemsCanvas.itemconfig(item, fill='green')
-
-		# find start and end node of edge
-		nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-		try:				self.G[nodes[0]][nodes[1]]
-		except KeyError:	nodes[0], nodes[1] = nodes[1], nodes[0]
 		
-		self.systemInfo = EdgeInfo(self.rightFrame, self, item, nodes, self.G, self.manager)
+		if self.systemsCanvas.find_withtag(CURRENT):
+			item = self.systemsCanvas.find_withtag(CURRENT)[0]
+			self.systemsCanvas.itemconfig(CURRENT, fill="green")
+			if self.checkTag(item) == 'node':
+				self.systemInfo = NodeInfo(self.rightFrame, self, item, self.G, self.manager)
+			if self.checkTag(item) == 'edge':
+				nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+				try:
+					self.G[nodes[0]][nodes[1]]
+				except KeyError:
+					nodes[0], nodes[1] = nodes[1], nodes[0]
+				self.systemInfo = EdgeInfo(self.rightFrame, self, item, nodes, self.G, self.manager)
+
 	"""-------------------------------------------------------END SELECT-----------------------------------------------------------"""
 
 
@@ -235,74 +224,61 @@ class CanvasFrame(Frame):
 
 		G_delete.remove_edge(nodes[0], nodes[1])
 
-	'''Runs on click of "delete" button; decides whether to call deleteNode or deleteEdge'''
+	'''Runs on click after "delete" button is pressed'''
 	def delete(self, event):
-		r = 22
-		selected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
+		if self.systemsCanvas.find_withtag(CURRENT):
+			item = self.systemsCanvas.find_withtag(CURRENT)[0]
 
-		if len(selected) > 0:
-			if self.systemsCanvas.type(selected[0]) == 'oval':
-				self.deleteNode(event, selected[0])
-		else:
-			r = 4
-			selected = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
+			'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
+			if self.checkTag(item) == 'node':
+				nodeCoords = self.systemsCanvas.coords(item)
+				overlapped = self.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
+				numEdges = 0
+				for x in overlapped:
+					if self.systemsCanvas.type(x) == 'line':
+						# add 'deleted' tag to ea. object x, and make it hidden
+						self.systemsCanvas.addtag_withtag('deleted', x)
+						self.systemsCanvas.itemconfig(x, state='hidden')
 
-			if len(selected) > 0 and self.systemsCanvas.type(selected[0]) == 'line':
-				self.deleteEdge(selected[0])
+						self.undoStack.append(x) # add edge to undo stack
+						self.systemsCanvas.dtag(x, 'edge')
+						self.deleteEdgeNX(x, self.G, self.D)
+						numEdges += 1
 
-	'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
-	def deleteNode(self, event, item):
-		# find edges overlapping with this node
-		r = 16
-		overlapped = self.systemsCanvas.find_overlapping(event.x-r, event.y-r, event.x+r, event.y+r)
-		numEdges = 0
+				self.systemsCanvas.addtag_withtag('deleted', item)
+				self.systemsCanvas.itemconfig(item, state='hidden')
+				self.systemsCanvas.dtag(item, 'node')
 
-		for x in overlapped:
-			if self.systemsCanvas.type(x) == 'line':
-				# add 'deleted' tag to ea. object x, and make it hidden
-				self.systemsCanvas.addtag_withtag('deleted', x)
-				self.systemsCanvas.itemconfig(x, state='hidden')
+				self.deleteNodeNX(item, self.G, self.D) # delete node from networkX
+				self.G.remove_node(item)
+				self.undoStack.append(item) # add node to undo stack; want this to be on top
 
-				self.undoStack.append(x) # add edge to undo stack
-				self.systemsCanvas.dtag(x, 'edge')
-				self.deleteEdgeNX(x, self.G, self.D)
-				numEdges += 1
+				# remove label of node if 'Show Labels' is active
+				if self.labels == 1:
+					self.hideLabels()
+					self.showLabels()
 
-		self.systemsCanvas.addtag_withtag('deleted', item)
-		self.systemsCanvas.itemconfig(item, state='hidden')
-		self.systemsCanvas.dtag(item, 'node')
+				# add to log file
+				log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted node " + str(item) + " and associated edges"
+				self.appendLog(log)
+			''' deletes selected edge from networkx and Tkinter '''
+			if self.checkTag(item) == 'edge':
+				self.deleteEdgeNX(item, self.G, self.D)
+				
+				self.undoStack.append(item)
+				self.systemsCanvas.dtag(item, 'edge')
+				self.systemsCanvas.addtag_withtag('deleted', item)
+				self.systemsCanvas.itemconfig(item, state='hidden')
 
-		self.deleteNodeNX(item, self.G, self.D) # delete node from networkX
-		self.G.remove_node(item)
-		self.undoStack.append(item) # add node to undo stack; want this to be on top
+				# add to log file
+				nodes = [str(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+				log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted edge between node " + nodes[0] + " and node " + nodes[1]
+				log += " (ID = " + str(item) + ")"
+				self.appendLog(log)
 
-		# remove label of node if 'Show Labels' is active
-		if self.labels == 1:
-			self.hideLabels()
-			self.showLabels()
-
-		# add to log file
-		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted node " + str(item) + " and associated edges"
-		self.appendLog(log)
-
-	# deletes selected edge with radius r in both Tkinter and networkX
-	def deleteEdge(self, item):
-		# remove edge from networkX
-		self.deleteEdgeNX(item, self.G, self.D)
-		
-		self.undoStack.append(item)
-		self.systemsCanvas.dtag(item, 'edge')
-		self.systemsCanvas.addtag_withtag('deleted', item)
-		self.systemsCanvas.itemconfig(item, state='hidden')
-
-		# add to log file
-		nodes = [str(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted edge between node " + nodes[0] + " and node " + nodes[1]
-		log += " (ID = " + str(item) + ")"
-		self.appendLog(log)
 	"""--------------------------------------------------------END DELETE-----------------------------------------------------------------"""
 
-	
+	# selects node on button press and moves node to location at button release
 	def dragStart(self, event):
 		r = 16
 		self.nodeDragItem = None
@@ -312,43 +288,44 @@ class CanvasFrame(Frame):
 
 	def dragEnd(self, event):
 		r = 8
-		
-		# move node:
-		if (event.x < 0) or (event.x > 700) or (event.y < 0) or (event.y > 500):
-			return
+		# will only move node if it's in All
+		if self.v.get() == 'All':
+			# move node:
+			if (event.x < 0) or (event.x > 700) or (event.y < 0) or (event.y > 500):
+				return
 
-		if self.nodeDragItem != None:
-			self.systemsCanvas.coords(self.nodeDragItem, event.x-r, event.y-r, event.x+r, event.y+r)
+			if self.nodeDragItem != None:
+				self.systemsCanvas.coords(self.nodeDragItem, event.x-r, event.y-r, event.x+r, event.y+r)
 
-			# move edges:
-			for startNode, endNode in self.G.out_edges([self.nodeDragItem]):
-				edge = self.G.edge[startNode][endNode]['edgeID']
-				edgeCoordsInt = self.systemsCanvas.coords(edge)
-				self.systemsCanvas.coords(edge, event.x, event.y, edgeCoordsInt[2], edgeCoordsInt[3])
-				edgeCoordsFin = self.systemsCanvas.coords(edge)
-				self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
-				self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
-				self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
-				self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
+				# move edges:
+				for startNode, endNode in self.G.out_edges([self.nodeDragItem]):
+					edge = self.G.edge[startNode][endNode]['edgeID']
+					edgeCoordsInt = self.systemsCanvas.coords(edge)
+					self.systemsCanvas.coords(edge, event.x, event.y, edgeCoordsInt[2], edgeCoordsInt[3])
+					edgeCoordsFin = self.systemsCanvas.coords(edge)
+					self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
+					self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
+					self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
+					self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
+				
+				for startNode, endNode in self.G.in_edges([self.nodeDragItem]): 
+					edge = self.G.edge[startNode][endNode]['edgeID']
+					edgeCoordsInt = self.systemsCanvas.coords(edge)				
+					self.systemsCanvas.coords(edge, edgeCoordsInt[0], edgeCoordsInt[1], event.x, event.y)
+					edgeCoordsFin = self.systemsCanvas.coords(edge)
+					self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
+					self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
+					self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
+					self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
+
+				
+				self.G.node[self.nodeDragItem]['x_coord'] = event.x
+				self.G.node[self.nodeDragItem]['y_coord'] = event.y
+
 			
-			for startNode, endNode in self.G.in_edges([self.nodeDragItem]): 
-				edge = self.G.edge[startNode][endNode]['edgeID']
-				edgeCoordsInt = self.systemsCanvas.coords(edge)				
-				self.systemsCanvas.coords(edge, edgeCoordsInt[0], edgeCoordsInt[1], event.x, event.y)
-				edgeCoordsFin = self.systemsCanvas.coords(edge)
-				self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
-				self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
-				self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
-				self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
-
-			
-			self.G.node[self.nodeDragItem]['x_coord'] = event.x
-			self.G.node[self.nodeDragItem]['y_coord'] = event.y
-
-		
-		if self.labels == 1:
-			self.hideLabels()
-			self.showLabels()
+			if self.labels == 1:
+				self.hideLabels()
+				self.showLabels()
 
 
 	# shows all node names when' Show Labels' is clicked
@@ -549,13 +526,14 @@ class CanvasFrame(Frame):
 
 	"""----------------------------------------------------NODE DEGREE ANALYSIS------------------------------------------------------------"""
 	def nodeDegrees(self):
-		if (not hasattr(self, 'nodeDegreeFrame') or self.nodeDegreeFrame.winfo_exists() == 0) and (not hasattr(self, 'nodeDegreePopup') or self.nodeDegreePopup.winfo_exists() == 0):
+		if len(self.G.nodes()) > 0 and (not hasattr(self, 'nodeDegreeFrame') or self.nodeDegreeFrame.winfo_exists() == 0) and (not hasattr(self, 'nodeDegreePopup') or self.nodeDegreePopup.winfo_exists() == 0):
 			# mini frame to display node degree analysis graph:
-			self.frameOrWindow = 0
+			self.frameOrWindow = 0 # 0 - frame, 1 - popup window
 			self.nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
 			self.nodeDegreeFrame.pack_propagate(0)
 			self.nodeDegreeFrame.pack(side='left', anchor='sw')
 
+			# toolbar to store max, min, exit buttons
 			self.toolbarFrame = Frame(self.nodeDegreeFrame, height=25, width=200, bg='light gray')
 			self.toolbarFrame.pack_propagate(0)
 			self.toolbarFrame.pack(side='top')
@@ -596,20 +574,23 @@ class CanvasFrame(Frame):
 			label.image = photo
 			label.pack(expand=1, fill=BOTH)
 
-		elif self.frameOrWindow == 0:
+		# updates node degree graph if tab is pressed again
+		elif hasattr(self, 'frameOrWindow') and self.frameOrWindow == 0:
 			self.nodeDegreeFrame.destroy()
 			self.nodeDegrees()
 		
-		elif self.frameOrWindow == 1:
+		elif hasattr(self, 'frameOrWindow') and self.frameOrWindow == 1:
 			self.nodeDegreePopup.destroy()
 			self.nodeDegrees()
 
+	# destroys either the node frame or popup when exit button is pressed
 	def analysisExit(self):
 		if self.frameOrWindow == 0:
 			self.nodeDegreeFrame.destroy()
 		else:
 			self.nodeDegreePopup.destroy()
 	
+	# docks node popup window into a frame or minimizes frame into just the toolbar when minimize button is pressed
 	def analysisMin(self):
 		if self.frameOrWindow == 1:
 			self.nodeDegreePopup.destroy()
@@ -617,6 +598,7 @@ class CanvasFrame(Frame):
 		else:
 			self.nodeDegreeFrame.config(height='30')
 	
+	# maximizes toolbar into a docked frame or maximizes frame into a popup window when maximize button is pressed
 	def analysisMax(self):
 		if self.frameOrWindow == 0 and self.nodeDegreeFrame.winfo_height() > 30:
 			self.nodeDegreeFrame.destroy()		
@@ -673,7 +655,7 @@ class CanvasFrame(Frame):
 		elif self.nodeDegreeFrame.winfo_height() == 30:
 			self.nodeDegreeFrame.config(height=200)
 	"""----------------------------------------------------END NODE DEGREE ANALYSIS-------------------------------------------------------"""
-
+	# drags popup window to mouse location upon key press release for node degrees and log window
 	def dragWindowStart(self, event):
 		self.startDragX = event.x
 		self.startDragY = event.y
@@ -743,6 +725,7 @@ class CanvasFrame(Frame):
 
 			self.logText.config(state=DISABLED)
 	
+	# destroy frame or popup window when exit button is pressed
 	def logExit(self):
 		if self.logFrameOrWindow == 0:
 			self.logContents = self.logText.get('1.0', END)
@@ -750,6 +733,7 @@ class CanvasFrame(Frame):
 		else:
 			self.logPopUp.destroy()
 
+	# docks node popup window into a frame or minimizes frame into just the toolbar when minimize button is pressed
 	def logMin(self):
 		if self.logFrameOrWindow == 0:
 			self.logFrame.config(height='30')
@@ -763,6 +747,7 @@ class CanvasFrame(Frame):
 			self.logText.config(state=DISABLED)
 			self.logText.see("end")
 
+	# maximizes toolbar into a docked frame or maximizes frame into a popup window when maximize button is pressed
 	def logMax(self):
 		if self.logFrameOrWindow == 0 and self.logFrame.winfo_height() > 30:
 			contents = self.logText.get('1.0', END)
