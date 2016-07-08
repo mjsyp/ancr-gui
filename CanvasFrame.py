@@ -6,6 +6,7 @@ import tkSimpleDialog
 import networkx as nx
 import matplotlib
 from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from PIL import Image, ImageTk
 from datetime import datetime
 
@@ -30,10 +31,11 @@ class CanvasFrame(Frame):
 
 	#binds mouse clicks to the createNode function when the 'create node' button is pressed 
 	def createNodeButtonClick(self):
-		# undo activefill if 'select' button was last pressed
-		if self.selectButton.cget('relief') == SUNKEN:
-			for node in self.systemsCanvas.find_withtag('node'):
-				self.systemsCanvas.itemconfig(node, activefill='red')
+		# undo activefill 
+		for node in self.systemsCanvas.find_withtag('node'):
+			self.systemsCanvas.itemconfig(node, activefill='red')
+		for edge in self.systemsCanvas.find_withtag('edge'):
+			self.systemsCanvas.itemconfig(edge, activefill='black')
 
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.createNodeButton)
@@ -47,10 +49,11 @@ class CanvasFrame(Frame):
 	# binds mouse clicks to the startEdge function and binds mouse click releases to the createEdge
 	# function when the 'create edge' button is pressed  
 	def createEdgeButtonClick(self):
-		# undo activefill if 'select' button was last pressed
-		if self.selectButton.cget('relief') == SUNKEN:
-			for node in self.systemsCanvas.find_withtag('node'):
-				self.systemsCanvas.itemconfig(node, activefill='red')
+		# undo activefill 
+		for node in self.systemsCanvas.find_withtag('node'):
+			self.systemsCanvas.itemconfig(node, activefill='red')
+		for edge in self.systemsCanvas.find_withtag('edge'):
+			self.systemsCanvas.itemconfig(edge, activefill='black')
 
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.createEdgeButton)
@@ -67,7 +70,7 @@ class CanvasFrame(Frame):
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.selectButton)
 
-		# make nodes green when your cursor scrolls over them
+		# make nodes and edges green when your cursor scrolls over them
 		for node in self.systemsCanvas.find_withtag('node'):
 			self.systemsCanvas.itemconfig(node, activefill='green')
 
@@ -77,12 +80,15 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.select)
+		self.systemsCanvas.itemconfig('node', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black')
 	
 	# binds mouse clicks to the deleteNode function when the 'delete node' button is pressed 
 	def deleteButtonClick(self):
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.deleteButton)
 
+		# make nodes and edges green when your cursor scrolls over them
 		for node in self.systemsCanvas.find_withtag('node'):
 			self.systemsCanvas.itemconfig(node, activefill='green')
 
@@ -99,10 +105,18 @@ class CanvasFrame(Frame):
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.dragNodeButton)
 
+		# makes nodes green when you scroll over them, and undos activefill on edges
+		for node in self.systemsCanvas.find_withtag('node'):
+			self.systemsCanvas.itemconfig(node, activefill='green')
+		for edge in self.systemsCanvas.find_withtag('edge'):
+			self.systemsCanvas.itemconfig(edge, activefill='black')
+
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.dragStart)
 		self.systemsCanvas.bind('<ButtonRelease-1>', self.dragEnd)
+		self.systemsCanvas.itemconfig('node', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black')
 	"""--------------------------------------------------END BUTTON BINDINGS----------------------------------------------------"""
 
 	
@@ -280,11 +294,11 @@ class CanvasFrame(Frame):
 
 	# selects node on button press and moves node to location at button release
 	def dragStart(self, event):
-		r = 16
 		self.nodeDragItem = None
-		nodeSelected = self.systemsCanvas.find_enclosed(event.x-r, event.y-r, event.x+r, event.y+r)
-		if len(nodeSelected) > 0:
-			self.nodeDragItem = nodeSelected[0]
+		if self.systemsCanvas.find_withtag(CURRENT):
+			item = self.systemsCanvas.find_withtag(CURRENT)[0]
+			if self.checkTag(item) == 'node':
+				self.nodeDragItem = item
 
 	def dragEnd(self, event):
 		r = 8
@@ -783,6 +797,34 @@ class CanvasFrame(Frame):
 			self.logFrame.config(height=200)
 	"""--------------------------------------------------END LOG WINDOW-----------------------------------------------------------"""
 
+	def viewGeometry(self):
+		# geoPopup= Toplevel(self.parent)
+		# geoPopup.title('Ship Geometry')
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+		xs = []
+		ys = []
+		zs = []
+
+		for node in self.G.nodes():
+			xs.append(self.G.node[node]['x'])
+			ys.append(self.G.node[node]['y'])
+			zs.append(self.G.node[node]['z'])
+
+		ax.scatter(xs, ys, zs, c='r', marker='o')
+		ax.set_xlabel('X Label')
+		ax.set_ylabel('Y Label')
+		ax.set_zlabel('Z Label')
+
+
+		plt.show()
+
+		# fig.savefig("geoplot.png", bbox_inches='tight')
+		# image = Image.open("geoplot.png")
+		# photo = ImageTk.PhotoImage(image)
+		# label = Label(geoPopup, image=photo, bg="white")
+		# label.image = photo
+		# label.pack()
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
 	def initUI(self):

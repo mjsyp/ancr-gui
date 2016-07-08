@@ -4,7 +4,7 @@ import networkx as nx
 import tkFileDialog
 import pickle
 from sys import platform as _platform
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 class Window(Frame):
   
@@ -24,6 +24,11 @@ class Window(Frame):
 	def save(self, event=None):
 		if hasattr(self, 'filename'):
 			pickle.dump(self.G, open(str(self.filename), 'w'))
+			# add to log file
+			s = str(self.filename)
+			filename = s.split('/')
+			log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved file: " + filename[len(filename)-1]
+			self.geoCanvas.appendLog(log)
 		else:
 			self.save_as()
 
@@ -33,14 +38,22 @@ class Window(Frame):
 			self.G.node[node]['systems'] = self.geoCanvas.manager.systems
 		self.filename = tkFileDialog.asksaveasfilename(defaultextension=".txt")
 		if self.filename != '': # asksaveasfile returns '' if dialog closed with "cancel".
-			self.parent.title("ANCR-GUI - " + self.filename)
+			s = str(self.filename)
+			filename = s.split('/')
+			self.parent.title("ANCR-GUI - " + filename[len(filename)-1])
 			pickle.dump(self.G, open(str(self.filename), 'w'))
+
+		# add to log file
+		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved file as: " + str(self.filename)
+		self.geoCanvas.appendLog(log)
 
 	# can open any previously saved network x graph and plot nodes and edges onto the canvas, and resume all gui functionality 
 	def open(self, event=None):
 		self.filename = tkFileDialog.askopenfilename()
 		if self.filename != '':
-			self.parent.title("ANCR-GUI - " + self.filename)
+			s = str(self.filename)
+			filename = s.split('/')
+			self.parent.title("ANCR-GUI - " + filename[len(filename)-1])
 
 			self.G = pickle.load(open(str(self.filename)))
 			self.G = nx.convert_node_labels_to_integers(self.G, first_label=1)
@@ -70,6 +83,9 @@ class Window(Frame):
 				self.geoCanvas.dropdown.configure(bg="light blue")
 				self.geoCanvas.dropdown.pack(side='left')
 
+		# add to log file
+		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Opened file: " + str(self.filename)
+		self.geoCanvas.appendLog(log)
 				
 	# creates the gui menubar
 	def createTabs(self):
@@ -114,6 +130,7 @@ class Window(Frame):
 		viewTab.add_command(label="Show Labels", command=self.geoCanvas.showLabels)
 		viewTab.add_command(label="Hide Labels", command=self.geoCanvas.hideLabels)
 		viewTab.add_command(label='Log Window', command=self.geoCanvas.logWindow)
+		viewTab.add_command(label='Geometry', command=self.geoCanvas.viewGeometry)
 		menubar.add_cascade(label="View", menu=viewTab)
 
 		#Analysis Tab
