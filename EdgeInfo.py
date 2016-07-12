@@ -19,7 +19,6 @@ class EdgeInfo(Frame):
 		self.initUI()
 
 	def createTypeLabel(self):
-
 		self.typeLabel = Label(self.parent, text="Type:", bg=self.color, anchor=W)
 		self.typeLabel.grid(row=2, column=0, padx=5, pady=5, sticky=E)
 
@@ -27,8 +26,8 @@ class EdgeInfo(Frame):
 		self.optionList = self.manager.types
 
 		# Create frame to hold the OptionMenu
-		self.typeMenu = Frame(self.parent, highlightbackground=self.color)
-		self.typeMenu.grid(row=2, column=1, padx=10)
+		self.typeMenu = Frame(self.parent, bg=self.color)
+		self.typeMenu.grid(row=2, column=1, padx=5)
 
 		# create a StringVar that holds the selected option in the dropdown
 		self.v = StringVar()
@@ -37,7 +36,7 @@ class EdgeInfo(Frame):
 		# actual dropdown
 		self.dropdown = OptionMenu(self.typeMenu, self.v, *self.optionList)
 		self.dropdown.config(bg=self.color, highlightbackground=self.color)
-		self.dropdown.grid(row=2, column=1)
+		self.dropdown.grid(row=2, column=1, pady=5)
 
 		# 'Create New' button
 		self.createTypeBtn = Button(self.parent, text="Create New", 
@@ -57,17 +56,17 @@ class EdgeInfo(Frame):
 			# redraw dropdown
 			self.dropdown.grid_forget()
 			self.dropdown = OptionMenu(self.typeMenu, self.v, *self.optionList)
-			self.dropdown.configure(bg=self.color, highlightbackground=self.color)
-			self.dropdown.grid(row=2, column=1)
+			self.dropdown.config(bg=self.color, highlightbackground=self.color)
+			self.dropdown.grid(row=2, column=1, pady=5)
 
 	def createDemandLabel(self):
 		# Demand
  		self.demandLabel = Label(self.parent, text="Demand:", bg=self.color, anchor=W)
- 		self.demandLabel.grid(row=3, column=0, padx=5, pady=5, sticky=E)
+ 		self.demandLabel.grid(row=3, column=0, padx=5, sticky=E)
 
 		self.createDemandBtn = Button(self.parent, text="Create New", 
 			command=self.createNewDemand, highlightbackground=self.color)
-		self.createDemandBtn.grid(row=3, column=1)
+		self.createDemandBtn.grid(row=3, column=1, pady=5)
 
 		self.numDemands = 0
 
@@ -92,8 +91,7 @@ class EdgeInfo(Frame):
 		self.systemDict[label] = newEntry
 
 		# move widgets down to make room for new demand label
-		self.createDemandBtn.grid(row=4+self.numDemands, column=1)
-
+		self.createDemandBtn.grid(row=4+self.numDemands, column=1, pady=5)
 		for item in self.parent.grid_slaves():
 			if int(item.grid_info()["row"]) > (4 + self.numDemands):
 				newRow = int(item.grid_info()["row"]) + self.numDemands + 1
@@ -101,6 +99,7 @@ class EdgeInfo(Frame):
 
 		self.numDemands += 1
 
+		# add new demand to the main toolbar dropdown
 		if label not in self.leftFrame.optionList:
 			self.leftFrame.optionList.insert(len(self.leftFrame.optionList)-2, label)
 			self.leftFrame.dropdown.destroy()
@@ -111,20 +110,20 @@ class EdgeInfo(Frame):
 
 	def createGeometryLabel(self):
 		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color, anchor=W)
-		self.geometryLabel.grid(row=5, column=0, padx=5, pady=5, sticky=E)
+		self.geometryLabel.grid(row=5, column=0, padx=5, sticky=E)
 
 		self.xLabel = Label(self.parent, text="x", bg=self.color)
-		self.xLabel.grid(row=5, column=1, padx=1, pady=1)
+		self.xLabel.grid(row=5, column=1, padx=1)
 		self.xEntry = Entry(self.parent, highlightbackground=self.color, width=9)
 		self.xEntry.grid(row=5, column=2)
 
 		self.yLabel = Label(self.parent, text="y", bg=self.color)
-		self.yLabel.grid(row=6, column=1, padx=1, pady=1)
+		self.yLabel.grid(row=6, column=1, padx=1)
 		self.yEntry = Entry(self.parent, highlightbackground=self.color, width=9)
 		self.yEntry.grid(row=6, column=2)
 
 		self.zLabel = Label(self.parent, text="z", bg=self.color)
-		self.zLabel.grid(row=7, column=1, padx=1, pady=1)
+		self.zLabel.grid(row=7, column=1, padx=1)
 		self.zEntry = Entry(self.parent, highlightbackground=self.color, width=9)
 		self.zEntry.grid(row=7, column=2)
 
@@ -187,21 +186,21 @@ class EdgeInfo(Frame):
 	def initUI(self):
 		# Name
 		self.nameLabel = Label(self.parent, text="Name:", bg=self.color)
-		self.nameLabel.grid(row=1, column=0, padx=5, pady=10, sticky=E)
+		self.nameLabel.grid(row=1, column=0, padx=5, pady=5, sticky=E)
 
 		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
-		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W, padx=10)
+		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W, padx=5)
 
 		# Notes
 		self.notesLabel = Label(self.parent, text="Notes:", bg=self.color)
-		self.notesLabel.grid(row=8, column=0, padx=5, pady=5, sticky=E)
-		self.notes = Text(self.parent, height=8, width=25, font='TkDefaultFont')
-		self.notes.grid(row=8, column=1, columnspan=2, rowspan=8, pady=5, padx=10)
+		self.notesLabel.grid(row=8, column=0, padx=5, sticky=E)
+		self.notes = Text(self.parent, height=8, width=1, font='TkDefaultFont')
+		self.notes.grid(row=8, column=1, columnspan=2, rowspan=8, pady=10, padx=5, sticky=E+W)
 
 		# save button
 		self.saveBtn = Button(self.parent, text="Save", command=self.saveAttributes, 
 			highlightbackground=self.color)
-		self.saveBtn.grid(row=16, column=2, padx=5, sticky=E)
+		self.saveBtn.grid(row=16, column=2, padx=5, pady=5, sticky=E)
 
 		# Type, Demand, Geometry
 		self.createTypeLabel()

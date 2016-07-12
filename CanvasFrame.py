@@ -250,6 +250,35 @@ class CanvasFrame(Frame):
 			if self.systemsCanvas.find_withtag(CURRENT):
 				item = self.systemsCanvas.find_withtag(CURRENT)[0]
 
+			'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
+			if self.checkTag(item) == 'node':
+				nodeCoords = self.systemsCanvas.coords(item)
+				overlapped = self.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
+				numEdges = 0
+				for x in overlapped:
+					if self.systemsCanvas.type(x) == 'line':
+						# add 'deleted' tag to ea. object x, and make it hidden
+						self.systemsCanvas.addtag_withtag('deleted', x)
+						self.systemsCanvas.itemconfig(x, state='hidden')
+
+						self.undoStack.append(x) # add edge to undo stack
+						self.systemsCanvas.dtag(x, 'edge')
+						self.deleteEdgeNX(x, self.G, self.D)
+						numEdges += 1
+
+				self.systemsCanvas.addtag_withtag('deleted', item)
+				self.systemsCanvas.itemconfig(item, state='hidden')
+				self.systemsCanvas.dtag(item, 'node')
+
+				self.deleteNodeNX(item, self.G, self.D) # delete node from networkX
+				self.G.remove_node(item)
+				self.undoStack.append(item) # add node to undo stack; want this to be on top
+
+				# remove label of node if 'Show Labels' is active
+				if self.labels == 1:
+					self.hideLabels()
+					self.showLabels()
+
 				'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
 				if self.checkTag(item) == 'node':
 					nodeCoords = self.systemsCanvas.coords(item)
@@ -528,7 +557,7 @@ class CanvasFrame(Frame):
 				for nodeitem in visibleNodes:
 					# change size of nodes to reflect magnitude of value for this demand
 					coords = self.systemsCanvas.coords(nodeitem)
-					x = self.G.node[nodeitem][self.v.get()]
+					x = abs(self.G.node[nodeitem][self.v.get()])
 					offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
 					self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
 
@@ -567,15 +596,12 @@ class CanvasFrame(Frame):
 
 			image = Image.open("exit.png")
 			self.exitImage = ImageTk.PhotoImage(image)
-			#self.exitImage = PhotoImage(file="exit.gif")
 			exitButton = Button(self.toolbarFrame, image=self.exitImage, highlightbackground='light gray', command=self.analysisExit)
 			image = Image.open("minimize.png")
 			self.minImage = ImageTk.PhotoImage(image)
-			#self.minImage = PhotoImage(file="minimize.gif")
 			minButton = Button(self.toolbarFrame, image=self.minImage, highlightbackground='light gray', command=self.analysisMin)
 			image = Image.open("maximize.png")
 			self.maxImage = ImageTk.PhotoImage(image)
-			#self.maxImage = PhotoImage(file="maximize.gif")
 			maxButton = Button(self.toolbarFrame, image=self.maxImage, highlightbackground='light gray', command=self.analysisMax)
 
 			exitButton.pack(side='right')
@@ -834,7 +860,7 @@ class CanvasFrame(Frame):
 
 	def viewComponentGeo(self):
 		plt.close()
-
+		
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
 		xs = []
