@@ -558,13 +558,22 @@ class CanvasFrame(Frame):
 			self.toolbarFrame.pack_propagate(0)
 			self.toolbarFrame.pack(side='top')
 
-			exitButton = Button(self.toolbarFrame, text='ex', highlightbackground='light gray', command=self.analysisExit)
-			minButton = Button(self.toolbarFrame, text='min', highlightbackground='light gray', command=self.analysisMin)
-			maxButton = Button(self.toolbarFrame, text='max', highlightbackground='light gray', command=self.analysisMax)
+			image = Image.open("exit.png")
+			self.exitImage = ImageTk.PhotoImage(image)
+			#self.exitImage = PhotoImage(file="exit.gif")
+			exitButton = Button(self.toolbarFrame, image=self.exitImage, highlightbackground='light gray', command=self.analysisExit)
+			image = Image.open("minimize.png")
+			self.minImage = ImageTk.PhotoImage(image)
+			#self.minImage = PhotoImage(file="minimize.gif")
+			minButton = Button(self.toolbarFrame, image=self.minImage, highlightbackground='light gray', command=self.analysisMin)
+			image = Image.open("maximize.png")
+			self.maxImage = ImageTk.PhotoImage(image)
+			#self.maxImage = PhotoImage(file="maximize.gif")
+			maxButton = Button(self.toolbarFrame, image=self.maxImage, highlightbackground='light gray', command=self.analysisMax)
 
+			exitButton.pack(side='right')
 			maxButton.pack(side='right')
 			minButton.pack(side='right')
-			exitButton.pack(side='right')
 
 			nodeDegrees = nx.degree(self.G)
 			degrees = []
@@ -636,11 +645,15 @@ class CanvasFrame(Frame):
 			analysisToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
 			analysisToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.nodeDegreePopup))
 
-			exitButton = Button(analysisToolbar, text='ex', highlightbackground='light gray', command=self.analysisExit)
-			minButton = Button(analysisToolbar, text='min', highlightbackground='light gray', command=self.analysisMin)
+			image = Image.open("exit.png")
+			self.exitImage2 = ImageTk.PhotoImage(image)
+			exitButton = Button(analysisToolbar, image=self.exitImage2, highlightbackground='light gray', command=self.analysisExit)
+			image = Image.open("minimize.png")
+			self.minImage2 = ImageTk.PhotoImage(image)
+			minButton = Button(analysisToolbar, image=self.minImage2, highlightbackground='light gray', command=self.analysisMin)
 
-			minButton.pack(side='right')
 			exitButton.pack(side='right')
+			minButton.pack(side='right')
 
 			degrees = []
 			for key in nodeDegrees:
@@ -724,13 +737,19 @@ class CanvasFrame(Frame):
 			self.logToolbar.pack_propagate(0)
 			self.logToolbar.pack(side='top')
 
-			exitButton = Button(self.logToolbar, text='ex', highlightbackground='light gray', command=self.logExit)
-			minButton = Button(self.logToolbar, text='min', highlightbackground='light gray', command=self.logMin)
-			maxButton = Button(self.logToolbar, text='max', highlightbackground='light gray', command=self.logMax)
+			image = Image.open("exit.png")
+			self.exitImage3 = ImageTk.PhotoImage(image)
+			exitButton = Button(self.logToolbar, image=self.exitImage3, highlightbackground='light gray', command=self.logExit)
+			image = Image.open("minimize.png")
+			self.minImage3 = ImageTk.PhotoImage(image)
+			minButton = Button(self.logToolbar, image=self.minImage3, highlightbackground='light gray', command=self.logMin)
+			image = Image.open("maximize.png")
+			self.maxImage3 = ImageTk.PhotoImage(image)
+			maxButton = Button(self.logToolbar, image=self.maxImage3, highlightbackground='light gray', command=self.logMax)
 
+			exitButton.pack(side='right')
 			maxButton.pack(side='right')
 			minButton.pack(side='right')
-			exitButton.pack(side='right')
 
 			self.logScroll = Scrollbar(self.logFrame)
 			self.logScroll.pack(side='right', fill='y')
@@ -784,12 +803,16 @@ class CanvasFrame(Frame):
 			self.logPopUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
 			self.logPopUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.logPopUp))
 
-			exitButton = Button(self.logPopUpToolbar, text='ex', highlightbackground='light gray', command=self.logExit)
-			minButton = Button(self.logPopUpToolbar, text='min', highlightbackground='light gray', command=self.logMin)
+			image = Image.open("exit.png")
+			self.exitImage4 = ImageTk.PhotoImage(image)
+			exitButton = Button(self.logPopUpToolbar, image=self.exitImage4, highlightbackground='light gray', command=self.logExit)
+			image = Image.open("minimize.png")
+			self.minImage4 = ImageTk.PhotoImage(image)
+			minButton = Button(self.logPopUpToolbar, image=self.minImage4, highlightbackground='light gray', command=self.logMin)
 
-			minButton.pack(side='right')
 			exitButton.pack(side='right')
-
+			minButton.pack(side='right')
+			
 			self.logPopUpScroll = Scrollbar(self.logPopUp)
 			self.logPopUpScroll.pack(side='right', fill='y')
 			self.logPopUpText = Text(self.logPopUp, wrap='word', yscrollcommand=self.logPopUpScroll.set, bg='white', borderwidth=0)
