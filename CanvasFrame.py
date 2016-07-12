@@ -129,7 +129,7 @@ class CanvasFrame(Frame):
 	def createNode(self, event):
 		r = 8
 		item = self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node', state='normal') 
-		self.G.add_node(item, x=0, y=0, z=0, x_coord=event.x, y_coord=event.y)
+		self.G.add_node(item, x=0, y=0, z=0, x_coord=event.x, y_coord=event.y, EdgeLength=0)
 
 		self.undoStack.append(item)
 
@@ -880,21 +880,20 @@ class CanvasFrame(Frame):
 
 
 		plt.show()
-
 	
 	def viewCompartmentGeo(self):
 		fig = plt.figure()
 		ax = fig.gca(projection='3d')
 		ax.set_aspect("equal")
 
-		a = 2
 		for node in self.G.nodes():
 			if 'Type' in self.G.node[node]:
 				if self.G.node[node]['Type'] == 'Compartment':
+					a = self.G.node[node]['EdgeLength']
 					x = self.G.node[node]['x']
 					y = self.G.node[node]['y']
 					z = self.G.node[node]['z']
-					hSL = a/2
+					hSL = a/2.0
 					r = [-hSL, hSL]
 					rX = [-hSL + x, hSL + x]
 					rY = [-hSL + y, hSL + y]
