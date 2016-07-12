@@ -126,6 +126,12 @@ class NodeInfo(Frame):
 		self.zEntry = Entry(self.parent, highlightbackground=self.color, width=8)
 		self.zEntry.grid(row=6, column=2)
 
+		# Edge Length Parameter
+		self.edgeLabel = Label(self.parent, text="Edge Length", bg=self.color)
+		self.edgeLabel.grid(row=7, column=1, padx=1)
+		self.edgeEntry = Entry(self.parent, highlightbackground=self.color, width=8)
+		self.edgeEntry.grid(row=7, column=2)
+
 	def repopulateData(self):
 		if 'Name' in self.G.node[self.index] and self.G.node[self.index]['Name'] != None:
 			self.nameEntry.delete(0, END)
@@ -141,6 +147,9 @@ class NodeInfo(Frame):
 		if 'z' in self.G.node[self.index]:
 			self.zEntry.delete(0, END)
 			self.zEntry.insert(0, self.G.node[self.index]['z'])
+		if 'EdgeLength' in self.G.node[self.index] and self.G.node[self.index]['EdgeLength'] != None:
+			self.edgeEntry.delete(0, END)
+			self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'])
 		if 'Notes' in self.G.node[self.index]:
 			self.notes.delete('0.0', END)
 			self.notes.insert('0.0', self.G.node[self.index]['Notes'])
@@ -175,9 +184,9 @@ class NodeInfo(Frame):
 						coords[2]+offset, coords[3]+offset)
 
 	def saveAttributes(self):
-		titles = ['Name', 'Type', 'x', 'y', 'z', 'Notes']
-		values = [self.nameEntry.get(), self.v.get(), int(self.xEntry.get()), 
-			int(self.yEntry.get()), int(self.zEntry.get()), self.notes.get('0.0', END)]
+		titles = ['Name', 'Type', 'x', 'y', 'z', 'EdgeLength', 'Notes']
+		values = [self.nameEntry.get(), self.v.get(), int(self.xEntry.get()), int(self.yEntry.get()), 
+			int(self.zEntry.get()), int(self.edgeEntry.get()), self.notes.get('0.0', END)]
 		updated = []
 
 		# for each field, check if value is updated in NetworkX; if not, save and add to 'updated'
@@ -218,20 +227,19 @@ class NodeInfo(Frame):
 		# Name
 		self.nameLabel = Label(self.parent, text="Name:", bg=self.color)
 		self.nameLabel.grid(row=0, column=0, padx=5, pady=5, sticky=E)
-
 		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
 		self.nameEntry.grid(row=0, column=1, columnspan=2, sticky=E+W, padx=5)
 
 		# Notes
 		self.notesLabel = Label(self.parent, text="Notes:", bg=self.color)
-		self.notesLabel.grid(row=7, column=0, padx=5, sticky=E)
+		self.notesLabel.grid(row=8, column=0, padx=5, sticky=E)
 		self.notes = Text(self.parent, font='TkDefaultFont', width=1, height=8)
-		self.notes.grid(row=7, column=1, columnspan=2, rowspan=8, pady=10, padx=5, sticky=E+W)
+		self.notes.grid(row=8, column=1, columnspan=2, rowspan=8, padx=5, pady=10, sticky=E+W)
 		
 		# save button
 		self.saveBtn = Button(self.parent, text="Save", command=self.saveAttributes, 
 			highlightbackground=self.color)
-		self.saveBtn.grid(row=15, column=2, padx=5, pady=5, sticky=E)
+		self.saveBtn.grid(row=16, column=2, padx=5, sticky=E)
 
 		# Type, Demand, Geometry
 		self.createTypeLabel()
