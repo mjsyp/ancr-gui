@@ -859,18 +859,22 @@ class CanvasFrame(Frame):
 
 		a = 2
 		for node in self.G.nodes():
-			if self.G.node[node]['Type'] == 'Compartment':
-				x = self.G.node[node]['x']
-				y = self.G.node[node]['y']
-				z = self.G.node[node]['z']
-				hSL = a/2
-				r = [-hSL, hSL]
-				rX = [-hSL + x, hSL + x]
-				rY = [-hSL + y, hSL + y]
-				rZ = [-hSL + z, hSL + z]
-				for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
-					if np.sum(np.abs(s-e)) == r[1]-r[0]:
-						ax.plot3D(*zip(s,e), color="b")
+			if 'Type' in self.G.node[node]:
+				if self.G.node[node]['Type'] == 'Compartment':
+					x = self.G.node[node]['x']
+					y = self.G.node[node]['y']
+					z = self.G.node[node]['z']
+					hSL = a/2
+					r = [-hSL, hSL]
+					rX = [-hSL + x, hSL + x]
+					rY = [-hSL + y, hSL + y]
+					rZ = [-hSL + z, hSL + z]
+					for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
+						if np.sum(np.abs(s-e)) == r[1]-r[0]:
+							ax.plot3D(*zip(s,e), color="b")
+
+		scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
+		ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]]*3)
 		plt.show()
 
 
