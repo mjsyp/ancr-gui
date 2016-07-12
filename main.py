@@ -147,7 +147,7 @@ class Window(Frame):
 		if _platform == "win32":
 			self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=290) #dark colored bg to see panel
 		else:
-			self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=340)
+			self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=370)
 
 		self.leftFrame.pack(side="left", fill="both", expand=1)
 		self.leftFrame.pack_propagate(0)
@@ -155,7 +155,7 @@ class Window(Frame):
 		self.rightFrame.pack_propagate(0)
 		
 		# Creates a scrollbar on the right frame and corresponding window which it controls
-		self.rightSideCanvas = Canvas(self.rightFrame, height=700, width=350, bg='dark gray', highlightbackground='dark gray')
+		self.rightSideCanvas = Canvas(self.rightFrame, height=700, width=370, bg='dark gray', highlightbackground='dark gray')
 		self.rightCanvasFrame = Frame(self.rightSideCanvas, bg='dark gray')
 		self.vsb = Scrollbar(self.rightFrame, orient="vertical", command=self.rightSideCanvas.yview)
 		self.rightSideCanvas.configure(yscrollcommand=self.vsb.set)
@@ -175,7 +175,7 @@ class Window(Frame):
 
 	# set the right frame window to match the scroll bar configure
 	def onFrameConfigure(self, event):
-		self.rightSideCanvas.configure(scrollregion=self.rightSideCanvas.bbox("all"), width=350, height=700)
+		self.rightSideCanvas.configure(scrollregion=self.rightSideCanvas.bbox("all"), width=370, height=700)
 
 
 def main():
