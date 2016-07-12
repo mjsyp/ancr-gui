@@ -227,8 +227,10 @@ class CanvasFrame(Frame):
 	'''deletes edge with ID=item from G_delete; adds edge to G_add'''
 	def deleteEdgeNX(self, item, G_delete, G_add):
 		nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-		try:				self.G[nodes[0]][nodes[1]]
-		except KeyError:	nodes[0], nodes[1] = nodes[1], nodes[0]
+		try:				
+			self.G[nodes[0]][nodes[1]]
+		except KeyError:	
+			nodes[0], nodes[1] = nodes[1], nodes[0]
 
 		G_add.add_edge(nodes[0], nodes[1])
 
@@ -525,7 +527,11 @@ class CanvasFrame(Frame):
 			# loop through edges to show/hide based on whether the nodes are showing or not
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
 				nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
-				if (self.systemsCanvas.itemcget(nodes[0], 'state') == 'normal') and (self.systemsCanvas.itemcget(nodes[1], 'state') == 'normal'):
+				try:
+					self.G[nodes[0]][nodes[1]]
+				except KeyError:
+					nodes[0], nodes[1] = nodes[1], nodes[0]
+				if (self.systemsCanvas.itemcget(nodes[0], 'state') == 'normal') and (self.systemsCanvas.itemcget(nodes[1], 'state') == 'normal') and (self.v.get() in self.G.edge[nodes[0]][nodes[1]]):
 					self.systemsCanvas.itemconfig(edgeitem, state='normal')
 					self.systemsCanvas.itemconfig(edgeitem, arrow='last')
 				else:
@@ -818,13 +824,6 @@ class CanvasFrame(Frame):
 
 
 		plt.show()
-
-		# fig.savefig("geoplot.png", bbox_inches='tight')
-		# image = Image.open("geoplot.png")
-		# photo = ImageTk.PhotoImage(image)
-		# label = Label(geoPopup, image=photo, bg="white")
-		# label.image = photo
-		# label.pack()
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
 	def initUI(self):
