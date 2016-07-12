@@ -125,7 +125,7 @@ class CanvasFrame(Frame):
 	def createNode(self, event):
 		r = 8
 		item = self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node', state='normal') 
-		self.G.add_node(item, x=0, y=0, z=0, Name=None, x_coord=event.x, y_coord=event.y)
+		self.G.add_node(item, x=0, y=0, z=0, x_coord=event.x, y_coord=event.y)
 
 		self.undoStack.append(item)
 
@@ -239,7 +239,7 @@ class CanvasFrame(Frame):
 		G_delete.remove_edge(nodes[0], nodes[1])
 
 	'''Runs on click after "delete" button is pressed'''
-	def delete(self, event):
+	def delete(self, event=None):
 		if self.systemsCanvas.find_withtag(CURRENT):
 			item = self.systemsCanvas.find_withtag(CURRENT)[0]
 
@@ -518,7 +518,7 @@ class CanvasFrame(Frame):
 				for nodeitem in visibleNodes:
 					# change size of nodes to reflect magnitude of value for this demand
 					coords = self.systemsCanvas.coords(nodeitem)
-					x = self.G.node[nodeitem][self.v.get()]
+					x = abs(self.G.node[nodeitem][self.v.get()])
 					offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
 					self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
 
@@ -554,15 +554,12 @@ class CanvasFrame(Frame):
 
 			image = Image.open("exit.png")
 			self.exitImage = ImageTk.PhotoImage(image)
-			#self.exitImage = PhotoImage(file="exit.gif")
 			exitButton = Button(self.toolbarFrame, image=self.exitImage, highlightbackground='light gray', command=self.analysisExit)
 			image = Image.open("minimize.png")
 			self.minImage = ImageTk.PhotoImage(image)
-			#self.minImage = PhotoImage(file="minimize.gif")
 			minButton = Button(self.toolbarFrame, image=self.minImage, highlightbackground='light gray', command=self.analysisMin)
 			image = Image.open("maximize.png")
 			self.maxImage = ImageTk.PhotoImage(image)
-			#self.maxImage = PhotoImage(file="maximize.gif")
 			maxButton = Button(self.toolbarFrame, image=self.maxImage, highlightbackground='light gray', command=self.analysisMax)
 
 			exitButton.pack(side='right')
@@ -821,6 +818,7 @@ class CanvasFrame(Frame):
 	"""--------------------------------------------------END LOG WINDOW-----------------------------------------------------------"""
 
 	def viewGeometry(self):
+		plt.close()
 		# geoPopup= Toplevel(self.parent)
 		# geoPopup.title('Ship Geometry')
 		fig = plt.figure()

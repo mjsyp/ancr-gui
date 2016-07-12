@@ -130,7 +130,6 @@ class Window(Frame):
 		viewTab.add_command(label="Show Labels", command=self.geoCanvas.showLabels)
 		viewTab.add_command(label="Hide Labels", command=self.geoCanvas.hideLabels)
 		viewTab.add_command(label='Log Window', command=self.geoCanvas.logWindow)
-		viewTab.add_command(label='Geometry', command=self.geoCanvas.viewGeometry)
 		menubar.add_cascade(label="View", menu=viewTab)
 
 		#Analysis Tab
@@ -143,18 +142,15 @@ class Window(Frame):
 
 		# Create left and right frames and packs them within the parent frame
 		self.leftFrame = Frame(self.parent, bg='light blue', height=700, width=700) #light colored bg to see panel
-		if _platform == "win32":
-			self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=290) #dark colored bg to see panel
-		else:
-			self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=340)
+		self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=425) #dark colored bg to see panel
 
 		self.leftFrame.pack(side="left", fill="both", expand=1)
-		self.leftFrame.pack_propagate(0)
+		#self.leftFrame.pack_propagate(0)
 		self.rightFrame.pack(side="right", fill="y", expand=0)
-		self.rightFrame.pack_propagate(0)
+		#self.rightFrame.pack_propagate(0)
 		
 		# Creates a scrollbar on the right frame and corresponding window which it controls
-		self.rightSideCanvas = Canvas(self.rightFrame, height=700, width=300, bg='dark gray', highlightbackground='dark gray')
+		self.rightSideCanvas = Canvas(self.rightFrame, height=700, width=300, bg='dark gray', highlightbackground='dark gray', highlightthickness=0)
 		self.rightCanvasFrame = Frame(self.rightSideCanvas, bg='dark gray')
 		self.vsb = Scrollbar(self.rightFrame, orient="vertical", command=self.rightSideCanvas.yview)
 		self.rightSideCanvas.configure(yscrollcommand=self.vsb.set)
