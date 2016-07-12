@@ -130,7 +130,8 @@ class Window(Frame):
 		viewTab.add_command(label="Show Labels", command=self.geoCanvas.showLabels)
 		viewTab.add_command(label="Hide Labels", command=self.geoCanvas.hideLabels)
 		viewTab.add_command(label='Log Window', command=self.geoCanvas.logWindow)
-		viewTab.add_command(label='Geometry', command=self.geoCanvas.viewGeometry)
+		viewTab.add_command(label='Component Geometry', command=self.geoCanvas.viewComponentGeo)
+		viewTab.add_command(label='Compartment Geometry', command= self.geoCanvas.viewCompartmentGeo)
 		menubar.add_cascade(label="View", menu=viewTab)
 
 		#Analysis Tab
