@@ -5,7 +5,7 @@ class Manager:
 	def __init__(self, parent):
 		self.parent = parent
 		self.systems = []
-		self.types = ["Hello", "World"]
+		self.types = ["Component", "Compartment"]
 
 	def addSystem(self, system):
 		self.systems.append(system)

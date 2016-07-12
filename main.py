@@ -130,6 +130,8 @@ class Window(Frame):
 		viewTab.add_command(label="Show Labels", command=self.geoCanvas.showLabels)
 		viewTab.add_command(label="Hide Labels", command=self.geoCanvas.hideLabels)
 		viewTab.add_command(label='Log Window', command=self.geoCanvas.logWindow)
+		viewTab.add_command(label='Component Geometry', command=self.geoCanvas.viewComponentGeo)
+		viewTab.add_command(label='Compartment Geometry', command= self.geoCanvas.viewCompartmentGeo)
 		menubar.add_cascade(label="View", menu=viewTab)
 
 		#Analysis Tab
@@ -150,7 +152,7 @@ class Window(Frame):
 		#self.rightFrame.pack_propagate(0)
 		
 		# Creates a scrollbar on the right frame and corresponding window which it controls
-		self.rightSideCanvas = Canvas(self.rightFrame, height=700, width=300, bg='dark gray', highlightbackground='dark gray', highlightthickness=0)
+		self.rightSideCanvas = Canvas(self.rightFrame, height=700, width=350, bg='dark gray', highlightbackground='dark gray', highlightthickness=0)
 		self.rightCanvasFrame = Frame(self.rightSideCanvas, bg='dark gray')
 		self.vsb = Scrollbar(self.rightFrame, orient="vertical", command=self.rightSideCanvas.yview)
 		self.rightSideCanvas.configure(yscrollcommand=self.vsb.set)
@@ -170,7 +172,7 @@ class Window(Frame):
 
 	# set the right frame window to match the scroll bar configure
 	def onFrameConfigure(self, event):
-		self.rightSideCanvas.configure(scrollregion=self.rightSideCanvas.bbox("all"), width=300, height=700)
+		self.rightSideCanvas.configure(scrollregion=self.rightSideCanvas.bbox("all"), width=350, height=700)
 
 
 def main():
