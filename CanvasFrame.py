@@ -342,7 +342,7 @@ class CanvasFrame(Frame):
 		# will only move node if it's in All
 		if self.v.get() == 'All':
 			# move node:
-			if (event.x < 0) or (event.x > 700) or (event.y < 0) or (event.y > 500):
+			if (event.x < 0) or (event.x > self.systemsCanvas.winfo_width()) or (event.y < 0) or (event.y > self.systemsCanvas.winfo_height()):
 				return
 
 			if self.nodeDragItem != None:
