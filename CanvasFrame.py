@@ -248,7 +248,7 @@ class CanvasFrame(Frame):
 	def delete(self, event):
 		if self.systemsCanvas.find_withtag(CURRENT):
 			item = self.systemsCanvas.find_withtag(CURRENT)[0]
-			'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
+			'''deletes selected node and any edges overlapping it in both Tkinter and networkX if system is All'''
 			if self.v.get() == 'All':
 				if self.checkTag(item) == 'node':
 					nodeCoords = self.systemsCanvas.coords(item)
@@ -273,54 +273,27 @@ class CanvasFrame(Frame):
 					self.G.remove_node(item)
 					self.undoStack.append(item) # add node to undo stack; want this to be on top
 
-					'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
-					if self.checkTag(item) == 'node':
-						nodeCoords = self.systemsCanvas.coords(item)
-						overlapped = self.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
-						numEdges = 0
-						for x in overlapped:
-							if self.systemsCanvas.type(x) == 'line':
-								# add 'deleted' tag to ea. object x, and make it hidden
-								self.systemsCanvas.addtag_withtag('deleted', x)
-								self.systemsCanvas.itemconfig(x, state='hidden')
-
-								self.undoStack.append(x) # add edge to undo stack
-								self.systemsCanvas.dtag(x, 'edge')
-								self.deleteEdgeNX(x, self.G, self.D)
-								numEdges += 1
-
-						self.systemsCanvas.addtag_withtag('deleted', item)
-						self.systemsCanvas.itemconfig(item, state='hidden')
-						self.systemsCanvas.dtag(item, 'node')
-
-						self.deleteNodeNX(item, self.G, self.D) # delete node from networkX
-						self.G.remove_node(item)
-						self.undoStack.append(item) # add node to undo stack; want this to be on top
-
-						# remove label of node if 'Show Labels' is active
-						if self.labels == 1:
-							self.hideLabels()
-							self.showLabels()
-
-						# add to log file
-						log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted node " + str(item) + " and associated edges"
-						self.appendLog(log)
+					# adxsd to log file
+					log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted node " + str(item) + " and associated edges"
+					self.appendLog(log)
 					
-					''' deletes selected edge from networkx and Tkinter '''
-					if self.checkTag(item) == 'edge':
-						self.deleteEdgeNX(item, self.G, self.D)
-						
-						self.undoStack.append(item)
-						self.systemsCanvas.dtag(item, 'edge')
-						self.systemsCanvas.addtag_withtag('deleted', item)
-						self.systemsCanvas.itemconfig(item, state='hidden')
+				''' deletes selected edge from networkx and Tkinter if system is All'''
+				if self.checkTag(item) == 'edge':
+					self.deleteEdgeNX(item, self.G, self.D)
+					
+					self.undoStack.append(item)
+					self.systemsCanvas.dtag(item, 'edge')
+					self.systemsCanvas.addtag_withtag('deleted', item)
+					self.systemsCanvas.itemconfig(item, state='hidden')
 
-						# add to log file
-						nodes = [str(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-						log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted edge between node " + nodes[0] + " and node " + nodes[1]
-						log += " (ID = " + str(item) + ")"
-						self.appendLog(log)
+					# add to log file
+					nodes = [str(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+					log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted edge between node " + nodes[0] + " and node " + nodes[1]
+					log += " (ID = " + str(item) + ")"
+					self.appendLog(log)
+
 			else:
+				''' if system is not All, then removes that specific demand for that node and its associated edges'''
 				if self.checkTag(item) == 'node':
 					nodeCoords = self.systemsCanvas.coords(item)
 					overlapped = self.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
@@ -329,7 +302,8 @@ class CanvasFrame(Frame):
 							self.systemsCanvas.itemconfig(x, state='hidden')
 					self.systemsCanvas.itemconfig(item, state='hidden')
 					del self.G.node[item][self.v.get()]
-				elif self.checkTag(item) == 'edge':
+				''' if system is not All, then removes that specific demand for the edge'''
+				if self.checkTag(item) == 'edge':
 					nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
 					try:				
 						self.G[nodes[0]][nodes[1]]
@@ -338,7 +312,7 @@ class CanvasFrame(Frame):
 					self.systemsCanvas.itemconfig(item, state='hidden')
 					del self.G.edge[nodes[0]][nodes[1]][self.v.get()]
 
-		# remove label of node if 'Show Labels' is active
+		# refreshes labels if show labels is active
 		if self.labels == 1:
 			self.hideLabels()
 			self.showLabels()
@@ -370,6 +344,7 @@ class CanvasFrame(Frame):
 					edgeCoordsInt = self.systemsCanvas.coords(edge)
 					self.systemsCanvas.coords(edge, event.x, event.y, edgeCoordsInt[2], edgeCoordsInt[3])
 					edgeCoordsFin = self.systemsCanvas.coords(edge)
+					# saves new edge coordinates
 					self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
 					self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
 					self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
@@ -380,16 +355,17 @@ class CanvasFrame(Frame):
 					edgeCoordsInt = self.systemsCanvas.coords(edge)				
 					self.systemsCanvas.coords(edge, edgeCoordsInt[0], edgeCoordsInt[1], event.x, event.y)
 					edgeCoordsFin = self.systemsCanvas.coords(edge)
+					# saves new edge coordinates
 					self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
 					self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
 					self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
 					self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
 
-				
+				# saves new node coordinates
 				self.G.node[self.nodeDragItem]['x_coord'] = event.x
 				self.G.node[self.nodeDragItem]['y_coord'] = event.y
 
-			
+			# refreshes labels if show labels is active
 			if self.labels == 1:
 				self.hideLabels()
 				self.showLabels()
@@ -413,7 +389,7 @@ class CanvasFrame(Frame):
 		for widget in self.systemsCanvas.winfo_children():
 				widget.destroy()
 
-
+	# check type of item or whether it has been deleted 
 	def checkTag(self, item):
 		for x in self.systemsCanvas.gettags(item):
 			if x == 'deleted':
@@ -592,6 +568,7 @@ class CanvasFrame(Frame):
 
 			self.prevOption = self.v.get()
 
+		# refreshes labels if show labels is active
 		if self.labels == 1:
 			self.hideLabels()
 			self.showLabels()
@@ -678,6 +655,7 @@ class CanvasFrame(Frame):
 	
 	# maximizes toolbar into a docked frame or maximizes frame into a popup window when maximize button is pressed
 	def analysisMax(self):
+		# if its a frame, make it a pop up window
 		if self.frameOrWindow == 0 and self.nodeDegreeFrame.winfo_height() > 30:
 			self.nodeDegreeFrame.destroy()		
 
@@ -733,7 +711,8 @@ class CanvasFrame(Frame):
 			label = Label(self.nodeDegreePopup, image=photo, bg="white")
 			label.image = photo
 			label.pack()
-
+		
+		# if its a toolbar, make it a frame	
 		elif self.nodeDegreeFrame.winfo_height() == 30:
 			self.nodeDegreeFrame.config(height=200)
 	"""----------------------------------------------------END NODE DEGREE ANALYSIS-------------------------------------------------------"""
@@ -873,7 +852,7 @@ class CanvasFrame(Frame):
 		elif self.logFrame.winfo_height() == 30:
 			self.logFrame.config(height=200)
 	"""--------------------------------------------------END LOG WINDOW-----------------------------------------------------------"""
-
+	# for all nodes that are components, plot their x, y, z, geometry location into a 3d scatter plot
 	def viewComponentGeo(self):
 		plt.close()
 		
@@ -898,6 +877,7 @@ class CanvasFrame(Frame):
 
 		plt.show()
 	
+	# for all nodes that are compartments, plot a cube in its x, y, z, geometry location with given edge length 
 	def viewCompartmentGeo(self):
 		plt.close()
 
@@ -913,13 +893,12 @@ class CanvasFrame(Frame):
 					y = self.G.node[node]['y']
 					z = self.G.node[node]['z']
 					hSL = float(a/2)
-					print hSL
 					r = [-hSL, hSL]
 					rX = [-hSL + x, hSL + x]
 					rY = [-hSL + y, hSL + y]
 					rZ = [-hSL + z, hSL + z]
 					for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
-						if np.sum(np.abs(s-e)) == r[1]-r[0]:
+						if not np.sum(np.abs(s-e)) > a+0.0000001:
 							ax.plot3D(*zip(s,e), color="b")
 
 		scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
