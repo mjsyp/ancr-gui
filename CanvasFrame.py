@@ -1,4 +1,5 @@
 from Tkinter import *
+from DockedWindows import *
 from Manager import *
 from NodeInfo import *
 from EdgeInfo import *
@@ -6,11 +7,8 @@ import tkSimpleDialog
 import networkx as nx
 import matplotlib
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from PIL import Image, ImageTk
 from datetime import datetime
-import numpy as np
-from itertools import product, combinations
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):
@@ -34,10 +32,8 @@ class CanvasFrame(Frame):
 	#binds mouse clicks to the createNode function when the 'create node' button is pressed 
 	def createNodeButtonClick(self):
 		# undo activefill 
-		for node in self.systemsCanvas.find_withtag('node'):
-			self.systemsCanvas.itemconfig(node, activefill='red')
-		for edge in self.systemsCanvas.find_withtag('edge'):
-			self.systemsCanvas.itemconfig(edge, activefill='black')
+		self.systemsCanvas.itemconfig('node', activefill='red')
+		self.systemsCanvas.itemconfig('edge', activefill='black')
 
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.createNodeButton)
@@ -52,10 +48,8 @@ class CanvasFrame(Frame):
 	# function when the 'create edge' button is pressed  
 	def createEdgeButtonClick(self):
 		# undo activefill 
-		for node in self.systemsCanvas.find_withtag('node'):
-			self.systemsCanvas.itemconfig(node, activefill='red')
-		for edge in self.systemsCanvas.find_withtag('edge'):
-			self.systemsCanvas.itemconfig(edge, activefill='black')
+		self.systemsCanvas.itemconfig('node', activefill='red')
+		self.systemsCanvas.itemconfig('edge', activefill='black')
 
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.createEdgeButton)
@@ -73,11 +67,8 @@ class CanvasFrame(Frame):
 		self.buttonRelief(self.selectButton)
 
 		# make nodes and edges green when your cursor scrolls over them
-		for node in self.systemsCanvas.find_withtag('node'):
-			self.systemsCanvas.itemconfig(node, activefill='green')
-
-		for edge in self.systemsCanvas.find_withtag('edge'):
-			self.systemsCanvas.itemconfig(edge, activefill='green')
+		self.systemsCanvas.itemconfig('node', activefill='green')
+		self.systemsCanvas.itemconfig('edge', activefill='green')
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
@@ -91,11 +82,8 @@ class CanvasFrame(Frame):
 		self.buttonRelief(self.deleteButton)
 
 		# make nodes and edges green when your cursor scrolls over them
-		for node in self.systemsCanvas.find_withtag('node'):
-			self.systemsCanvas.itemconfig(node, activefill='green')
-
-		for edge in self.systemsCanvas.find_withtag('edge'):
-			self.systemsCanvas.itemconfig(edge, activefill='green')
+		self.systemsCanvas.itemconfig('node', activefill='green')
+		self.systemsCanvas.itemconfig('edge', activefill='green')
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
@@ -108,10 +96,8 @@ class CanvasFrame(Frame):
 		self.buttonRelief(self.dragNodeButton)
 
 		# makes nodes green when you scroll over them, and undos activefill on edges
-		for node in self.systemsCanvas.find_withtag('node'):
-			self.systemsCanvas.itemconfig(node, activefill='green')
-		for edge in self.systemsCanvas.find_withtag('edge'):
-			self.systemsCanvas.itemconfig(edge, activefill='black')
+		self.systemsCanvas.itemconfig('node', activefill='green')
+		self.systemsCanvas.itemconfig('edge', activefill='black')
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
@@ -193,6 +179,15 @@ class CanvasFrame(Frame):
 	"""---------------------------------------------------END CREATE NODE/EDGE--------------------------------------------------------"""
 
 
+	def edgeEndpoints(self, edgeitem):
+		nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
+		try:
+			self.G[nodes[0]][nodes[1]]
+		except KeyError:
+			nodes[0], nodes[1] = nodes[1], nodes[0]
+		return nodes
+
+
 	"""----------------------------------------------------------SELECT-------------------------------------------------------------------"""
 	def select(self, event):
 		# clear right pane of any previous info
@@ -209,11 +204,7 @@ class CanvasFrame(Frame):
 			if self.checkTag(item) == 'node':
 				self.systemInfo = NodeInfo(self.rightFrame, self, item, self.G, self.manager)
 			if self.checkTag(item) == 'edge':
-				nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-				try:
-					self.G[nodes[0]][nodes[1]]
-				except KeyError:
-					nodes[0], nodes[1] = nodes[1], nodes[0]
+				nodes = self.edgeEndpoints(item)
 				self.systemInfo = EdgeInfo(self.rightFrame, self, item, nodes, self.G, self.manager)
 
 	"""-------------------------------------------------------END SELECT-----------------------------------------------------------"""
@@ -228,11 +219,7 @@ class CanvasFrame(Frame):
 
 	'''deletes edge with ID=item from G_delete; adds edge to G_add'''
 	def deleteEdgeNX(self, item, G_delete, G_add):
-		nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-		try:				
-			self.G[nodes[0]][nodes[1]]
-		except KeyError:	
-			nodes[0], nodes[1] = nodes[1], nodes[0]
+		nodes = self.edgeEndpoints(item)
 
 		G_add.add_edge(nodes[0], nodes[1])
 
@@ -243,7 +230,7 @@ class CanvasFrame(Frame):
 		G_delete.remove_edge(nodes[0], nodes[1])
 
 	'''Runs on click after "delete" button is pressed'''
-	def delete(self, event=None):
+	def delete(self, event):
 		if self.systemsCanvas.find_withtag(CURRENT):
 			item = self.systemsCanvas.find_withtag(CURRENT)[0]
 
@@ -346,7 +333,7 @@ class CanvasFrame(Frame):
 				self.showLabels()
 
 
-	# shows all node names when' Show Labels' is clicked
+	# shows all node names when 'Show Labels' is clicked
 	def showLabels(self):
 		self.labels = 1
 		for item in self.systemsCanvas.find_withtag('node'):
@@ -444,13 +431,32 @@ class CanvasFrame(Frame):
 			self.appendLog(log) # append log message
 	"""------------------------------------------------------END UNDO/REDO---------------------------------------------------------------"""
 
-
-	# changes radius of item back to 8
+	# changes radius of item back to 8 and removes '+', '-', or '0' label
 	def normalNodeSize(self, item):
 		coords = self.systemsCanvas.coords(item)
 		midpointX = (coords[0] + coords[2]) / 2
 		midpointY = (coords[1] + coords[3]) / 2
 		self.systemsCanvas.coords(item, midpointX-8, midpointY-8, midpointX+8, midpointY+8)
+
+		self.systemsCanvas.delete('label')
+
+	def scaleNodeSize(self, nodeitem, minDemand, maxDemand):
+		# change size of nodes to reflect magnitude of value for this demand
+		coords = self.systemsCanvas.coords(nodeitem)
+		demand = self.G.node[nodeitem][self.v.get()]
+		offset = 10 * (abs(demand) - minDemand) / (maxDemand - minDemand)
+		self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
+
+		# places a label on each visible node indicating whether the demand is positive or negative
+		if demand < 0:
+			self.systemsCanvas.create_text(self.G.node[nodeitem]['x_coord'], self.G.node[nodeitem]['y_coord'], 
+				text='-', tag='label', state=DISABLED, fill='white')
+		elif demand > 0:
+			self.systemsCanvas.create_text(self.G.node[nodeitem]['x_coord'], self.G.node[nodeitem]['y_coord'], 
+				text='+', tag='label', state=DISABLED, fill='white')
+		else:
+			self.systemsCanvas.create_text(self.G.node[nodeitem]['x_coord'], self.G.node[nodeitem]['y_coord'], 
+				text='0', tag='label', state=DISABLED, fill='white')
 
 	# creates new system in option menu and only displays nodes with specific system demands
 	def newOptionMenu(self, event):
@@ -497,8 +503,8 @@ class CanvasFrame(Frame):
 
 		# switched to a specific system
 		else:
-			self.minDemand = 1000000000
-			self.maxDemand = -1000000000
+			minDemand = 1000000000
+			maxDemand = -1000000000
 			visibleNodes = []
 
 			# loop through nodes to show/hide based on the current system
@@ -513,29 +519,25 @@ class CanvasFrame(Frame):
 					self.systemsCanvas.itemconfig(nodeitem, state='normal') # change state back to normal
 
 					# find minimum and maximum values for this demand
-					if self.G.node[nodeitem][self.v.get()] < self.minDemand:
-						self.minDemand = self.G.node[nodeitem][self.v.get()]
-					if self.G.node[nodeitem][self.v.get()] > self.maxDemand:
-						self.maxDemand = self.G.node[nodeitem][self.v.get()]
+					if self.G.node[nodeitem][self.v.get()] < minDemand:
+						minDemand = self.G.node[nodeitem][self.v.get()]
+					if self.G.node[nodeitem][self.v.get()] > maxDemand:
+						maxDemand = self.G.node[nodeitem][self.v.get()]
 				else:
 					self.systemsCanvas.itemconfig(nodeitem, state='hidden') # make node hidden
 			
-			if self.minDemand != self.maxDemand:
+			# if they dont all have the same demand (minDemand=maxDemand), 
+			# then scale nodes based on magnitude of demand
+			if minDemand != maxDemand:
 				for nodeitem in visibleNodes:
-					# change size of nodes to reflect magnitude of value for this demand
-					coords = self.systemsCanvas.coords(nodeitem)
-					x = abs(self.G.node[nodeitem][self.v.get()])
-					offset = 10 * (x - self.minDemand) / (self.maxDemand - self.minDemand)
-					self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
+					self.scaleNodeSize(nodeitem, minDemand, maxDemand)
 
 			# loop through edges to show/hide based on whether the nodes are showing or not
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
-				nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
-				try:
-					self.G[nodes[0]][nodes[1]]
-				except KeyError:
-					nodes[0], nodes[1] = nodes[1], nodes[0]
-				if (self.systemsCanvas.itemcget(nodes[0], 'state') == 'normal') and (self.systemsCanvas.itemcget(nodes[1], 'state') == 'normal') and (self.v.get() in self.G.edge[nodes[0]][nodes[1]]):
+				nodes = self.edgeEndpoints(edgeitem)
+				if (self.systemsCanvas.itemcget(nodes[0], 'state') == 'normal') and \
+				   (self.systemsCanvas.itemcget(nodes[1], 'state') == 'normal') and \
+				   (self.v.get() in self.G.edge[nodes[0]][nodes[1]]) :
 					self.systemsCanvas.itemconfig(edgeitem, state='normal')
 					self.systemsCanvas.itemconfig(edgeitem, arrow='last')
 				else:
@@ -547,332 +549,22 @@ class CanvasFrame(Frame):
 			self.hideLabels()
 			self.showLabels()
 
-
-	"""----------------------------------------------------NODE DEGREE ANALYSIS------------------------------------------------------------"""
-	def nodeDegrees(self):
-		if len(self.G.nodes()) > 0 and (not hasattr(self, 'nodeDegreeFrame') or self.nodeDegreeFrame.winfo_exists() == 0) and (not hasattr(self, 'nodeDegreePopup') or self.nodeDegreePopup.winfo_exists() == 0):
-			# mini frame to display node degree analysis graph:
-			self.frameOrWindow = 0 # 0 - frame, 1 - popup window
-			self.nodeDegreeFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
-			self.nodeDegreeFrame.pack_propagate(0)
-			self.nodeDegreeFrame.pack(side='left', anchor='sw')
-
-			# toolbar to store max, min, exit buttons
-			self.toolbarFrame = Frame(self.nodeDegreeFrame, bg='light gray')
-			self.toolbarFrame.pack(side='top', fill='x')
-
-			image = Image.open("exit.png")
-			self.exitImage = ImageTk.PhotoImage(image)
-			exitButton = Button(self.toolbarFrame, image=self.exitImage, highlightbackground='light gray', command=self.analysisExit)
-			image = Image.open("minimize.png")
-			self.minImage = ImageTk.PhotoImage(image)
-			minButton = Button(self.toolbarFrame, image=self.minImage, highlightbackground='light gray', command=self.analysisMin)
-			image = Image.open("maximize.png")
-			self.maxImage = ImageTk.PhotoImage(image)
-			maxButton = Button(self.toolbarFrame, image=self.maxImage, highlightbackground='light gray', command=self.analysisMax)
-
-			exitButton.pack(side='right')
-			maxButton.pack(side='right')
-			minButton.pack(side='right')
-
-			nodeDegrees = nx.degree(self.G)
-			degrees = []
-			for key in nodeDegrees:
-				degrees.append(nodeDegrees[key])
-
-			fig = plt.figure(figsize=(1.2, 0.9)) 
-			ax = fig.add_subplot(1,1,1) # one row, one column, first plot
-			ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left') # Plot the data.
-			ax.tick_params(axis='both', which='major', labelsize=8)
-			ax.tick_params(axis='both', which='minor', labelsize=8)
-			ya = ax.get_yaxis()
-			ya.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
-			xa = ax.get_xaxis()
-			xa.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
-
-			# Add some axis labels.
-			ax.set_xlabel("Degree", fontsize=10)
-			ax.set_ylabel("Frequency", fontsize=10)
-			ax.axis([min(degrees)-1, max(degrees)+1, 0, len(degrees)])
-
-			fig.savefig("histogramplot.png", bbox_inches='tight') # Produce an image.
-			image = Image.open("histogramplot.png")
-			photo = ImageTk.PhotoImage(image)
-
-			label = Label(self.nodeDegreeFrame, image=photo, bg="white")
-			label.image = photo
-			label.pack(expand=1, fill=BOTH)
-
-		# updates node degree graph if tab is pressed again
-		elif hasattr(self, 'frameOrWindow') and self.frameOrWindow == 0:
-			self.nodeDegreeFrame.destroy()
-			self.nodeDegrees()
-		
-		elif hasattr(self, 'frameOrWindow') and self.frameOrWindow == 1:
-			self.nodeDegreePopup.destroy()
-			self.nodeDegrees()
-
-	# destroys either the node frame or popup when exit button is pressed
-	def analysisExit(self):
-		if self.frameOrWindow == 0:
-			self.nodeDegreeFrame.destroy()
-		else:
-			self.nodeDegreePopup.destroy()
-	
-	# docks node popup window into a frame or minimizes frame into just the toolbar when minimize button is pressed
-	def analysisMin(self):
-		if self.frameOrWindow == 1:
-			self.nodeDegreePopup.destroy()
-			self.nodeDegrees()
-		else:
-			self.nodeDegreeFrame.config(height='30')
-	
-	# maximizes toolbar into a docked frame or maximizes frame into a popup window when maximize button is pressed
-	def analysisMax(self):
-		if self.frameOrWindow == 0 and self.nodeDegreeFrame.winfo_height() > 30:
-			self.nodeDegreeFrame.destroy()		
-
-			# popout menu to display node degree analysis graph:
-			nodeDegrees = nx.degree(self.G)
-			self.frameOrWindow = 1
-			self.nodeDegreePopup = Toplevel(self.parent, bg='white')
-			self.nodeDegreePopup.title("Node Degrees")
-			self.nodeDegreePopup.overrideredirect(1)
-			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
-
-			analysisToolbar = Frame(self.nodeDegreePopup, bg='light gray')
-			analysisToolbar.pack(side='top', fill='x')
-			analysisToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
-			analysisToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.nodeDegreePopup))
-
-			image = Image.open("exit.png")
-			self.exitImage2 = ImageTk.PhotoImage(image)
-			exitButton = Button(analysisToolbar, image=self.exitImage2, highlightbackground='light gray', command=self.analysisExit)
-			image = Image.open("minimize.png")
-			self.minImage2 = ImageTk.PhotoImage(image)
-			minButton = Button(analysisToolbar, image=self.minImage2, highlightbackground='light gray', command=self.analysisMin)
-
-			exitButton.pack(side='right')
-			minButton.pack(side='right')
-
-			degrees = []
-			for key in nodeDegrees:
-				degrees.append(nodeDegrees[key])
-
-			# Create figure object and axes object
-			fig = plt.figure(figsize=(6, 5))
-			ax = fig.add_subplot(1,1,1) # one row, one column, first plot
-
-			# plot data and set axis info
-			ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left') # Plot the data.
-			ax.tick_params(axis='both', which='major', labelsize=12)
-			ya = ax.get_yaxis()
-			ya.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
-			xa = ax.get_xaxis()
-			xa.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
-
-			# Add some axis labels.
-			ax.set_xlabel("Degree", fontsize=18)
-			ax.set_ylabel("Frequency", fontsize=19)
-			ax.axis([min(degrees)-1, max(degrees)+1, 0, len(degrees)])
-			# Produce an image.
-			fig.savefig("histogramplot.png", bbox_inches='tight')
-
-			image = Image.open("histogramplot.png")
-			photo = ImageTk.PhotoImage(image)
-
-			label = Label(self.nodeDegreePopup, image=photo, bg="white")
-			label.image = photo
-			label.pack()
-
-		elif self.nodeDegreeFrame.winfo_height() == 30:
-			self.nodeDegreeFrame.config(height=200)
-	"""----------------------------------------------------END NODE DEGREE ANALYSIS-------------------------------------------------------"""
-	# drags popup window to mouse location upon key press release for node degrees and log window
-	def dragWindowStart(self, event):
-		self.startDragX = event.x
-		self.startDragY = event.y
-	
-	def dragWindowEnd(self, event, window):
-		w = window
-		s = w.geometry()
-		geometry = s.split('+')
-		x = int(geometry[1])+event.x-self.startDragX
-		y = int(geometry[2])+event.y-self.startDragY
-		if x>0 and y>0:
-			w.geometry(("%dx%d%+d%+d" % (600, 550, x, y)))
-		elif x>0 and y<0:
-			w.geometry(("%dx%d%+d%+d" % (600, 550, x, 0)))
-		elif x<0 and y>0:
-			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, y)))
-		else:
-			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
-
-	"""---------------------------------------------------------LOG WINDOW----------------------------------------------------------------"""
 	def appendLog(self, text):
-		if (not hasattr(self, 'logFrame') or  not self.logFrame.winfo_exists()) and (not hasattr(self, 'logPopUp') or self.logPopUp.winfo_exists() == 0) :
-			self.logContents += text
+		if (not hasattr(self.dockedWindows, 'logFrame') or not self.dockedWindows.logFrame.winfo_exists()) and \
+		   (not hasattr(self.dockedWindows, 'logPopUp') or self.dockedWindows.logPopUp.winfo_exists() == 0) :
+			self.dockedWindows.logContents += text
 
-		elif self.logFrameOrWindow == 0:
-			self.logText.config(state=NORMAL)
-			self.logText.insert(END, "\n" + text)
-			self.logText.config(state=DISABLED)
-			self.logText.see("end")
+		elif self.dockedWindows.logFrameOrWindow == 0:
+			self.dockedWindows.logText.config(state=NORMAL)
+			self.dockedWindows.logText.insert(END, "\n" + text)
+			self.dockedWindows.logText.config(state=DISABLED)
+			self.dockedWindows.logText.see("end")
 
 		else:
-			self.logPopUpText.config(state=NORMAL)
-			self.logPopUpText.insert(END, "\n" + text)
-			self.logPopUpText.config(state=DISABLED)
-			self.logPopUpText.see("end")
-
-	# log window to display all actions done on gui	
-	def logWindow(self):
-		if (not hasattr(self, 'logFrame') or  not self.logFrame.winfo_exists()) and (not hasattr(self, 'logPopUp') or self.logPopUp.winfo_exists() == 0) :
-			self.logFrameOrWindow = 0
-			self.logFrame = Frame(self.miniFrames, height=200, width=200, bg='white', borderwidth=3, relief='raised')
-			self.logFrame.pack_propagate(0)
-			self.logFrame.pack(side='left', anchor='sw')
-
-			self.logToolbar = Frame(self.logFrame, bg='light gray')
-			self.logToolbar.pack(side='top', fill='x')
-
-			image = Image.open("exit.png")
-			self.exitImage3 = ImageTk.PhotoImage(image)
-			exitButton = Button(self.logToolbar, image=self.exitImage3, highlightbackground='light gray', command=self.logExit)
-			image = Image.open("minimize.png")
-			self.minImage3 = ImageTk.PhotoImage(image)
-			minButton = Button(self.logToolbar, image=self.minImage3, highlightbackground='light gray', command=self.logMin)
-			image = Image.open("maximize.png")
-			self.maxImage3 = ImageTk.PhotoImage(image)
-			maxButton = Button(self.logToolbar, image=self.maxImage3, highlightbackground='light gray', command=self.logMax)
-
-			exitButton.pack(side='right')
-			maxButton.pack(side='right')
-			minButton.pack(side='right')
-
-			self.logScroll = Scrollbar(self.logFrame)
-			self.logScroll.pack(side='right', fill='y')
-			self.logText = Text(self.logFrame, wrap='word', yscrollcommand=self.logScroll.set, bg='white', borderwidth=0)
-			self.logText.pack(expand=1, fill='both')
-			self.logScroll.config(command=self.logText.yview)
-
-			# if there is a log file already started, repopulate that text
-			if hasattr(self, 'logContents'):
-				self.logText.insert(END, self.logContents)
-				self.logText.see("end")
-
-			self.logText.config(state=DISABLED)
-	
-	# destroy frame or popup window when exit button is pressed
-	def logExit(self):
-		if self.logFrameOrWindow == 0:
-			self.logContents = self.logText.get('1.0', END)
-			self.logFrame.destroy()
-		else:
-			self.logPopUp.destroy()
-
-	# docks node popup window into a frame or minimizes frame into just the toolbar when minimize button is pressed
-	def logMin(self):
-		if self.logFrameOrWindow == 0:
-			self.logFrame.config(height='30')
-		else:
-			contents = self.logPopUpText.get('1.0', END)
-			self.logPopUp.destroy()
-			self.logWindow()
-
-			self.logText.config(state=NORMAL)
-			self.logText.insert(END, contents)
-			self.logText.config(state=DISABLED)
-			self.logText.see("end")
-
-	# maximizes toolbar into a docked frame or maximizes frame into a popup window when maximize button is pressed
-	def logMax(self):
-		if self.logFrameOrWindow == 0 and self.logFrame.winfo_height() > 30:
-			contents = self.logText.get('1.0', END)
-			self.logFrame.destroy()
-			
-			self.logFrameOrWindow = 1
-			self.logPopUp = Toplevel(self.parent, bg='white', bd=2, relief=RIDGE)
-			self.logPopUp.overrideredirect(1)
-			self.logPopUp.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
-
-			self.logPopUpToolbar = Frame(self.logPopUp, height=25, width=600, bg='light gray')
-			self.logPopUpToolbar.pack_propagate(0)
-			self.logPopUpToolbar.pack(side='top')
-			self.logPopUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
-			self.logPopUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.logPopUp))
-
-			image = Image.open("exit.png")
-			self.exitImage4 = ImageTk.PhotoImage(image)
-			exitButton = Button(self.logPopUpToolbar, image=self.exitImage4, highlightbackground='light gray', command=self.logExit)
-			image = Image.open("minimize.png")
-			self.minImage4 = ImageTk.PhotoImage(image)
-			minButton = Button(self.logPopUpToolbar, image=self.minImage4, highlightbackground='light gray', command=self.logMin)
-
-			exitButton.pack(side='right')
-			minButton.pack(side='right')
-			
-			self.logPopUpScroll = Scrollbar(self.logPopUp)
-			self.logPopUpScroll.pack(side='right', fill='y')
-			self.logPopUpText = Text(self.logPopUp, wrap='word', yscrollcommand=self.logPopUpScroll.set, bg='white', borderwidth=0)
-			self.logPopUpText.insert(END, contents)
-			self.logPopUpText.config(state=DISABLED)
-			self.logPopUpText.see("end")
-			self.logPopUpText.pack(expand=1, fill='both')
-			self.logPopUpScroll.config(command=self.logPopUpText.yview)
-
-		elif self.logFrame.winfo_height() == 30:
-			self.logFrame.config(height=200)
-	"""--------------------------------------------------END LOG WINDOW-----------------------------------------------------------"""
-
-	def viewComponentGeo(self):
-		plt.close()
-		
-		fig = plt.figure()
-		ax = fig.add_subplot(111, projection='3d')
-		xs = []
-		ys = []
-		zs = []
-
-		for node in self.G.nodes():
-			if self.G.node[node]['Type'] == 'Component':
-				xs.append(self.G.node[node]['x'])
-				ys.append(self.G.node[node]['y'])
-				zs.append(self.G.node[node]['z'])
-
-		ax.scatter(xs, ys, zs, c='r', marker='o')
-		ax.set_xlabel('X Label')
-		ax.set_ylabel('Y Label')
-		ax.set_zlabel('Z Label')
-
-
-		plt.show()
-
-	
-	def viewCompartmentGeo(self):
-		fig = plt.figure()
-		ax = fig.gca(projection='3d')
-		ax.set_aspect("equal")
-
-		a = 2
-		for node in self.G.nodes():
-			if 'Type' in self.G.node[node]:
-				if self.G.node[node]['Type'] == 'Compartment':
-					x = self.G.node[node]['x']
-					y = self.G.node[node]['y']
-					z = self.G.node[node]['z']
-					hSL = a/2
-					r = [-hSL, hSL]
-					rX = [-hSL + x, hSL + x]
-					rY = [-hSL + y, hSL + y]
-					rZ = [-hSL + z, hSL + z]
-					for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
-						if np.sum(np.abs(s-e)) == r[1]-r[0]:
-							ax.plot3D(*zip(s,e), color="b")
-
-		scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
-		ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]]*3)
-		plt.show()
+			self.dockedWindows.logPopUpText.config(state=NORMAL)
+			self.dockedWindows.logPopUpText.insert(END, "\n" + text)
+			self.dockedWindows.logPopUpText.config(state=DISABLED)
+			self.dockedWindows.logPopUpText.see("end")
 
 
 	# Initilizes the toolbar, toolbar buttons, systems menu, and canvas 	
@@ -884,6 +576,7 @@ class CanvasFrame(Frame):
 		self.color = "light blue"
 		self.labels = 0
 		self.prevOption = "All"
+		#self.logContents = ""
 		self.undoStack = []
 		self.redoStack = []
 
@@ -927,7 +620,4 @@ class CanvasFrame(Frame):
 		self.miniFrames.pack_propagate(0)
 		self.miniFrames.pack(side='bottom', fill="both", expand=1)
 
-		# calls log window function
-		self.logWindow()
-
-
+		self.dockedWindows = DockedWindows(self.miniFrames, self.G) # creates docked analysis windows

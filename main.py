@@ -1,5 +1,7 @@
 from Tkinter import *
 from CanvasFrame import *
+from DockedWindows import *
+from Geometry import *
 import networkx as nx
 import tkFileDialog
 import pickle
@@ -113,7 +115,7 @@ class Window(Frame):
 
 		# File Tab
 		fileTab = Menu(menubar, tearoff=0)
-		fileTab.add_command(label="Open...", command=self.open, accelerator=accelPrefix+"O", )
+		fileTab.add_command(label="Open...", command=self.open, accelerator=accelPrefix+"O")
 		fileTab.add_command(label="Save", command=self.save, accelerator=accelPrefix+"S")
 		fileTab.add_command(label="Save As...", command=self.save_as, accelerator=accelPrefix+"Shift-S")
 		fileTab.add_command(label="Exit", command=self.exit, accelerator=accelPrefix+"Q")
@@ -129,14 +131,14 @@ class Window(Frame):
 		viewTab = Menu(menubar, tearoff=0)
 		viewTab.add_command(label="Show Labels", command=self.geoCanvas.showLabels)
 		viewTab.add_command(label="Hide Labels", command=self.geoCanvas.hideLabels)
-		viewTab.add_command(label='Log Window', command=self.geoCanvas.logWindow)
-		viewTab.add_command(label='Component Geometry', command=self.geoCanvas.viewComponentGeo)
-		viewTab.add_command(label='Compartment Geometry', command= self.geoCanvas.viewCompartmentGeo)
+		viewTab.add_command(label='Log Window', command=self.geoCanvas.dockedWindows.logWindow)
+		viewTab.add_command(label='Component Geometry', command=lambda:viewComponentGeo(self.G)) 
+		viewTab.add_command(label='Compartment Geometry', command=lambda:viewCompartmentGeo(self.G))
 		menubar.add_cascade(label="View", menu=viewTab)
 
 		#Analysis Tab
 		analysisTab = Menu(menubar, tearoff=0)
-		analysisTab.add_command(label="Node Degrees", command=self.geoCanvas.nodeDegrees)
+		analysisTab.add_command(label="Node Degrees", command=self.geoCanvas.dockedWindows.nodeDegrees)
 		menubar.add_cascade(label="Analysis", menu=analysisTab)
 
 	def initUI(self):
@@ -144,7 +146,7 @@ class Window(Frame):
 
 		# Create left and right frames and packs them within the parent frame
 		self.leftFrame = Frame(self.parent, bg='light blue', height=700, width=700) #light colored bg to see panel
-		self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=425) #dark colored bg to see panel
+		self.rightFrame = Frame(self.parent, bg="dark gray", height=700, width=350) #dark colored bg to see panel
 
 		self.leftFrame.pack(side="left", fill="both", expand=1)
 		#self.leftFrame.pack_propagate(0)
@@ -152,7 +154,7 @@ class Window(Frame):
 		#self.rightFrame.pack_propagate(0)
 		
 		# Creates a scrollbar on the right frame and corresponding window which it controls
-		self.rightSideCanvas = Canvas(self.rightFrame, height=700, width=350, bg='dark gray', highlightbackground='dark gray', highlightthickness=0)
+		self.rightSideCanvas = Canvas(self.rightFrame, height=700, width=300, bg='dark gray', highlightbackground='dark gray', highlightthickness=0)
 		self.rightCanvasFrame = Frame(self.rightSideCanvas, bg='dark gray')
 		self.vsb = Scrollbar(self.rightFrame, orient="vertical", command=self.rightSideCanvas.yview)
 		self.rightSideCanvas.configure(yscrollcommand=self.vsb.set)
@@ -160,19 +162,15 @@ class Window(Frame):
 		self.vsb.pack(side="right", fill="y")
 		self.rightSideCanvas.pack(side="left", expand=True)
 		self.rightSideCanvas.create_window((0,0), window=self.rightCanvasFrame, anchor="nw")
-
-
-		# Use CanvasFrame to fill left frame
-		self.geoCanvas = CanvasFrame(self.leftFrame, self.rightCanvasFrame, self.G, self.D)
-
-		# enables scrollbar functionality 
-		self.rightCanvasFrame.bind("<Configure>", self.onFrameConfigure)
+		
+		self.geoCanvas = CanvasFrame(self.leftFrame, self.rightCanvasFrame, self.G, self.D) # handles creation of canvas and miniframes
+		self.rightCanvasFrame.bind("<Configure>", self.onFrameConfigure) # enables scrollbar functionality
 
 		self.createTabs()
 
 	# set the right frame window to match the scroll bar configure
 	def onFrameConfigure(self, event):
-		self.rightSideCanvas.configure(scrollregion=self.rightSideCanvas.bbox("all"), width=350, height=700)
+		self.rightSideCanvas.configure(scrollregion=self.rightSideCanvas.bbox("all"), width=300, height=700)
 
 
 def main():
