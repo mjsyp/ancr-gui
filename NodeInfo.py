@@ -185,8 +185,8 @@ class NodeInfo(Frame):
 
 	def saveAttributes(self):
 		titles = ['Name', 'Type', 'x', 'y', 'z', 'EdgeLength', 'Notes']
-		values = [self.nameEntry.get(), self.v.get(), int(self.xEntry.get()), int(self.yEntry.get()), 
-			int(self.zEntry.get()), int(self.edgeEntry.get()), self.notes.get('0.0', END)]
+		values = [self.nameEntry.get(), self.v.get(), float(self.xEntry.get()), float(self.yEntry.get()), 
+			float(self.zEntry.get()), float(self.edgeEntry.get()), self.notes.get('0.0', END)]
 		updated = []
 
 		# for each field, check if value is updated in NetworkX; if not, save and add to 'updated'

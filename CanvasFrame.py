@@ -246,40 +246,10 @@ class CanvasFrame(Frame):
 
 	'''Runs on click after "delete" button is pressed'''
 	def delete(self, event):
-		if self.v.get() == 'All':
-			if self.systemsCanvas.find_withtag(CURRENT):
-				item = self.systemsCanvas.find_withtag(CURRENT)[0]
-
+		if self.systemsCanvas.find_withtag(CURRENT):
+			item = self.systemsCanvas.find_withtag(CURRENT)[0]
 			'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
-			if self.checkTag(item) == 'node':
-				nodeCoords = self.systemsCanvas.coords(item)
-				overlapped = self.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
-				numEdges = 0
-				for x in overlapped:
-					if self.systemsCanvas.type(x) == 'line':
-						# add 'deleted' tag to ea. object x, and make it hidden
-						self.systemsCanvas.addtag_withtag('deleted', x)
-						self.systemsCanvas.itemconfig(x, state='hidden')
-
-						self.undoStack.append(x) # add edge to undo stack
-						self.systemsCanvas.dtag(x, 'edge')
-						self.deleteEdgeNX(x, self.G, self.D)
-						numEdges += 1
-
-				self.systemsCanvas.addtag_withtag('deleted', item)
-				self.systemsCanvas.itemconfig(item, state='hidden')
-				self.systemsCanvas.dtag(item, 'node')
-
-				self.deleteNodeNX(item, self.G, self.D) # delete node from networkX
-				self.G.remove_node(item)
-				self.undoStack.append(item) # add node to undo stack; want this to be on top
-
-				# remove label of node if 'Show Labels' is active
-				if self.labels == 1:
-					self.hideLabels()
-					self.showLabels()
-
-				'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
+			if self.v.get() == 'All':
 				if self.checkTag(item) == 'node':
 					nodeCoords = self.systemsCanvas.coords(item)
 					overlapped = self.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
@@ -303,29 +273,75 @@ class CanvasFrame(Frame):
 					self.G.remove_node(item)
 					self.undoStack.append(item) # add node to undo stack; want this to be on top
 
-					# remove label of node if 'Show Labels' is active
-					if self.labels == 1:
-						self.hideLabels()
-						self.showLabels()
+					'''deletes selected node and any edges overlapping it in both Tkinter and networkX'''
+					if self.checkTag(item) == 'node':
+						nodeCoords = self.systemsCanvas.coords(item)
+						overlapped = self.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
+						numEdges = 0
+						for x in overlapped:
+							if self.systemsCanvas.type(x) == 'line':
+								# add 'deleted' tag to ea. object x, and make it hidden
+								self.systemsCanvas.addtag_withtag('deleted', x)
+								self.systemsCanvas.itemconfig(x, state='hidden')
 
-					# add to log file
-					log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted node " + str(item) + " and associated edges"
-					self.appendLog(log)
-				
-				''' deletes selected edge from networkx and Tkinter '''
-				if self.checkTag(item) == 'edge':
-					self.deleteEdgeNX(item, self.G, self.D)
+								self.undoStack.append(x) # add edge to undo stack
+								self.systemsCanvas.dtag(x, 'edge')
+								self.deleteEdgeNX(x, self.G, self.D)
+								numEdges += 1
+
+						self.systemsCanvas.addtag_withtag('deleted', item)
+						self.systemsCanvas.itemconfig(item, state='hidden')
+						self.systemsCanvas.dtag(item, 'node')
+
+						self.deleteNodeNX(item, self.G, self.D) # delete node from networkX
+						self.G.remove_node(item)
+						self.undoStack.append(item) # add node to undo stack; want this to be on top
+
+						# remove label of node if 'Show Labels' is active
+						if self.labels == 1:
+							self.hideLabels()
+							self.showLabels()
+
+						# add to log file
+						log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted node " + str(item) + " and associated edges"
+						self.appendLog(log)
 					
-					self.undoStack.append(item)
-					self.systemsCanvas.dtag(item, 'edge')
-					self.systemsCanvas.addtag_withtag('deleted', item)
-					self.systemsCanvas.itemconfig(item, state='hidden')
+					''' deletes selected edge from networkx and Tkinter '''
+					if self.checkTag(item) == 'edge':
+						self.deleteEdgeNX(item, self.G, self.D)
+						
+						self.undoStack.append(item)
+						self.systemsCanvas.dtag(item, 'edge')
+						self.systemsCanvas.addtag_withtag('deleted', item)
+						self.systemsCanvas.itemconfig(item, state='hidden')
 
-					# add to log file
-					nodes = [str(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-					log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted edge between node " + nodes[0] + " and node " + nodes[1]
-					log += " (ID = " + str(item) + ")"
-					self.appendLog(log)
+						# add to log file
+						nodes = [str(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+						log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Deleted edge between node " + nodes[0] + " and node " + nodes[1]
+						log += " (ID = " + str(item) + ")"
+						self.appendLog(log)
+			else:
+				if self.checkTag(item) == 'node':
+					nodeCoords = self.systemsCanvas.coords(item)
+					overlapped = self.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
+					for x in overlapped:
+						if self.checkTag(x) == 'edge':
+							self.systemsCanvas.itemconfig(x, state='hidden')
+					self.systemsCanvas.itemconfig(item, state='hidden')
+					del self.G.node[item][self.v.get()]
+				elif self.checkTag(item) == 'edge':
+					nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
+					try:				
+						self.G[nodes[0]][nodes[1]]
+					except KeyError:	
+						nodes[0], nodes[1] = nodes[1], nodes[0]
+					self.systemsCanvas.itemconfig(item, state='hidden')
+					del self.G.edge[nodes[0]][nodes[1]][self.v.get()]
+
+		# remove label of node if 'Show Labels' is active
+		if self.labels == 1:
+			self.hideLabels()
+			self.showLabels()
 
 	"""--------------------------------------------------------END DELETE-----------------------------------------------------------------"""
 
@@ -342,7 +358,7 @@ class CanvasFrame(Frame):
 		# will only move node if it's in All
 		if self.v.get() == 'All':
 			# move node:
-			if (event.x < 0) or (event.x > 700) or (event.y < 0) or (event.y > 500):
+			if (event.x < 0) or (event.x > self.systemsCanvas.winfo_width()) or (event.y < 0) or (event.y > self.systemsCanvas.winfo_height()):
 				return
 
 			if self.nodeDragItem != None:
@@ -868,10 +884,11 @@ class CanvasFrame(Frame):
 		zs = []
 
 		for node in self.G.nodes():
-			if self.G.node[node]['Type'] == 'Component':
-				xs.append(self.G.node[node]['x'])
-				ys.append(self.G.node[node]['y'])
-				zs.append(self.G.node[node]['z'])
+			if 'Type' in self.G.node[node]:
+				if self.G.node[node]['Type'] == 'Component':
+					xs.append(self.G.node[node]['x'])
+					ys.append(self.G.node[node]['y'])
+					zs.append(self.G.node[node]['z'])
 
 		ax.scatter(xs, ys, zs, c='r', marker='o')
 		ax.set_xlabel('X Label')
@@ -882,6 +899,8 @@ class CanvasFrame(Frame):
 		plt.show()
 	
 	def viewCompartmentGeo(self):
+		plt.close()
+
 		fig = plt.figure()
 		ax = fig.gca(projection='3d')
 		ax.set_aspect("equal")
@@ -893,7 +912,8 @@ class CanvasFrame(Frame):
 					x = self.G.node[node]['x']
 					y = self.G.node[node]['y']
 					z = self.G.node[node]['z']
-					hSL = a/2.0
+					hSL = float(a/2)
+					print hSL
 					r = [-hSL, hSL]
 					rX = [-hSL + x, hSL + x]
 					rY = [-hSL + y, hSL + y]
