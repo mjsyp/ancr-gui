@@ -5,7 +5,6 @@ import numpy as np
 from itertools import product, combinations
 import networkx as nx
 
-
 def viewComponentGeo(G):
 	plt.close()
 		
@@ -28,7 +27,6 @@ def viewComponentGeo(G):
 	ax.set_zlabel('Z Label')
 
 	plt.show()
-
 
 def viewCompartmentGeo(G):
 	plt.close()
