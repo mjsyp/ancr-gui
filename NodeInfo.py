@@ -30,7 +30,7 @@ class NodeInfo(Frame):
 
 		# actual dropdown
 		self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.createNewType)
-		self.dropdown.config(highlightbackground=self.color)
+		self.dropdown.config(highlightbackground=self.color, bg=self.color)
 		self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def createNewType(self, event):
@@ -47,7 +47,7 @@ class NodeInfo(Frame):
 				# redraw dropdown
 				self.dropdown.grid_forget()
 				self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.createNewType)
-				self.dropdown.config(highlightbackground=self.color)
+				self.dropdown.config(highlightbackground=self.color, bg=self.color)
 				self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def createDemandLabel(self):
@@ -55,7 +55,7 @@ class NodeInfo(Frame):
  		self.demandLabel = Label(self.propGroup, text="Demands:", bg=self.color, anchor=W)
  		self.demandLabel.grid(row=2, column=0, padx=5, sticky=E)
 
-		self.createDemandBtn = Button(self.propGroup, text="New Demand", command=self.createNewDemand)
+		self.createDemandBtn = Button(self.propGroup, text="New Demand", command=self.createNewDemand, highlightbackground=self.color)
 		self.createDemandBtn.grid(row=2, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 		self.numDemands = 0
@@ -90,7 +90,7 @@ class NodeInfo(Frame):
 			self.leftFrame.dropdown.destroy()
 			self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, 
 				*self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
-			self.leftFrame.dropdown.configure(highlightbackground="light blue")
+			self.leftFrame.dropdown.configure(highlightbackground="light blue", bg='light blue')
 			self.leftFrame.dropdown.pack(side='left')
 
 	def creategeoGroup(self):
@@ -102,12 +102,12 @@ class NodeInfo(Frame):
 		self.geoOption = StringVar()
 		self.geoOption.set(self.geoOptionList[0])
 		self.geoDropdown = OptionMenu(self.geoGroup, self.geoOption, *self.geoOptionList, command=self.geoSwitch)
-		self.geoDropdown.config(highlightbackground=self.color)
+		self.geoDropdown.config(highlightbackground=self.color, bg=self.color)
 		self.geoDropdown.grid(row=0, column=1, columnspan=2, pady=5, sticky=E+W)
 
 		self.createSimpleGeoLabel()
 
-	def geoSwitch(self, event):
+	def geoSwitch(self, event=None):
 		# destroy current widgets in this group
 		for widget in self.geoGroup.winfo_children():
 			if widget != self.geoDropdown:
@@ -115,8 +115,24 @@ class NodeInfo(Frame):
 
 		if self.geoOption.get() == "Simple":
 			self.createSimpleGeoLabel()
+			self.xEntry.delete(0, END)
+			self.xEntry.insert(0, 0)
+			self.yEntry.delete(0, END)
+			self.yEntry.insert(0, 0)
+			self.zEntry.delete(0, END)
+			self.zEntry.insert(0, 0)
+			self.edgeEntry.delete(0, END)
+			self.edgeEntry.insert(0, 0)
 		else:
 			self.createAdvGeoLabel()
+			self.xEntry.delete(0, END)
+			self.xEntry.insert(0, 0)
+			self.yEntry.delete(0, END)
+			self.yEntry.insert(0, 0)
+			self.zEntry.delete(0, END)
+			self.zEntry.insert(0, 0)
+			self.edgeEntry.delete(0, END)
+			self.edgeEntry.insert(0, 0)
 
 	def createSimpleGeoLabel(self):
 		self.geoGroup.columnconfigure(1, weight=1)
@@ -147,10 +163,17 @@ class NodeInfo(Frame):
 	def createAdvGeoLabel(self):
 		self.numCoords = 1
 		self.geoDropdown.grid(row=0, column=0, columnspan=8, pady=5, sticky=E+W)
+
+		# initilize entry widget lists
+		self.xEntryList = []
+		self.yEntryList = []
+		self.zEntryList = []
+		self.edgeEntryList = []
+		
 		self.createNewGeo()
 
 		# create new button
-		self.newCoordBtn = Button(self.geoGroup, text="Create New", command=self.createNewGeo)
+		self.newCoordBtn = Button(self.geoGroup, text="Create New", command=self.createNewGeo, bg=self.color, highlightbackground=self.color)
 		self.newCoordBtn.grid(row=self.numCoords, column=6, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def createNewGeo(self):
@@ -159,22 +182,26 @@ class NodeInfo(Frame):
 		self.xLabel.grid(row=self.numCoords, column=0, padx=(5, 0), pady=(0, 5))
 		self.xEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.xEntry.grid(row=self.numCoords, column=1, pady=(0, 5))
+		self.xEntryList.append(self.xEntry)
 
 		self.yLabel = Label(self.geoGroup, text="y", bg=self.color)
 		self.yLabel.grid(row=self.numCoords, column=2, padx=(5, 0), pady=(0, 5))
 		self.yEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.yEntry.grid(row=self.numCoords, column=3, pady=(0, 5))
+		self.yEntryList.append(self.yEntry)
 
 		self.zLabel = Label(self.geoGroup, text="z", bg=self.color)
 		self.zLabel.grid(row=self.numCoords, column=4, padx=(5, 0), pady=(0, 5))
 		self.zEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.zEntry.grid(row=self.numCoords, column=5, pady=(0, 5))
+		self.zEntryList.append(self.zEntry)
 
 		# Edge Length Parameter
 		self.edgeLabel = Label(self.geoGroup, text="Edge Length", bg=self.color)
 		self.edgeLabel.grid(row=self.numCoords, column=6, padx=(5, 0), pady=(0, 5))
 		self.edgeEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.edgeEntry.grid(row=self.numCoords, column=7, padx=(0, 5), pady=(0, 5))
+		self.edgeEntryList.append(self.edgeEntry)
 
 		try:
 			self.newCoordBtn.grid(row=self.numCoords+1, column=6, columnspan=2, padx=5, pady=5, sticky=E+W)
@@ -190,21 +217,48 @@ class NodeInfo(Frame):
 			self.nameEntry.insert(0, self.G.node[self.index]['Name'])
 		if 'Type' in self.G.node[self.index] and self.G.node[self.index]['Type'] != None:
 			self.v.set(self.G.node[self.index]['Type'])
-		if 'x' in self.G.node[self.index]:
-			self.xEntry.delete(0, END)
-			self.xEntry.insert(0, self.G.node[self.index]['x'])
-		if 'y' in self.G.node[self.index]:
-			self.yEntry.delete(0, END)
-			self.yEntry.insert(0, self.G.node[self.index]['y'])
-		if 'z' in self.G.node[self.index]:
-			self.zEntry.delete(0, END)
-			self.zEntry.insert(0, self.G.node[self.index]['z'])
-		if 'EdgeLength' in self.G.node[self.index] and self.G.node[self.index]['EdgeLength'] != None:
-			self.edgeEntry.delete(0, END)
-			self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'])
 		if 'Notes' in self.G.node[self.index]:
 			self.notes.delete('0.0', END)
 			self.notes.insert('0.0', self.G.node[self.index]['Notes'])
+		
+		try: 
+			int(self.G.node[self.index]['x'])
+			if 'x' in self.G.node[self.index]:
+				self.xEntry.delete(0, END)
+				self.xEntry.insert(0, self.G.node[self.index]['x'])
+			if 'y' in self.G.node[self.index]:
+				self.yEntry.delete(0, END)
+				self.yEntry.insert(0, self.G.node[self.index]['y'])
+			if 'z' in self.G.node[self.index]:
+				self.zEntry.delete(0, END)
+				self.zEntry.insert(0, self.G.node[self.index]['z'])
+			if 'EdgeLength' in self.G.node[self.index] and self.G.node[self.index]['EdgeLength'] != None:
+				self.edgeEntry.delete(0, END)
+				self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'])
+		except TypeError: 
+			self.geoOption.set('Advanced')
+			self.geoSwitch()
+
+			self.xEntry.delete(0, END)
+			self.xEntry.insert(0, self.G.node[self.index]['x'][0])
+			self.yEntry.delete(0, END)
+			self.yEntry.insert(0, self.G.node[self.index]['y'][0])
+			self.zEntry.delete(0, END)
+			self.zEntry.insert(0, self.G.node[self.index]['z'][0])
+			self.edgeEntry.delete(0, END)
+			self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'][0])
+
+			for i in range(0, len(self.G.node[self.index]['x'])-1):
+				self.createNewGeo()
+				self.xEntry.delete(0, END)
+				self.xEntry.insert(0, self.G.node[self.index]['x'][i+1])
+				self.yEntry.delete(0, END)
+				self.yEntry.insert(0, self.G.node[self.index]['y'][i+1])
+				self.zEntry.delete(0, END)
+				self.zEntry.insert(0, self.G.node[self.index]['z'][i+1])
+				self.edgeEntry.delete(0, END)
+				self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'][i+1])
+
         
 		for x in self.manager.systems:
 			if x in self.G.node[self.index]:
@@ -237,9 +291,8 @@ class NodeInfo(Frame):
 				self.leftFrame.scaleNodeSize(nodeitem)
 
 	def saveAttributes(self):
-		titles = ['Name', 'Type', 'x', 'y', 'z', 'EdgeLength', 'Notes']
-		values = [self.nameEntry.get(), self.v.get(), float(self.xEntry.get()), float(self.yEntry.get()), 
-			float(self.zEntry.get()), float(self.edgeEntry.get()), self.notes.get('0.0', END)]
+		titles = ['Name', 'Type', 'Notes']
+		values = [self.nameEntry.get(), self.v.get(), self.notes.get('0.0', END)]
 		updated = []
 
 		# for each field, check if value is updated in NetworkX; if not, save and add to 'updated'
@@ -254,6 +307,38 @@ class NodeInfo(Frame):
 		if self.leftFrame.labels == 1:
 			self.leftFrame.hideLabels()
 			self.leftFrame.showLabels()
+
+		# if node has simple geometry 
+		if self.geoOption.get() == 'Simple':
+			geolist = ['x', 'y', 'z', 'EdgeLength']
+			geovalues = [float(self.xEntry.get()), float(self.yEntry.get()), float(self.zEntry.get()), float(self.edgeEntry.get())]
+
+			# for each field, check if value is updated in NetworkX; if not, save and add to 'updated'
+			for i in range(0, len(geolist)):
+				if (geolist[i] not in self.G.node[self.index]) or (self.G.node[self.index][geolist[i]] != geovalues[i]):
+					self.G.node[self.index][geolist[i]] = geovalues[i]
+
+					# make sure we don't log a save when the value is empty string or endl
+					if geovalues[i] != '' and geovalues[i] != '\n':
+						updated.append(geolist[i])
+		
+		else:
+			geolist = ['x', 'y', 'z', 'EdgeLength']
+			xVals = []
+			yVals = []
+			zVals = []
+			edgeVals = []
+			
+			for i in range(0, len(self.xEntryList)):
+				xVals.append(float(self.xEntryList[i].get()))
+				yVals.append(float(self.yEntryList[i].get()))
+				zVals.append(float(self.zEntryList[i].get()))
+				edgeVals.append(float(self.edgeEntryList[i].get()))
+			
+			self.G.node[self.index]['x'] = xVals
+			self.G.node[self.index]['y'] = yVals
+			self.G.node[self.index]['z'] = zVals
+			self.G.node[self.index]['EdgeLength'] = edgeVals
 
 		# Demands
 		for x in self.manager.systems: # for each system

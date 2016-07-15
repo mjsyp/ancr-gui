@@ -24,9 +24,13 @@ def viewComponentGeo(G):
 	for node in G.nodes():
 		if 'Type' in G.node[node]:
 			if G.node[node]['Type'] == 'Component':
-				xs.append(G.node[node]['x'])
-				ys.append(G.node[node]['y'])
-				zs.append(G.node[node]['z'])
+				try: 
+					int(G.node[node]['x'])
+					xs.append(G.node[node]['x'])
+					ys.append(G.node[node]['y'])
+					zs.append(G.node[node]['z'])
+				except TypeError:
+					pass
 
 	ax.scatter(xs, ys, zs, c='r', marker='o')
 	ax.set_xlabel('X')
@@ -56,18 +60,34 @@ def viewCompartmentGeo(G):
 	for node in G.nodes():
 		if 'Type' in G.node[node]:
 			if G.node[node]['Type'] == 'Compartment':
-				a = G.node[node]['EdgeLength']
-				x = G.node[node]['x']
-				y = G.node[node]['y']
-				z = G.node[node]['z']
-				hSL = float(a/2)
-				r = [-hSL, hSL]
-				rX = [-hSL + x, hSL + x]
-				rY = [-hSL + y, hSL + y]
-				rZ = [-hSL + z, hSL + z]
-				for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
-					if not np.sum(np.abs(s-e)) > a+0.0000001:
-						ax.plot3D(*zip(s,e), color="b")
+				try: 
+					int(G.node[node]['x'])
+					a = G.node[node]['EdgeLength']
+					x = G.node[node]['x']
+					y = G.node[node]['y']
+					z = G.node[node]['z']
+					hSL = float(a/2)
+					r = [-hSL, hSL]
+					rX = [-hSL + x, hSL + x]
+					rY = [-hSL + y, hSL + y]
+					rZ = [-hSL + z, hSL + z]
+					for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
+						if not np.sum(np.abs(s-e)) > a+0.0000001:
+							ax.plot3D(*zip(s,e), color="b")
+				except TypeError:
+					for i in range(0, len(G.node[node]['x'])):	
+						a = G.node[node]['EdgeLength'][i]
+						x = G.node[node]['x'][i]
+						y = G.node[node]['y'][i]
+						z = G.node[node]['z'][i]
+						hSL = float(a/2)
+						r = [-hSL, hSL]
+						rX = [-hSL + x, hSL + x]
+						rY = [-hSL + y, hSL + y]
+						rZ = [-hSL + z, hSL + z]
+						for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
+							if not np.sum(np.abs(s-e)) > a+0.0000001:
+								ax.plot3D(*zip(s,e), color="b")
 
 	scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
 	ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]]*3)

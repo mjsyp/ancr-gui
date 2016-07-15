@@ -489,7 +489,7 @@ class CanvasFrame(Frame):
 				self.v.set(self.optionList[len(self.optionList)-3])
 				self.dropdown.destroy()
 				self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
-				self.dropdown.configure(highlightbackground="light blue")
+				self.dropdown.configure(highlightbackground="light blue", bg='light blue')
 				self.dropdown.pack(side='left')
 
 				# add new system to the list in the Manager class
@@ -614,7 +614,7 @@ class CanvasFrame(Frame):
 		self.v.set(self.optionList[len(self.optionList) - 2])
 
 		self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
-		self.dropdown.configure(highlightbackground="light blue")
+		self.dropdown.configure(highlightbackground="light blue", bg='light blue')
 		self.dropdown.pack(side='left')
 		
 		self.createNodeButton = Button(self.toolbar, text="create node", command=self.createNodeButtonClick, 

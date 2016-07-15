@@ -31,7 +31,7 @@ class EdgeInfo(Frame):
 
 		# actual dropdown
 		self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.createNewType)
-		self.dropdown.config(highlightbackground=self.color)
+		self.dropdown.config(highlightbackground=self.color, bg=self.color)
 		self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def createNewType(self, event):
@@ -48,7 +48,7 @@ class EdgeInfo(Frame):
 				# redraw dropdown
 				self.dropdown.grid_forget()
 				self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.createNewType)
-				self.dropdown.config(highlightbackground=self.color)
+				self.dropdown.config(highlightbackground=self.color, bg=self.color)
 				self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def createDemandLabel(self):
@@ -57,7 +57,7 @@ class EdgeInfo(Frame):
  		self.demandLabel.grid(row=2, column=0, padx=5, sticky=E)
 
 		self.createDemandBtn = Button(self.propGroup, text="New Demand", 
-			command=self.createNewDemand, highlightbackground=self.color)
+			command=self.createNewDemand, highlightbackground=self.color, bg=self.color)
 		self.createDemandBtn.grid(row=2, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 		self.numDemands = 0
@@ -92,7 +92,7 @@ class EdgeInfo(Frame):
 			self.leftFrame.dropdown.destroy()
 			self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, 
 				*self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
-			self.leftFrame.dropdown.configure(highlightbackground="light blue")
+			self.leftFrame.dropdown.configure(highlightbackground="light blue", bg='light blue')
 			self.leftFrame.dropdown.pack(side='left')
 
 	def creategeoGroup(self):
