@@ -87,8 +87,7 @@ class Window(Frame):
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Opened file: " + str(self.filename)
-		self.geoCanvas.appendLog(log)
-				
+		self.geoCanvas.appendLog(log)	
 	# creates the gui menubar
 	def createTabs(self):
 		# Binds submenus to their shortcut key; use ctrl for windows and cmd for OS X

@@ -79,9 +79,8 @@ class CanvasFrame(Frame):
 		self.buttonRelief(self.deleteButton)
 
 		# make nodes and edges green when your cursor scrolls over them
-		if self.v.get() == 'All':
-			self.systemsCanvas.itemconfig('node', activefill='green')
-			self.systemsCanvas.itemconfig('edge', activefill='green')
+		self.systemsCanvas.itemconfig('node', activefill='green')
+		self.systemsCanvas.itemconfig('edge', activefill='green')
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
@@ -96,6 +95,8 @@ class CanvasFrame(Frame):
 		# makes nodes green when you scroll over them in All, and undos activefill on edges
 		if self.v.get() == 'All':
 			self.systemsCanvas.itemconfig('node', activefill='green')
+		else:
+			self.systemsCanvas.itemconfig('node', activefill='red')
 		self.systemsCanvas.itemconfig('edge', activefill='black')
 
 		self.systemsCanvas.unbind('<Button-1>')
