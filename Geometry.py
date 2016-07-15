@@ -1,15 +1,21 @@
+from Tkinter import *
 import matplotlib
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from itertools import product, combinations
 import networkx as nx
-
+from PIL import Image, ImageTk
+from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure 
 
 def viewComponentGeo(G):
-	plt.close()
+	componentgeo = Toplevel()
+	componentgeo.title('Component Geometry')
 		
-	fig = plt.figure()
+	fig = Figure()
+	canvas = FigureCanvasTkAgg(fig, master=componentgeo)
 	ax = fig.add_subplot(111, projection='3d')
 	xs = []
 	ys = []
@@ -23,17 +29,27 @@ def viewComponentGeo(G):
 				zs.append(G.node[node]['z'])
 
 	ax.scatter(xs, ys, zs, c='r', marker='o')
-	ax.set_xlabel('X Label')
-	ax.set_ylabel('Y Label')
-	ax.set_zlabel('Z Label')
+	ax.set_xlabel('X')
+	ax.set_ylabel('Y')
+	ax.set_zlabel('Z')
 
-	plt.show()
-
+	#fig.savefig("componentgeo.png", bbox_inches='tight')
+	
+	canvas.show()
+	canvas.get_tk_widget().configure(borderwidth=0, highlightbackground='gray', highlightcolor='gray', selectbackground='gray')
+	canvas.get_tk_widget().pack()
+	toolbar = NavigationToolbar2TkAgg(canvas, componentgeo)
+	toolbar.update()
+	#canvas._tkcanvas.pack()
 
 def viewCompartmentGeo(G):
-	plt.close()
+	
+	compartmentgeo = Toplevel()
+	compartmentgeo.title("Compartment Geometry")
+	fig = Figure()
 
-	fig = plt.figure()
+	canvas = FigureCanvasTkAgg(fig, master=compartmentgeo)
+	
 	ax = fig.gca(projection='3d')
 	ax.set_aspect("equal")
 
@@ -55,4 +71,13 @@ def viewCompartmentGeo(G):
 
 	scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
 	ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]]*3)
-	plt.show()
+
+	canvas.show()
+	canvas.get_tk_widget().configure(borderwidth=0, highlightbackground='gray', highlightcolor='gray', selectbackground='gray')
+	canvas.get_tk_widget().pack()
+	toolbar = NavigationToolbar2TkAgg(canvas, compartmentgeo)
+	toolbar.update()
+	
+
+
+
