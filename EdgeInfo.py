@@ -19,54 +19,46 @@ class EdgeInfo(Frame):
 		self.initUI()
 
 	def createTypeLabel(self):
-		self.typeLabel = Label(self.parent, text="Type:", bg=self.color, anchor=W)
-		self.typeLabel.grid(row=2, column=0, padx=5, pady=5, sticky=E)
+		self.typeLabel = Label(self.propGroup, text="Type:", bg=self.color)
+		self.typeLabel.grid(row=1, column=0, padx=5, pady=5, sticky=E)
 
 		# initialize default options in dropdown to the list in our Manager
 		self.optionList = self.manager.types
-
-		# Create frame to hold the OptionMenu
-		self.typeMenu = Frame(self.parent, bg=self.color)
-		self.typeMenu.grid(row=2, column=1, padx=5)
 
 		# create a StringVar that holds the selected option in the dropdown
 		self.v = StringVar()
 		self.v.set(self.optionList[0])
 
 		# actual dropdown
-		self.dropdown = OptionMenu(self.typeMenu, self.v, *self.optionList)
-		self.dropdown.config(bg=self.color, highlightbackground=self.color)
-		self.dropdown.grid(row=2, column=1, pady=5)
+		self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.createNewType)
+		self.dropdown.config(highlightbackground=self.color)
+		self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
-		# 'Create New' button
-		self.createTypeBtn = Button(self.parent, text="Create New", 
-			command=self.createNewType, highlightbackground=self.color)
-		self.createTypeBtn.grid(row=2, column=2)
+	def createNewType(self, event):
+		if self.v.get() == "Create New":
+			typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
 
-	def createNewType(self):
-		typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
+			if typeLabel != None:
+				# add to manager and to list in dropdown
+				self.manager.addType(typeLabel)
 
-		if typeLabel != None:
-			# add to manager and to list in dropdown
-			self.manager.addType(typeLabel)
+				# select new 'type' in dropdown
+				self.v.set(self.optionList[len(self.optionList)-2])
 
-			# select new 'type' in dropdown
-			self.v.set(self.optionList[len(self.optionList)-1])
-
-			# redraw dropdown
-			self.dropdown.grid_forget()
-			self.dropdown = OptionMenu(self.typeMenu, self.v, *self.optionList)
-			self.dropdown.config(bg=self.color, highlightbackground=self.color)
-			self.dropdown.grid(row=2, column=1, pady=5)
+				# redraw dropdown
+				self.dropdown.grid_forget()
+				self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.createNewType)
+				self.dropdown.config(highlightbackground=self.color)
+				self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def createDemandLabel(self):
 		# Demand
- 		self.demandLabel = Label(self.parent, text="Demand:", bg=self.color, anchor=W)
- 		self.demandLabel.grid(row=3, column=0, padx=5, sticky=E)
+ 		self.demandLabel = Label(self.propGroup, text="Demands:", bg=self.color, anchor=W)
+ 		self.demandLabel.grid(row=2, column=0, padx=5, sticky=E)
 
-		self.createDemandBtn = Button(self.parent, text="Create New", 
+		self.createDemandBtn = Button(self.propGroup, text="New Demand", 
 			command=self.createNewDemand, highlightbackground=self.color)
-		self.createDemandBtn.grid(row=3, column=1, pady=5)
+		self.createDemandBtn.grid(row=2, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 		self.numDemands = 0
 
@@ -84,19 +76,14 @@ class EdgeInfo(Frame):
 				return
 
 		# Create new label and corresponding entry
-		self.newDemandLabel = Label(self.parent, text=label, bg=self.color)
-		self.newDemandLabel.grid(row=3+self.numDemands, column=1)
-		newEntry = Entry(self.parent, highlightbackground=self.color, width=9)
-		newEntry.grid(row=3+self.numDemands, column=2, padx=10)
+		self.newDemandLabel = Label(self.propGroup, text=label, bg=self.color)
+		self.newDemandLabel.grid(row=2+self.numDemands, column=1)
+		newEntry = Entry(self.propGroup, highlightbackground=self.color, width=9)
+		newEntry.grid(row=2+self.numDemands, column=2, padx=10)
 		self.systemDict[label] = newEntry
 
-		# move widgets down to make room for new demand label
-		self.createDemandBtn.grid(row=4+self.numDemands, column=1, pady=5)
-		for item in self.parent.grid_slaves():
-			if int(item.grid_info()["row"]) > (4 + self.numDemands):
-				newRow = int(item.grid_info()["row"]) + self.numDemands + 1
-				item.grid_configure(row=newRow)
-
+		# move 'Create New' button down
+		self.createDemandBtn.grid(row=3+self.numDemands, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 		self.numDemands += 1
 
 		# add new demand to the main toolbar dropdown
@@ -105,27 +92,35 @@ class EdgeInfo(Frame):
 			self.leftFrame.dropdown.destroy()
 			self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, 
 				*self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
-			self.leftFrame.dropdown.configure(bg="light blue")
+			self.leftFrame.dropdown.configure(highlightbackground="light blue")
 			self.leftFrame.dropdown.pack(side='left')
 
-	def createGeometryLabel(self):
-		self.geometryLabel = Label(self.parent, text="Geometry:", bg=self.color, anchor=W)
-		self.geometryLabel.grid(row=5, column=0, padx=5, sticky=E)
+	def creategeoGroup(self):
+		self.geoGroup = LabelFrame(self.parent, text="Geometry", bg=self.color)
+		#self.geoGroup.grid(row=4, rowspan=3, columnspan=3, padx=10, sticky=E+W)
+		self.geoGroup.grid(row=1, padx=10, sticky=E+W)
 
-		self.xLabel = Label(self.parent, text="x", bg=self.color)
-		self.xLabel.grid(row=5, column=1, padx=1)
-		self.xEntry = Entry(self.parent, highlightbackground=self.color, width=9)
-		self.xEntry.grid(row=5, column=2)
+		self.createSimpleGeoLabel()
 
-		self.yLabel = Label(self.parent, text="y", bg=self.color)
-		self.yLabel.grid(row=6, column=1, padx=1)
-		self.yEntry = Entry(self.parent, highlightbackground=self.color, width=9)
-		self.yEntry.grid(row=6, column=2)
+	def createSimpleGeoLabel(self):
+		self.geoGroup.columnconfigure(1, weight=1)
+		self.geoGroup.columnconfigure(2, weight=1)
 
-		self.zLabel = Label(self.parent, text="z", bg=self.color)
-		self.zLabel.grid(row=7, column=1, padx=1)
-		self.zEntry = Entry(self.parent, highlightbackground=self.color, width=9)
-		self.zEntry.grid(row=7, column=2)
+		# x, y, z coordinate entries
+		self.xLabel = Label(self.geoGroup, text="x", bg=self.color)
+		self.xLabel.grid(row=1, column=1, padx=5, sticky=E+W)
+		self.xEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
+		self.xEntry.grid(row=1, column=2, padx=5, sticky=E+W)
+
+		self.yLabel = Label(self.geoGroup, text="y", bg=self.color)
+		self.yLabel.grid(row=2, column=1, padx=5, sticky=E+W)
+		self.yEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
+		self.yEntry.grid(row=2, column=2, padx=5, sticky=E+W)
+
+		self.zLabel = Label(self.geoGroup, text="z", bg=self.color)
+		self.zLabel.grid(row=3, column=1, padx=5, sticky=E+W)
+		self.zEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
+		self.zEntry.grid(row=3, column=2, padx=5, pady=(1,5), sticky=E+W)
 
 	def repopulateData(self):
 		if ('Name' in self.G.edge[self.nodes[0]][self.nodes[1]]) and (self.G.edge[self.nodes[0]][self.nodes[1]]['Name'] != None):
@@ -184,29 +179,33 @@ class EdgeInfo(Frame):
 		self.leftFrame.appendLog(log)
 
 	def initUI(self):
-		# Name
-		self.nameLabel = Label(self.parent, text="Name:", bg=self.color)
-		self.nameLabel.grid(row=1, column=0, padx=5, pady=5, sticky=E)
+		self.propGroup = LabelFrame(self.parent, text="Properties", bg=self.color)
+		self.propGroup.grid(row=0, padx=10, sticky=E+W)
 
-		self.nameEntry = Entry(self.parent, highlightbackground=self.color)
-		self.nameEntry.grid(row=1, column=1, columnspan=2, sticky=E+W, padx=5)
+		# Name
+		self.nameLabel = Label(self.propGroup, text="Name:", bg=self.color)
+		self.nameLabel.grid(row=0, column=0, padx=5, pady=(5, 1), sticky=E)
+		self.nameEntry = Entry(self.propGroup, highlightbackground=self.color)
+		self.nameEntry.grid(row=0, column=1, columnspan=2, padx=5, pady=(5, 1), sticky=E+W)
+
+		# Type, Demand
+		self.createTypeLabel()
+		self.createDemandLabel()
+
+		# Geometry
+		self.creategeoGroup()
 
 		# Notes
-		self.notesLabel = Label(self.parent, text="Notes:", bg=self.color)
-		self.notesLabel.grid(row=8, column=0, padx=5, sticky=E)
-		self.notes = Text(self.parent, height=8, width=1, font='TkDefaultFont')
-		self.notes.grid(row=8, column=1, columnspan=2, rowspan=8, pady=10, padx=5, sticky=E+W)
-
+		self.notesGroup = LabelFrame(self.parent, text="Notes", bg=self.color)
+		self.notesGroup.grid(row=2, padx=10, sticky=E+W)
+		self.notes = Text(self.notesGroup, font='TkDefaultFont', width=1, height=12)
+		self.notesGroup.columnconfigure(0, weight=1)
+		self.notes.grid(row=0, column=0, padx=5, pady=(1, 5), sticky=E+W)
+		
 		# save button
 		self.saveBtn = Button(self.parent, text="Save", command=self.saveAttributes, 
 			highlightbackground=self.color)
-		self.saveBtn.grid(row=16, column=2, padx=5, pady=5, sticky=E)
-
-		# Type, Demand, Geometry
-		self.createTypeLabel()
-		self.createGeometryLabel()
-		self.createDemandLabel() # create demand last bc placement relies on type and geometry labels
+		self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
 
 		# if node attributes have been set previously, populate right pane using the existing data
 		self.repopulateData()
-
