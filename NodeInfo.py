@@ -161,27 +161,28 @@ class NodeInfo(Frame):
 
 	def updateNodeSizes(self):
 		if self.leftFrame.v.get() != 'All' and self.leftFrame.v.get() != 'Create New':
-			# update min and max vals
-			if self.G.node[self.index][self.leftFrame.v.get()] < self.leftFrame.minDemand:
-				self.leftFrame.minDemand = self.G.node[self.index][self.leftFrame.v.get()]
-			if self.G.node[self.index][self.leftFrame.v.get()] > self.leftFrame.maxDemand:
-				self.leftFrame.maxDemand = self.G.node[self.index][self.leftFrame.v.get()]
+			self.leftFrame.minDemand = 1000000000
+			self.leftFrame.maxDemand = -1
+			visibleNodes = []
 
-			for node in self.leftFrame.systemsCanvas.find_withtag('node'):
-				if self.leftFrame.systemsCanvas.itemcget(node, 'state') == 'normal':
-					# change sizes of nodes back to normal
-					coords = self.leftFrame.systemsCanvas.coords(node)
-					midpointX = (coords[0] + coords[2]) / 2
-					midpointY = (coords[1] + coords[3]) / 2
-					r = 8
-					self.leftFrame.systemsCanvas.coords(node, midpointX-8, midpointY-8, midpointX+8, midpointY+8)
+			for nodeitem in self.leftFrame.systemsCanvas.find_withtag('node'):
+				if self.leftFrame.v.get() in self.G.node[nodeitem]:
+					visibleNodes.append(nodeitem) # add to a list of visible nodes
 
-					# update size of nodes to reflect magnitude of value for this demand
-					coords = self.leftFrame.systemsCanvas.coords(node)
-					x = self.G.node[node][self.leftFrame.v.get()]
-					offset = 10 * (x - self.leftFrame.minDemand) / (self.leftFrame.maxDemand - self.leftFrame.minDemand)
-					self.leftFrame.systemsCanvas.coords(node, coords[0]-offset, coords[1]-offset, 
-						coords[2]+offset, coords[3]+offset)
+					# find minimum and maximum values for this demand
+					thisDemand = self.G.node[nodeitem][self.leftFrame.v.get()]
+					if abs(thisDemand) < self.leftFrame.minDemand:
+						self.leftFrame.minDemand = abs(thisDemand)
+					if abs(thisDemand) > self.leftFrame.maxDemand:
+						self.leftFrame.maxDemand = abs(thisDemand)
+
+			# delete old '+' or '-' labels
+			self.leftFrame.systemsCanvas.delete('label')
+
+			for nodeitem in visibleNodes:
+				# update node sizes
+				self.leftFrame.normalNodeSize(nodeitem)
+				self.leftFrame.scaleNodeSize(nodeitem)
 
 	def saveAttributes(self):
 		titles = ['Name', 'Type', 'x', 'y', 'z', 'EdgeLength', 'Notes']

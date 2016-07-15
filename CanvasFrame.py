@@ -5,9 +5,6 @@ from NodeInfo import *
 from EdgeInfo import *
 import tkSimpleDialog
 import networkx as nx
-import matplotlib
-from matplotlib import pyplot as plt
-from PIL import Image, ImageTk
 from datetime import datetime
 
 class CanvasFrame(Frame):
@@ -464,25 +461,22 @@ class CanvasFrame(Frame):
 		midpointY = (coords[1] + coords[3]) / 2
 		self.systemsCanvas.coords(item, midpointX-8, midpointY-8, midpointX+8, midpointY+8)
 
-		self.systemsCanvas.delete('label')
-
-	def scaleNodeSize(self, nodeitem, minDemand, maxDemand):
+	def scaleNodeSize(self, nodeitem):
 		# change size of nodes to reflect magnitude of value for this demand
 		coords = self.systemsCanvas.coords(nodeitem)
 		demand = self.G.node[nodeitem][self.v.get()]
-		offset = 10 * (abs(demand) - minDemand) / (maxDemand - minDemand)
+		offset = 10 * (abs(demand) - self.minDemand) / (self.maxDemand - self.minDemand)
 		self.systemsCanvas.coords(nodeitem, coords[0]-offset, coords[1]-offset, coords[2]+offset, coords[3]+offset)
 
 		# places a label on each visible node indicating whether the demand is positive or negative
 		if demand < 0:
-			self.systemsCanvas.create_text(self.G.node[nodeitem]['x_coord'], self.G.node[nodeitem]['y_coord'], 
-				text='-', tag='label', state=DISABLED, fill='white')
+			labelText = '-'
 		elif demand > 0:
-			self.systemsCanvas.create_text(self.G.node[nodeitem]['x_coord'], self.G.node[nodeitem]['y_coord'], 
-				text='+', tag='label', state=DISABLED, fill='white')
+			labelText = '+'
 		else:
-			self.systemsCanvas.create_text(self.G.node[nodeitem]['x_coord'], self.G.node[nodeitem]['y_coord'], 
-				text='0', tag='label', state=DISABLED, fill='white')
+			labelText = '0'
+		self.systemsCanvas.create_text(self.G.node[nodeitem]['x_coord'], self.G.node[nodeitem]['y_coord'], 
+			text=labelText, tag='label', state=DISABLED, fill='white')
 
 	# creates new system in option menu and only displays nodes with specific system demands
 	def newOptionMenu(self, event):
@@ -519,6 +513,7 @@ class CanvasFrame(Frame):
 			for nodeitem in self.systemsCanvas.find_withtag('node'):
 				self.systemsCanvas.itemconfig(nodeitem, state='normal')
 				self.normalNodeSize(nodeitem)
+				self.systemsCanvas.delete('label')
 
 			# make all edges visible and remove arrows
 			for edgeitem in self.systemsCanvas.find_withtag('edge'):
@@ -529,45 +524,47 @@ class CanvasFrame(Frame):
 
 		# switched to a specific system
 		else:
-			minDemand = 1000000000
-			maxDemand = -1000000000
-			visibleNodes = []
+			if self.prevOption != self.v.get():
+				self.minDemand = 1000000000
+				self.maxDemand = -1
+				visibleNodes = []
 
-			# loop through nodes to show/hide based on the current system
-			# also change sizes of nodes back to normal so they don't keep growing
-			# also figure out what the min and max value for the current demand is
-			for nodeitem in self.systemsCanvas.find_withtag('node'):
-				self.normalNodeSize(nodeitem) # change size of each node back to normal
+				# loop through nodes to show/hide based on the current system
+				# also change sizes of nodes back to normal so they don't keep growing
+				# also figure out what the min and max value for the current demand is
+				for nodeitem in self.systemsCanvas.find_withtag('node'):
+					self.normalNodeSize(nodeitem) # change size of each node back to normal
+					self.systemsCanvas.delete('label') # remove '+' or '-' label
 
-				# if nodeitem has a value for this demand (self.v.get())
-				if self.v.get() in self.G.node[nodeitem]:
-					visibleNodes.append(nodeitem) # add to a list of visible nodes
-					self.systemsCanvas.itemconfig(nodeitem, state='normal') # change state back to normal
+					# if nodeitem has a value for this demand (self.v.get())
+					if self.v.get() in self.G.node[nodeitem]:
+						visibleNodes.append(nodeitem) # add to a list of visible nodes
+						self.systemsCanvas.itemconfig(nodeitem, state='normal') # change state back to normal
 
-					# find minimum and maximum values for this demand
-					if self.G.node[nodeitem][self.v.get()] < minDemand:
-						minDemand = self.G.node[nodeitem][self.v.get()]
-					if self.G.node[nodeitem][self.v.get()] > maxDemand:
-						maxDemand = self.G.node[nodeitem][self.v.get()]
-				else:
-					self.systemsCanvas.itemconfig(nodeitem, state='hidden') # make node hidden
-			
-			# if they dont all have the same demand (minDemand=maxDemand), 
-			# then scale nodes based on magnitude of demand
-			if minDemand != maxDemand:
-				for nodeitem in visibleNodes:
-					self.scaleNodeSize(nodeitem, minDemand, maxDemand)
+						# find minimum and maximum values for this demand
+						thisDemand = self.G.node[nodeitem][self.v.get()]
+						if abs(thisDemand) < self.minDemand:
+							self.minDemand = abs(thisDemand)
+						if abs(thisDemand) > self.maxDemand:
+							self.maxDemand = abs(thisDemand)
+					else:
+						self.systemsCanvas.itemconfig(nodeitem, state='hidden') # make node hidden
+				
+				# if they dont all have the same demand (minDemand=maxDemand)
+				if self.minDemand != self.maxDemand:
+					for nodeitem in visibleNodes:
+						self.scaleNodeSize(nodeitem) # then scale nodes based on magnitude of demand
 
-			# loop through edges to show/hide based on whether the nodes are showing or not
-			for edgeitem in self.systemsCanvas.find_withtag('edge'):
-				nodes = self.edgeEndpoints(edgeitem)
-				if (self.systemsCanvas.itemcget(nodes[0], 'state') == 'normal') and \
-				   (self.systemsCanvas.itemcget(nodes[1], 'state') == 'normal') and \
-				   (self.v.get() in self.G.edge[nodes[0]][nodes[1]]) :
-					self.systemsCanvas.itemconfig(edgeitem, state='normal')
-					self.systemsCanvas.itemconfig(edgeitem, arrow='last')
-				else:
-					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+				# loop through edges to show/hide based on whether the nodes are showing or not
+				for edgeitem in self.systemsCanvas.find_withtag('edge'):
+					nodes = self.edgeEndpoints(edgeitem)
+					if (self.systemsCanvas.itemcget(nodes[0], 'state') == 'normal') and \
+					   (self.systemsCanvas.itemcget(nodes[1], 'state') == 'normal') and \
+					   (self.v.get() in self.G.edge[nodes[0]][nodes[1]]) :
+						self.systemsCanvas.itemconfig(edgeitem, state='normal')
+						self.systemsCanvas.itemconfig(edgeitem, arrow='last')
+					else:
+						self.systemsCanvas.itemconfig(edgeitem, state='hidden')
 
 			self.prevOption = self.v.get()
 
