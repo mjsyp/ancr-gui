@@ -306,7 +306,7 @@ class DockedWindows(Frame):
 
 		x = r * math.cos(angle) + 100
 		y = r * math.sin(angle) + 75
-		return (x, y)
+		return [x, y]
 
 	def showSubNetwork(self, node):
 		if (not hasattr(self, 'subNetworkFrame') or  not self.subNetworkFrame.winfo_exists()) and (not hasattr(self, 'subNetworkPopUp') or self.subNetworkPopUp.winfo_exists() == 0) :
@@ -321,7 +321,7 @@ class DockedWindows(Frame):
 			self.subNetworktoolbar = Frame(self.subNetworkFrame, bg='light gray')
 			self.subNetworktoolbar.pack(side='top', fill='x')
 
-			self.frameCanvas = Canvas(self.subNetworkFrame, width=200, height=150, bg='white')
+			self.frameCanvas = Canvas(self.subNetworkFrame, width=200, height=180, bg='white')
 			self.frameCanvas.pack(side='bottom')
 
 			image = Image.open("exit.png") 
@@ -342,8 +342,8 @@ class DockedWindows(Frame):
 			try: # simple geometry
 				int(x)
 			except TypeError: # advanced geometry
-				for i in range(0, len(x)-1):
-					coord = self.drawPoint(70, i, len(x))
+				for i in range(0, len(x)):
+					coord = self.drawPoint(50, i, len(x))
 					r=4
 					self.frameCanvas.create_oval(coord[0]-r, coord[1]-r, coord[0]+r, coord[1]+r, fill='red')
 
