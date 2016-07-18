@@ -208,9 +208,8 @@ class NodeEdgeInfo(Frame):
 				self.leftFrame.scaleNodeSize(nodeitem)
 
 	def saveNodeAttributes(self):
-		titles = ['Name', 'Type', 'x', 'y', 'z', 'EdgeLength', 'Notes']
-		values = [self.nameEntry.get(), self.v.get(), float(self.xEntry.get()), float(self.yEntry.get()), 
-			float(self.zEntry.get()), float(self.edgeEntry.get()), self.notes.get('0.0', END)]
+		titles = ['Name', 'Type', 'Notes']
+		values = [self.nameEntry.get(), self.v.get(), self.notes.get('0.0', END)]
 		updated = []
 
 		# for each field, check if value is updated in NetworkX; if not, save and add to 'updated'
@@ -225,6 +224,38 @@ class NodeEdgeInfo(Frame):
 		if self.leftFrame.labels == 1:
 			self.leftFrame.hideLabels()
 			self.leftFrame.showLabels()
+
+		# if node has simple geometry 
+		if self.geoOption.get() == 'Simple':
+			geolist = ['x', 'y', 'z', 'EdgeLength']
+			geovalues = [float(self.xEntry.get()), float(self.yEntry.get()), float(self.zEntry.get()), float(self.edgeEntry.get())]
+
+			# for each field, check if value is updated in NetworkX; if not, save and add to 'updated'
+			for i in range(0, len(geolist)):
+				if (geolist[i] not in self.G.node[self.index]) or (self.G.node[self.index][geolist[i]] != geovalues[i]):
+					self.G.node[self.index][geolist[i]] = geovalues[i]
+
+					# make sure we don't log a save when the value is empty string or endl
+					if geovalues[i] != '' and geovalues[i] != '\n':
+						updated.append(geolist[i])
+		
+		else:
+			geolist = ['x', 'y', 'z', 'EdgeLength']
+			xVals = []
+			yVals = []
+			zVals = []
+			edgeVals = []
+			
+			for i in range(0, len(self.xEntryList)):
+				xVals.append(float(self.xEntryList[i].get()))
+				yVals.append(float(self.yEntryList[i].get()))
+				zVals.append(float(self.zEntryList[i].get()))
+				edgeVals.append(float(self.edgeEntryList[i].get()))
+			
+			self.G.node[self.index]['x'] = xVals
+			self.G.node[self.index]['y'] = yVals
+			self.G.node[self.index]['z'] = zVals
+			self.G.node[self.index]['EdgeLength'] = edgeVals
 
 		# Demands
 		for x in self.manager.systems: # for each system
@@ -284,21 +315,48 @@ class NodeEdgeInfo(Frame):
 			self.nameEntry.insert(0, self.G.node[self.index]['Name'])
 		if 'Type' in self.G.node[self.index] and self.G.node[self.index]['Type'] != None:
 			self.v.set(self.G.node[self.index]['Type'])
-		if 'x' in self.G.node[self.index]:
-			self.xEntry.delete(0, END)
-			self.xEntry.insert(0, self.G.node[self.index]['x'])
-		if 'y' in self.G.node[self.index]:
-			self.yEntry.delete(0, END)
-			self.yEntry.insert(0, self.G.node[self.index]['y'])
-		if 'z' in self.G.node[self.index]:
-			self.zEntry.delete(0, END)
-			self.zEntry.insert(0, self.G.node[self.index]['z'])
-		if 'EdgeLength' in self.G.node[self.index] and self.G.node[self.index]['EdgeLength'] != None:
-			self.edgeEntry.delete(0, END)
-			self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'])
 		if 'Notes' in self.G.node[self.index]:
 			self.notes.delete('0.0', END)
 			self.notes.insert('0.0', self.G.node[self.index]['Notes'])
+		
+		try: 
+			int(self.G.node[self.index]['x'])
+			if 'x' in self.G.node[self.index]:
+				self.xEntry.delete(0, END)
+				self.xEntry.insert(0, self.G.node[self.index]['x'])
+			if 'y' in self.G.node[self.index]:
+				self.yEntry.delete(0, END)
+				self.yEntry.insert(0, self.G.node[self.index]['y'])
+			if 'z' in self.G.node[self.index]:
+				self.zEntry.delete(0, END)
+				self.zEntry.insert(0, self.G.node[self.index]['z'])
+			if 'EdgeLength' in self.G.node[self.index] and self.G.node[self.index]['EdgeLength'] != None:
+				self.edgeEntry.delete(0, END)
+				self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'])
+		except TypeError: 
+			self.geoOption.set('Advanced')
+			self.geoSwitch()
+
+			self.xEntry.delete(0, END)
+			self.xEntry.insert(0, self.G.node[self.index]['x'][0])
+			self.yEntry.delete(0, END)
+			self.yEntry.insert(0, self.G.node[self.index]['y'][0])
+			self.zEntry.delete(0, END)
+			self.zEntry.insert(0, self.G.node[self.index]['z'][0])
+			self.edgeEntry.delete(0, END)
+			self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'][0])
+
+			for i in range(0, len(self.G.node[self.index]['x'])-1):
+				self.createNewGeo()
+				self.xEntry.delete(0, END)
+				self.xEntry.insert(0, self.G.node[self.index]['x'][i+1])
+				self.yEntry.delete(0, END)
+				self.yEntry.insert(0, self.G.node[self.index]['y'][i+1])
+				self.zEntry.delete(0, END)
+				self.zEntry.insert(0, self.G.node[self.index]['z'][i+1])
+				self.edgeEntry.delete(0, END)
+				self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'][i+1])
+
         
 		for x in self.manager.systems:
 			if x in self.G.node[self.index]:

@@ -180,7 +180,6 @@ def main():
 	#nx.draw(app.G)
 	#plt.show()
 
-
 if __name__ == '__main__':
 	main()
 	

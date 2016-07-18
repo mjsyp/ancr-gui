@@ -487,7 +487,7 @@ class CanvasFrame(Frame):
 				self.optionList.insert(len(self.optionList)-2, typeLabel)
 				self.dropdown.destroy()
 				self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
-				self.dropdown.configure(highlightbackground="light blue")
+				self.dropdown.configure(highlightbackground="light blue", bg='light blue')
 				self.dropdown.pack(side='left')
 
 				# add new system to the list in the Manager class
