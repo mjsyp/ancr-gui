@@ -3,6 +3,7 @@ import networkx as nx
 import matplotlib
 from matplotlib import pyplot as plt
 from PIL import Image, ImageTk
+import math
 
 class DockedWindows(Frame):
 	def __init__(self, parent, G):
@@ -295,7 +296,17 @@ class DockedWindows(Frame):
 			self.logFrame.config(height=200)
 
 	''' -----------------------------------------------------END LOG WINDOW-----------------------------------------------------'''
+
+
+
 	''' ----------------------------------------------------SUB NETWORK---------------------------------------------------------'''
+	def drawPoint(self, r, currPointIndex, totalNumPoints):
+		theta = (math.pi * 2) / totalNumPoints
+		angle = theta * currPointIndex
+
+		x = r * math.cos(angle) + 100
+		y = r * math.sin(angle) + 75
+		return (x, y)
 
 	def showSubNetwork(self, node):
 		if (not hasattr(self, 'subNetworkFrame') or  not self.subNetworkFrame.winfo_exists()) and (not hasattr(self, 'subNetworkPopUp') or self.subNetworkPopUp.winfo_exists() == 0) :
@@ -328,11 +339,13 @@ class DockedWindows(Frame):
 			minButton.pack(side='right')
 
 			x = self.G.node[self.selectedNode]['x']
-			try:
-				int(self.G.node[self.selectedNode]['x'])
-
-			except TypeError:
-				pass
+			try: # simple geometry
+				int(x)
+			except TypeError: # advanced geometry
+				for i in range(0, len(x)-1):
+					coord = self.drawPoint(70, i, len(x))
+					r=4
+					self.frameCanvas.create_oval(coord[0]-r, coord[1]-r, coord[0]+r, coord[1]+r, fill='red')
 
 		# updates node degree graph if tab is pressed again
 		elif hasattr(self, 'SubNeworkFrameOrWindow') and self.SubNeworkFrameOrWindow == 0:
