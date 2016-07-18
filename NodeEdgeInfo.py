@@ -106,16 +106,32 @@ class NodeEdgeInfo(Frame):
 
 		self.createSimpleGeoLabel()
 
-	def geoSwitch(self, event):
+	def geoSwitch(self, event=None):
 		# destroy current widgets in this group
 		for widget in self.geoGroup.winfo_children():
 			if widget != self.geoDropdown:
-				widget.grid_forget()
+				widget.destroy()
 
 		if self.geoOption.get() == "Simple":
 			self.createSimpleGeoLabel()
+			self.xEntry.delete(0, END)
+			self.xEntry.insert(0, 0)
+			self.yEntry.delete(0, END)
+			self.yEntry.insert(0, 0)
+			self.zEntry.delete(0, END)
+			self.zEntry.insert(0, 0)
+			self.edgeEntry.delete(0, END)
+			self.edgeEntry.insert(0, 0)
 		else:
 			self.createAdvGeoLabel()
+			self.xEntry.delete(0, END)
+			self.xEntry.insert(0, 0)
+			self.yEntry.delete(0, END)
+			self.yEntry.insert(0, 0)
+			self.zEntry.delete(0, END)
+			self.zEntry.insert(0, 0)
+			self.edgeEntry.delete(0, END)
+			self.edgeEntry.insert(0, 0)
 
 	def createSimpleGeoLabel(self):
 		self.geoGroup.columnconfigure(0, weight=1)
@@ -146,6 +162,13 @@ class NodeEdgeInfo(Frame):
 	def createAdvGeoLabel(self):
 		self.numCoords = 1
 		self.geoDropdown.grid(row=0, column=0, columnspan=8, pady=5, sticky=E+W)
+
+		# initilize entry widget lists
+		self.xEntryList = []
+		self.yEntryList = []
+		self.zEntryList = []
+		self.edgeEntryList = []
+		
 		self.createNewGeo()
 
 		# create new button
@@ -158,22 +181,26 @@ class NodeEdgeInfo(Frame):
 		self.xLabel.grid(row=self.numCoords, column=0, padx=(5, 0), pady=(0, 5))
 		self.xEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.xEntry.grid(row=self.numCoords, column=1, pady=(0, 5))
+		self.xEntryList.append(self.xEntry)
 
 		self.yLabel = Label(self.geoGroup, text="y", bg=self.color)
 		self.yLabel.grid(row=self.numCoords, column=2, padx=(5, 0), pady=(0, 5))
 		self.yEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.yEntry.grid(row=self.numCoords, column=3, pady=(0, 5))
+		self.yEntryList.append(self.yEntry)
 
 		self.zLabel = Label(self.geoGroup, text="z", bg=self.color)
 		self.zLabel.grid(row=self.numCoords, column=4, padx=(5, 0), pady=(0, 5))
 		self.zEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.zEntry.grid(row=self.numCoords, column=5, pady=(0, 5))
+		self.zEntryList.append(self.zEntry)
 
 		# Edge Length Parameter
 		self.edgeLabel = Label(self.geoGroup, text="Edge Length", bg=self.color)
 		self.edgeLabel.grid(row=self.numCoords, column=6, padx=(5, 0), pady=(0, 5))
 		self.edgeEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.edgeEntry.grid(row=self.numCoords, column=7, padx=(0, 5), pady=(0, 5))
+		self.edgeEntryList.append(self.edgeEntry)
 
 		try:
 			self.newCoordBtn.grid(row=self.numCoords+1, column=6, columnspan=2, padx=5, pady=5, sticky=E+W)
@@ -357,11 +384,11 @@ class NodeEdgeInfo(Frame):
 				self.edgeEntry.delete(0, END)
 				self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'][i+1])
 
-        
 		for x in self.manager.systems:
 			if x in self.G.node[self.index]:
 				self.systemDict[x].delete(0, END)
 				self.systemDict[x].insert(0, self.G.node[self.index][x])
+
 
 	def repopulateEdgeData(self):
 		if ('Name' in self.G.edge[self.nodes[0]][self.nodes[1]]) and (self.G.edge[self.nodes[0]][self.nodes[1]]['Name'] != None):
@@ -413,4 +440,3 @@ class NodeEdgeInfo(Frame):
 			self.repopulateEdgeData()
 			self.saveBtn = Button(self.parent, text="Save", command=self.saveEdgeAttributes, highlightbackground=self.color)
 			self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
-
