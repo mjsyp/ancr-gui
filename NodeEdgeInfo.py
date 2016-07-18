@@ -141,23 +141,24 @@ class NodeEdgeInfo(Frame):
 		self.xLabel = Label(self.geoGroup, text="x", bg=self.color)
 		self.xLabel.grid(row=1, column=0, padx=5, sticky=E+W)
 		self.xEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
-		self.xEntry.grid(row=1, column=1, padx=5, sticky=E+W)
-
+		self.xEntry.grid(row=1, column=1, padx=5, sticky=E+W)		
+		
 		self.yLabel = Label(self.geoGroup, text="y", bg=self.color)
 		self.yLabel.grid(row=2, column=0, padx=5, sticky=E+W)
 		self.yEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
-		self.yEntry.grid(row=2, column=1, padx=5, sticky=E+W)
-
+		self.yEntry.grid(row=2, column=1, padx=5, sticky=E+W)		
+		
 		self.zLabel = Label(self.geoGroup, text="z", bg=self.color)
 		self.zLabel.grid(row=3, column=0, padx=5, sticky=E+W)
 		self.zEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
-		self.zEntry.grid(row=3, column=1, padx=5, sticky=E+W)
-
+		self.zEntry.grid(row=3, column=1, padx=5, sticky=E+W)		
+		
 		# Edge Length Parameter
 		self.edgeLabel = Label(self.geoGroup, text="Edge Length", bg=self.color)
 		self.edgeLabel.grid(row=4, column=0, padx=5, sticky=E+W)
 		self.edgeEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
 		self.edgeEntry.grid(row=4, column=1, padx=5, pady=(1, 5), sticky=E+W)
+		
 
 	def createAdvGeoLabel(self):
 		self.numCoords = 1
@@ -181,18 +182,21 @@ class NodeEdgeInfo(Frame):
 		self.xLabel.grid(row=self.numCoords, column=0, padx=(5, 0), pady=(0, 5))
 		self.xEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.xEntry.grid(row=self.numCoords, column=1, pady=(0, 5))
+		self.xEntry.insert(0, 0)
 		self.xEntryList.append(self.xEntry)
 
 		self.yLabel = Label(self.geoGroup, text="y", bg=self.color)
 		self.yLabel.grid(row=self.numCoords, column=2, padx=(5, 0), pady=(0, 5))
 		self.yEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.yEntry.grid(row=self.numCoords, column=3, pady=(0, 5))
+		self.yEntry.insert(0, 0)
 		self.yEntryList.append(self.yEntry)
 
 		self.zLabel = Label(self.geoGroup, text="z", bg=self.color)
 		self.zLabel.grid(row=self.numCoords, column=4, padx=(5, 0), pady=(0, 5))
 		self.zEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.zEntry.grid(row=self.numCoords, column=5, pady=(0, 5))
+		self.zEntry.insert(0, 0)
 		self.zEntryList.append(self.zEntry)
 
 		# Edge Length Parameter
@@ -200,6 +204,7 @@ class NodeEdgeInfo(Frame):
 		self.edgeLabel.grid(row=self.numCoords, column=6, padx=(5, 0), pady=(0, 5))
 		self.edgeEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
 		self.edgeEntry.grid(row=self.numCoords, column=7, padx=(0, 5), pady=(0, 5))
+		self.edgeEntry.insert(0, 0)
 		self.edgeEntryList.append(self.edgeEntry)
 
 		try:

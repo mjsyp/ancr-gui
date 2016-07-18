@@ -3,6 +3,7 @@ import networkx as nx
 import matplotlib
 from matplotlib import pyplot as plt
 from PIL import Image, ImageTk
+import math
 
 class DockedWindows(Frame):
 	def __init__(self, parent, G):
@@ -327,12 +328,14 @@ class DockedWindows(Frame):
 			maxButton.pack(side='right')
 			minButton.pack(side='right')
 
-			x = self.G.node[self.selectedNode]['x']
 			try:
 				int(self.G.node[self.selectedNode]['x'])
+				r = 4
+				self.frameCanvas.create_oval(100-r, 75-r, 100+r, 75+r, fill='red')
 
 			except TypeError:
 				pass
+
 
 		# updates node degree graph if tab is pressed again
 		elif hasattr(self, 'SubNeworkFrameOrWindow') and self.SubNeworkFrameOrWindow == 0:
@@ -364,7 +367,7 @@ class DockedWindows(Frame):
 			popUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
 			popUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.subNetworkPopUp))
 
-			self.frameCanvas = Canvas(self.subNetworkPopUp, width=600, height=550, bg='white')
+			self.frameCanvas = Canvas(self.subNetworkPopUp, width=600, height=500, bg='green')
 			self.frameCanvas.pack(side='bottom')
 
 			image = Image.open("exit.png")
