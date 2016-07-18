@@ -202,6 +202,7 @@ class CanvasFrame(Frame):
 			self.systemsCanvas.itemconfig(CURRENT, fill="green")
 			if self.checkTag(item) == 'node':
 				self.systemInfo = NodeEdgeInfo(self.rightFrame, self, item, self.G, self.manager)
+				self.dockedWindows.showSubNetwork(item)
 			if self.checkTag(item) == 'edge':
 				nodes = self.edgeEndpoints(item)
 				self.systemInfo = NodeEdgeInfo(self.rightFrame, self, item, self.G, self.manager, nodes)

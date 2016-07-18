@@ -12,7 +12,7 @@ class DockedWindows(Frame):
 		self.G = G
 
 		self.initUI()
-
+	"""----------------------------------------------------NODE DEGREE ANALYSIS-------------------------------------------------------"""
 	def nodeDegrees(self):
 		if len(self.G.nodes()) > 0 and \
 		  (not hasattr(self, 'nodeDegreeFrame') or self.nodeDegreeFrame.winfo_exists() == 0) and \
@@ -266,18 +266,18 @@ class DockedWindows(Frame):
 			self.logPopUp.overrideredirect(1)
 			self.logPopUp.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
 
-			self.logPopUpToolbar = Frame(self.logPopUp, height=25, width=600, bg='light gray')
-			self.logPopUpToolbar.pack_propagate(0)
-			self.logPopUpToolbar.pack(side='top')
-			self.logPopUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
-			self.logPopUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.logPopUp))
+			logPopUpToolbar = Frame(self.logPopUp, height=25, width=600, bg='light gray')
+			logPopUpToolbar.pack_propagate(0)
+			logPopUpToolbar.pack(side='top')
+			logPopUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
+			logPopUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.logPopUp))
 
 			image = Image.open("exit.png")
 			self.exitImage4 = ImageTk.PhotoImage(image)
-			exitButton = Button(self.logPopUpToolbar, image=self.exitImage4, highlightbackground='light gray', command=self.logExit)
+			exitButton = Button(logPopUpToolbar, image=self.exitImage4, highlightbackground='light gray', command=self.logExit)
 			image = Image.open("minimize.png")
 			self.minImage4 = ImageTk.PhotoImage(image)
-			minButton = Button(self.logPopUpToolbar, image=self.minImage4, highlightbackground='light gray', command=self.logMin)
+			minButton = Button(logPopUpToolbar, image=self.minImage4, highlightbackground='light gray', command=self.logMin)
 
 			exitButton.pack(side='right')
 			minButton.pack(side='right')
@@ -294,7 +294,102 @@ class DockedWindows(Frame):
 		elif self.logFrame.winfo_height() == 30:
 			self.logFrame.config(height=200)
 
+	''' -----------------------------------------------------END LOG WINDOW-----------------------------------------------------'''
+	''' ----------------------------------------------------SUB NETWORK---------------------------------------------------------'''
 
+	def showSubNetwork(self, node):
+		if (not hasattr(self, 'subNetworkFrame') or  not self.subNetworkFrame.winfo_exists()) and (not hasattr(self, 'subNetworkPopUp') or self.subNetworkPopUp.winfo_exists() == 0) :
+			self.SubNeworkFrameOrWindow = 0 #0 is docked frame, 1 is pop up window
+			self.selectedNode = node
+			
+			self.subNetworkFrame = Frame(self.parent, height=200, width=200, bg='white', borderwidth=3, relief='raised')
+			self.subNetworkFrame.pack_propagate(0)
+			self.subNetworkFrame.pack(side='left', anchor='sw')
+
+			# toolbar to store max, min, exit buttons
+			self.subNetworktoolbar = Frame(self.subNetworkFrame, bg='light gray')
+			self.subNetworktoolbar.pack(side='top', fill='x')
+
+			self.frameCanvas = Canvas(self.subNetworkFrame, width=200, height=150, bg='white')
+			self.frameCanvas.pack(side='bottom')
+
+			image = Image.open("exit.png") 
+			self.exitImage5 = ImageTk.PhotoImage(image)
+			exitButton = Button(self.subNetworktoolbar, image=self.exitImage5, highlightbackground='light gray', command=self.subNetworkExit)
+			image = Image.open("minimize.png")
+			self.minImage5 = ImageTk.PhotoImage(image)
+			minButton = Button(self.subNetworktoolbar, image=self.minImage5, highlightbackground='light gray', command=self.subNetworkMin)
+			image = Image.open("maximize.png")
+			self.maxImage5 = ImageTk.PhotoImage(image)
+			maxButton = Button(self.subNetworktoolbar, image=self.maxImage5, highlightbackground='light gray', command=self.subNetworkMax)
+
+			exitButton.pack(side='right')
+			maxButton.pack(side='right')
+			minButton.pack(side='right')
+
+			x = self.G.node[self.selectedNode]['x']
+			try:
+				int(self.G.node[self.selectedNode]['x'])
+
+			except TypeError:
+				pass
+
+		# updates node degree graph if tab is pressed again
+		elif hasattr(self, 'SubNeworkFrameOrWindow') and self.SubNeworkFrameOrWindow == 0:
+			self.subNetworkFrame.destroy()
+			self.showSubNetwork(self.selectedNode)
+		
+		elif hasattr(self, 'SubNeworkFrameOrWindow') and self.SubNeworkFrameOrWindow == 1:
+			self.subNetworkPopUp.destroy()
+			self.showSubNetwork(self.selectedNode)
+	
+	def subNetworkExit(self):
+		if self.SubNeworkFrameOrWindow == 0:
+			self.subNetworkFrame.destroy()
+		else:
+			self.subNetworkPopUp.destroy()
+	
+	def subNetworkMax(self):
+		if self.SubNeworkFrameOrWindow == 0 and self.subNetworkFrame.winfo_height() > 30:
+			self.subNetworkFrame.destroy()
+
+			self.SubNeworkFrameOrWindow = 1
+			self.subNetworkPopUp = Toplevel(self.parent, bg='white')
+			self.subNetworkPopUp.title("Node Degrees")
+			self.subNetworkPopUp.overrideredirect(1)
+			self.subNetworkPopUp.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
+
+			popUpToolbar = Frame(self.subNetworkPopUp, bg='light gray')
+			popUpToolbar.pack(side='top', fill='x')
+			popUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
+			popUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.subNetworkPopUp))
+
+			self.frameCanvas = Canvas(self.subNetworkPopUp, width=600, height=550, bg='white')
+			self.frameCanvas.pack(side='bottom')
+
+			image = Image.open("exit.png")
+			self.exitImage6 = ImageTk.PhotoImage(image)
+			exitButton = Button(popUpToolbar, image=self.exitImage6, highlightbackground='light gray', command=self.subNetworkExit)
+			image = Image.open("minimize.png")
+			self.minImage6 = ImageTk.PhotoImage(image)
+			minButton = Button(popUpToolbar, image=self.minImage6, highlightbackground='light gray', command=self.subNetworkMin)
+
+			exitButton.pack(side='right')
+			minButton.pack(side='right')
+
+			#do stuff
+
+		elif self.subNetworkFrame.winfo_height() == 30:
+			self.subNetworkFrame.config(height=200)
+	
+	def subNetworkMin(self):
+		if self.SubNeworkFrameOrWindow == 1:
+			self.subNetworkPopUp.destroy()
+			self.showSubNetwork(self.selectedNode)
+		else:
+			self.subNetworkFrame.config(height='30')
+	"""----------------------------------------------------END SUB NETWORK-------------------------------------------------------"""
+	
 	def initUI(self):
 		self.logWindow()
 
