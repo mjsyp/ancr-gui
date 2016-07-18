@@ -347,6 +347,7 @@ class DockedWindows(Frame):
 					r=4
 					self.frameCanvas.create_oval(coord[0]-r, coord[1]-r, coord[0]+r, coord[1]+r, fill='red')
 
+
 		# updates node degree graph if tab is pressed again
 		elif hasattr(self, 'SubNeworkFrameOrWindow') and self.SubNeworkFrameOrWindow == 0:
 			self.subNetworkFrame.destroy()
@@ -377,7 +378,7 @@ class DockedWindows(Frame):
 			popUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
 			popUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.subNetworkPopUp))
 
-			self.frameCanvas = Canvas(self.subNetworkPopUp, width=600, height=550, bg='white')
+			self.frameCanvas = Canvas(self.subNetworkPopUp, width=600, height=500, bg='green')
 			self.frameCanvas.pack(side='bottom')
 
 			image = Image.open("exit.png")
