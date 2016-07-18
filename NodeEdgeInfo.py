@@ -3,8 +3,8 @@ import tkSimpleDialog
 import networkx as nx
 from datetime import datetime
 
-class NodeInfo(Frame):
-	def __init__(self, parent, leftFrame, index, G, manager):
+class NodeEdgeInfo(Frame):
+	def __init__(self, parent, leftFrame, index, G, manager, nodes=None):
 		Frame.__init__(self, parent)
 
 		self.parent = parent
@@ -12,6 +12,7 @@ class NodeInfo(Frame):
 		self.index = index
 		self.G = G
 		self.manager = manager
+		self.nodes=nodes
 
 		self.systemDict = {}
  		self.color = "dark gray" 
@@ -101,7 +102,7 @@ class NodeInfo(Frame):
 		self.geoOption.set(self.geoOptionList[0])
 		self.geoDropdown = OptionMenu(self.geoGroup, self.geoOption, *self.geoOptionList, command=self.geoSwitch)
 		self.geoDropdown.config(highlightbackground=self.color)
-		self.geoDropdown.grid(row=0, column=1, columnspan=2, pady=5, sticky=E+W)
+		self.geoDropdown.grid(row=0, column=0, columnspan=2, pady=5, sticky=E+W)
 
 		self.createSimpleGeoLabel()
 
@@ -109,7 +110,7 @@ class NodeInfo(Frame):
 		# destroy current widgets in this group
 		for widget in self.geoGroup.winfo_children():
 			if widget != self.geoDropdown:
-				widget.destroy()
+				widget.grid_forget()
 
 		if self.geoOption.get() == "Simple":
 			self.createSimpleGeoLabel()
@@ -117,30 +118,30 @@ class NodeInfo(Frame):
 			self.createAdvGeoLabel()
 
 	def createSimpleGeoLabel(self):
-		self.geoGroup.columnconfigure(1, weight=1)
-		self.geoGroup.columnconfigure(2, weight=1)
+		self.geoGroup.columnconfigure(0, weight=1)
+ 		self.geoGroup.columnconfigure(1, weight=1)
 
 		# x, y, z coordinate entries
 		self.xLabel = Label(self.geoGroup, text="x", bg=self.color)
-		self.xLabel.grid(row=1, column=1, padx=5, sticky=E+W)
+		self.xLabel.grid(row=1, column=0, padx=5, sticky=E+W)
 		self.xEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
-		self.xEntry.grid(row=1, column=2, padx=5, sticky=E+W)
+		self.xEntry.grid(row=1, column=1, padx=5, sticky=E+W)
 
 		self.yLabel = Label(self.geoGroup, text="y", bg=self.color)
-		self.yLabel.grid(row=2, column=1, padx=5, sticky=E+W)
+		self.yLabel.grid(row=2, column=0, padx=5, sticky=E+W)
 		self.yEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
-		self.yEntry.grid(row=2, column=2, padx=5, sticky=E+W)
+		self.yEntry.grid(row=2, column=1, padx=5, sticky=E+W)
 
 		self.zLabel = Label(self.geoGroup, text="z", bg=self.color)
-		self.zLabel.grid(row=3, column=1, padx=5, sticky=E+W)
+		self.zLabel.grid(row=3, column=0, padx=5, sticky=E+W)
 		self.zEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
-		self.zEntry.grid(row=3, column=2, padx=5, sticky=E+W)
+		self.zEntry.grid(row=3, column=1, padx=5, sticky=E+W)
 
 		# Edge Length Parameter
 		self.edgeLabel = Label(self.geoGroup, text="Edge Length", bg=self.color)
-		self.edgeLabel.grid(row=4, column=1, padx=5, sticky=E+W)
+		self.edgeLabel.grid(row=4, column=0, padx=5, sticky=E+W)
 		self.edgeEntry = Entry(self.geoGroup, highlightbackground=self.color, width=8)
-		self.edgeEntry.grid(row=4, column=2, padx=5, pady=(1, 5), sticky=E+W)
+		self.edgeEntry.grid(row=4, column=1, padx=5, pady=(1, 5), sticky=E+W)
 
 	def createAdvGeoLabel(self):
 		self.numCoords = 1
@@ -180,34 +181,6 @@ class NodeInfo(Frame):
 			pass
 
 		self.numCoords += 1
-		
- 
-	def repopulateData(self):
-		if 'Name' in self.G.node[self.index] and self.G.node[self.index]['Name'] != None:
-			self.nameEntry.delete(0, END)
-			self.nameEntry.insert(0, self.G.node[self.index]['Name'])
-		if 'Type' in self.G.node[self.index] and self.G.node[self.index]['Type'] != None:
-			self.v.set(self.G.node[self.index]['Type'])
-		if 'x' in self.G.node[self.index]:
-			self.xEntry.delete(0, END)
-			self.xEntry.insert(0, self.G.node[self.index]['x'])
-		if 'y' in self.G.node[self.index]:
-			self.yEntry.delete(0, END)
-			self.yEntry.insert(0, self.G.node[self.index]['y'])
-		if 'z' in self.G.node[self.index]:
-			self.zEntry.delete(0, END)
-			self.zEntry.insert(0, self.G.node[self.index]['z'])
-		if 'EdgeLength' in self.G.node[self.index] and self.G.node[self.index]['EdgeLength'] != None:
-			self.edgeEntry.delete(0, END)
-			self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'])
-		if 'Notes' in self.G.node[self.index]:
-			self.notes.delete('0.0', END)
-			self.notes.insert('0.0', self.G.node[self.index]['Notes'])
-        
-		for x in self.manager.systems:
-			if x in self.G.node[self.index]:
-				self.systemDict[x].delete(0, END)
-				self.systemDict[x].insert(0, self.G.node[self.index][x])
 
 	def updateNodeSizes(self):
 		if self.leftFrame.v.get() != 'All' and self.leftFrame.v.get() != 'Create New':
@@ -234,7 +207,7 @@ class NodeInfo(Frame):
 				self.leftFrame.normalNodeSize(nodeitem)
 				self.leftFrame.scaleNodeSize(nodeitem)
 
-	def saveAttributes(self):
+	def saveNodeAttributes(self):
 		titles = ['Name', 'Type', 'x', 'y', 'z', 'EdgeLength', 'Notes']
 		values = [self.nameEntry.get(), self.v.get(), float(self.xEntry.get()), float(self.yEntry.get()), 
 			float(self.zEntry.get()), float(self.edgeEntry.get()), self.notes.get('0.0', END)]
@@ -274,11 +247,85 @@ class NodeInfo(Frame):
 
 		self.leftFrame.appendLog(log)
 
+	def saveEdgeAttributes(self):
+		titles = ['Name', 'Type', 'Notes']
+		values = [self.nameEntry.get(), self.v.get(), self.notes.get('0.0', END)]
+		updated = []
 
+		# for each field, check if value is updated in NetworkX; if not, save and add to 'updated'
+		for i in range(0, len(titles)):
+			if (titles[i] not in self.G.edge[self.nodes[0]][self.nodes[1]]) or (self.G.edge[self.nodes[0]][self.nodes[1]][titles[i]] != values[i]):
+				self.G.edge[self.nodes[0]][self.nodes[1]][titles[i]] = values[i]
+
+				# make sure we don't log a save when the value is empty string or endl
+				if values[i] != '' and values[i] != '\n':
+					updated.append(titles[i])
+
+		# Demands
+		for x in self.manager.systems: # for each system
+			if self.systemDict[x].get() != None and self.systemDict[x].get() != '': # if there is a value for this demand
+				# if system doesn't exist in NetworkX already OR if the curr value in NetworkX isn't updated
+				if (x not in self.G.edge[self.nodes[0]][self.nodes[1]]) or (self.G.edge[self.nodes[0]][self.nodes[1]][x] != int(self.systemDict[x].get())):
+					updated.append(x)
+					self.G.edge[self.nodes[0]][self.nodes[1]][x] = int(self.systemDict[x].get())
+
+		# add to log file
+		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of edge between node " 
+ 		log = log + str(self.nodes[0]) + " and node " + str(self.nodes[1]) + " (ID = " + str(self.index) + ")"
+		log = log + " in the following fields: "
+		for field in updated:
+			log = log + str(field) + ", "
+		log = log[:-2]
+		self.leftFrame.appendLog(log)
+
+	def repopulateNodeData(self):
+		if 'Name' in self.G.node[self.index] and self.G.node[self.index]['Name'] != None:
+			self.nameEntry.delete(0, END)
+			self.nameEntry.insert(0, self.G.node[self.index]['Name'])
+		if 'Type' in self.G.node[self.index] and self.G.node[self.index]['Type'] != None:
+			self.v.set(self.G.node[self.index]['Type'])
+		if 'x' in self.G.node[self.index]:
+			self.xEntry.delete(0, END)
+			self.xEntry.insert(0, self.G.node[self.index]['x'])
+		if 'y' in self.G.node[self.index]:
+			self.yEntry.delete(0, END)
+			self.yEntry.insert(0, self.G.node[self.index]['y'])
+		if 'z' in self.G.node[self.index]:
+			self.zEntry.delete(0, END)
+			self.zEntry.insert(0, self.G.node[self.index]['z'])
+		if 'EdgeLength' in self.G.node[self.index] and self.G.node[self.index]['EdgeLength'] != None:
+			self.edgeEntry.delete(0, END)
+			self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'])
+		if 'Notes' in self.G.node[self.index]:
+			self.notes.delete('0.0', END)
+			self.notes.insert('0.0', self.G.node[self.index]['Notes'])
+        
+		for x in self.manager.systems:
+			if x in self.G.node[self.index]:
+				self.systemDict[x].delete(0, END)
+				self.systemDict[x].insert(0, self.G.node[self.index][x])
+
+	def repopulateEdgeData(self):
+		if ('Name' in self.G.edge[self.nodes[0]][self.nodes[1]]) and (self.G.edge[self.nodes[0]][self.nodes[1]]['Name'] != None):
+			self.nameEntry.delete(0, END)
+			self.nameEntry.insert(0, self.G.edge[self.nodes[0]][self.nodes[1]]['Name'])
+		if ('Type' in self.G.edge[self.nodes[0]][self.nodes[1]]) and (self.G.edge[self.nodes[0]][self.nodes[1]]['Type'] != None):
+			self.v.set(self.G.edge[self.nodes[0]][self.nodes[1]]['Type'])
+		if 'Notes' in self.G.edge[self.nodes[0]][self.nodes[1]]:
+			self.notes.delete('0.0', END)
+			self.notes.insert('0.0', self.G.edge[self.nodes[0]][self.nodes[1]]['Notes'])
+        
+		for x in self.manager.systems:
+			if x in self.G.edge[self.nodes[0]][self.nodes[1]]:
+				self.systemDict[x].delete(0, END)
+				self.systemDict[x].insert(0, self.G.edge[self.nodes[0]][self.nodes[1]][x])
 
 	def initUI(self):
 		self.propGroup = LabelFrame(self.parent, text="Properties", bg=self.color)
 		self.propGroup.grid(row=0, padx=10, sticky=E+W)
+
+		self.propGroup.columnconfigure(0, weight=1)
+ 		self.propGroup.columnconfigure(1, weight=1)
 
 		# Name
 		self.nameLabel = Label(self.propGroup, text="Name:", bg=self.color)
@@ -290,20 +337,22 @@ class NodeInfo(Frame):
 		self.createTypeLabel()
 		self.createDemandLabel()
 
-		# Geometry
-		self.creategeoGroup()
-
 		# Notes
 		self.notesGroup = LabelFrame(self.parent, text="Notes", bg=self.color)
 		self.notesGroup.grid(row=2, padx=10, sticky=E+W)
 		self.notes = Text(self.notesGroup, font='TkDefaultFont', width=1, height=12)
 		self.notesGroup.columnconfigure(0, weight=1)
 		self.notes.grid(row=0, column=0, padx=5, pady=(1, 5), sticky=E+W)
-		
-		# save button
-		self.saveBtn = Button(self.parent, text="Save", command=self.saveAttributes, 
-			highlightbackground=self.color)
-		self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
 
 		# if node attributes have been set previously, populate right pane using the existing data
-		self.repopulateData()
+		if self.nodes == None:
+			self.creategeoGroup()
+			self.repopulateNodeData()
+			self.saveBtn = Button(self.parent, text="Save", command=self.saveNodeAttributes(), highlightbackground=self.color)
+			self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
+			self.saveBtn.config(command=self.saveNodeAttributes())
+
+		else:
+			self.repopulateEdgeData()
+			self.saveBtn = Button(self.parent, text="Save", command=self.saveEdgeAttributes(), highlightbackground=self.color)
+			self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)

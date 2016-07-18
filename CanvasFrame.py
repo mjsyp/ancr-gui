@@ -1,8 +1,7 @@
 from Tkinter import *
 from DockedWindows import *
 from Manager import *
-from NodeInfo import *
-from EdgeInfo import *
+from NodeEdgeInfo import *
 import tkSimpleDialog
 import networkx as nx
 from datetime import datetime
@@ -154,10 +153,10 @@ class CanvasFrame(Frame):
 			else:
 				self.systemsCanvas.itemconfig(item, arrow='last')
 
-			self.G.add_edge(self.startNode[0], self.endNode[0], x=0, y=0, z=0, Name=None)
+			self.G.add_edge(self.startNode[0], self.endNode[0], Name=None)
 			self.systemsCanvas.addtag_withtag(str(self.startNode[0]), item)
 			self.systemsCanvas.addtag_withtag(str(self.endNode[0]), item)
-
+  
 			self.G.edge[self.startNode[0]][self.endNode[0]]['x1_coord'] = self.startNodeX
 			self.G.edge[self.startNode[0]][self.endNode[0]]['y1_coord'] = self.startNodeY
 			self.G.edge[self.startNode[0]][self.endNode[0]]['x2_coord'] = self.endNodeX
@@ -202,10 +201,10 @@ class CanvasFrame(Frame):
 			item = self.systemsCanvas.find_withtag(CURRENT)[0]
 			self.systemsCanvas.itemconfig(CURRENT, fill="green")
 			if self.checkTag(item) == 'node':
-				self.systemInfo = NodeInfo(self.rightFrame, self, item, self.G, self.manager)
+				self.systemInfo = NodeEdgeInfo(self.rightFrame, self, item, self.G, self.manager)
 			if self.checkTag(item) == 'edge':
 				nodes = self.edgeEndpoints(item)
-				self.systemInfo = EdgeInfo(self.rightFrame, self, item, nodes, self.G, self.manager)
+				self.systemInfo = NodeEdgeInfo(self.rightFrame, self, item, self.G, self.manager, nodes)
 
 	"""-------------------------------------------------------END SELECT-----------------------------------------------------------"""
 
@@ -486,7 +485,6 @@ class CanvasFrame(Frame):
 			if typeLabel != None:
 				# Update dropdown menu
 				self.optionList.insert(len(self.optionList)-2, typeLabel)
-				self.v.set(self.optionList[len(self.optionList)-3])
 				self.dropdown.destroy()
 				self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
 				self.dropdown.configure(highlightbackground="light blue")
@@ -614,7 +612,7 @@ class CanvasFrame(Frame):
 		self.v.set(self.optionList[len(self.optionList) - 2])
 
 		self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
-		self.dropdown.configure(highlightbackground="light blue")
+		self.dropdown.configure(bg="light blue", highlightbackground="light blue")
 		self.dropdown.pack(side='left')
 		
 		self.createNodeButton = Button(self.toolbar, text="create node", command=self.createNodeButtonClick, 
