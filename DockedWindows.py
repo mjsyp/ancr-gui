@@ -300,12 +300,12 @@ class DockedWindows(Frame):
 
 
 	''' ----------------------------------------------------SUB NETWORK---------------------------------------------------------'''
-	def drawPoint(self, r, currPointIndex, totalNumPoints):
+	def drawPoint(self, r, currPointIndex, totalNumPoints, centerX, centerY):
 		theta = (math.pi * 2) / totalNumPoints
 		angle = theta * currPointIndex
 
-		x = r * math.cos(angle) + 100
-		y = r * math.sin(angle) + 75
+		x = r * math.cos(angle) + centerX
+		y = r * math.sin(angle) + centerY
 		return [x, y]
 
 	def showSubNetwork(self, node):
@@ -343,7 +343,7 @@ class DockedWindows(Frame):
 				int(x)
 			except TypeError: # advanced geometry
 				for i in range(0, len(x)):
-					coord = self.drawPoint(50, i, len(x))
+					coord = self.drawPoint(50, i, len(x), 100, 75)
 					r=4
 					self.frameCanvas.create_oval(coord[0]-r, coord[1]-r, coord[0]+r, coord[1]+r, fill='red')
 
@@ -378,8 +378,8 @@ class DockedWindows(Frame):
 			popUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
 			popUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.subNetworkPopUp))
 
-			self.frameCanvas = Canvas(self.subNetworkPopUp, width=600, height=500, bg='green')
-			self.frameCanvas.pack(side='bottom')
+			self.PopUpCanvas = Canvas(self.subNetworkPopUp, width=600, height=520, bg='white')
+			self.PopUpCanvas.pack(side='bottom')
 
 			image = Image.open("exit.png")
 			self.exitImage6 = ImageTk.PhotoImage(image)
@@ -392,6 +392,14 @@ class DockedWindows(Frame):
 			minButton.pack(side='right')
 
 			#do stuff
+			x = self.G.node[self.selectedNode]['x']
+			try: # simple geometry
+				int(x)
+			except TypeError: # advanced geometry
+				for i in range(0, len(x)):
+					coord = self.drawPoint(200, i, len(x), 300, 260)
+					r=8
+					self.PopUpCanvas.create_oval(coord[0]-r, coord[1]-r, coord[0]+r, coord[1]+r, fill='red')
 
 		elif self.subNetworkFrame.winfo_height() == 30:
 			self.subNetworkFrame.config(height=200)
