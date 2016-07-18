@@ -31,7 +31,7 @@ class NodeEdgeInfo(Frame):
 
 		# actual dropdown
 		self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.createNewType)
-		self.dropdown.config(highlightbackground=self.color)
+		self.dropdown.config(highlightbackground=self.color, bg=self.color)
 		self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def createNewType(self, event):
@@ -46,7 +46,7 @@ class NodeEdgeInfo(Frame):
 				# redraw dropdown
 				self.dropdown.destroy()
 				self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.createNewType)
-				self.dropdown.config(highlightbackground=self.color)
+				self.dropdown.config(highlightbackground=self.color, bg=self.color)
 				self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def createDemandLabel(self):
@@ -54,7 +54,7 @@ class NodeEdgeInfo(Frame):
  		self.demandLabel = Label(self.propGroup, text="Demands:", bg=self.color, anchor=W)
  		self.demandLabel.grid(row=2, column=0, padx=5, sticky=E)
 
-		self.createDemandBtn = Button(self.propGroup, text="New Demand", command=self.createNewDemand)
+		self.createDemandBtn = Button(self.propGroup, text="New Demand", command=self.createNewDemand, bg=self.color, highlightbackground=self.color)
 		self.createDemandBtn.grid(row=2, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 		self.numDemands = 0
@@ -101,7 +101,7 @@ class NodeEdgeInfo(Frame):
 		self.geoOption = StringVar()
 		self.geoOption.set(self.geoOptionList[0])
 		self.geoDropdown = OptionMenu(self.geoGroup, self.geoOption, *self.geoOptionList, command=self.geoSwitch)
-		self.geoDropdown.config(highlightbackground=self.color)
+		self.geoDropdown.config(highlightbackground=self.color, bg=self.color)
 		self.geoDropdown.grid(row=0, column=0, columnspan=2, pady=5, sticky=E+W)
 
 		self.createSimpleGeoLabel()
@@ -149,7 +149,7 @@ class NodeEdgeInfo(Frame):
 		self.createNewGeo()
 
 		# create new button
-		self.newCoordBtn = Button(self.geoGroup, text="Create New", command=self.createNewGeo)
+		self.newCoordBtn = Button(self.geoGroup, text="Create New", command=self.createNewGeo, bg=self.color, highlightbackground=self.color)
 		self.newCoordBtn.grid(row=self.numCoords, column=6, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def createNewGeo(self):
@@ -406,11 +406,11 @@ class NodeEdgeInfo(Frame):
 		if self.nodes == None:
 			self.creategeoGroup()
 			self.repopulateNodeData()
-			self.saveBtn = Button(self.parent, text="Save", command=self.saveNodeAttributes(), highlightbackground=self.color)
+			self.saveBtn = Button(self.parent, text="Save", command=self.saveNodeAttributes, highlightbackground=self.color)
 			self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
-			self.saveBtn.config(command=self.saveNodeAttributes())
 
 		else:
 			self.repopulateEdgeData()
-			self.saveBtn = Button(self.parent, text="Save", command=self.saveEdgeAttributes(), highlightbackground=self.color)
+			self.saveBtn = Button(self.parent, text="Save", command=self.saveEdgeAttributes, highlightbackground=self.color)
 			self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
+
