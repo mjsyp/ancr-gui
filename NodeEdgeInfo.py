@@ -110,7 +110,7 @@ class NodeEdgeInfo(Frame):
 		# destroy current widgets in this group
 		for widget in self.geoGroup.winfo_children():
 			if widget != self.geoDropdown:
-				widget.destroy()
+				widget.grid_forget()
 
 		if self.geoOption.get() == "Simple":
 			self.createSimpleGeoLabel()
