@@ -191,7 +191,7 @@ class CanvasFrame(Frame):
 	def select(self, event):
 		# clear right pane of any previous info
 		for widget in self.rightFrame.winfo_children():
-					widget.destroy()
+			widget.destroy()
 
 		# fill all nodes red and all edges black to reset any previously selected item
 		self.systemsCanvas.itemconfig('node', fill='red')
@@ -638,7 +638,7 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.pack(fill="both", expand=1)
 
 		# creates frame for docked windows
-		self.miniFrames = Frame(self.parent, height=200, width=700, bg='white', borderwidth=1, relief='sunken')
+		self.miniFrames = PanedWindow(self.parent, height=200, width=700, bg='white', borderwidth=1, relief='sunken')
 		self.miniFrames.pack_propagate(0)
 		self.miniFrames.pack(side='bottom', fill="both", expand=1)
 
