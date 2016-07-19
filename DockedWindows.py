@@ -307,6 +307,10 @@ class DockedWindows(Frame):
 		x = r * math.cos(angle) + centerX
 		y = r * math.sin(angle) + centerY
 		return [x, y]
+	
+	def adjacency(self, x1, x2, y1, y2, z1, z2, a1, a2):
+		EPSILON = .001
+		return math.fabs(x1-x2)-(a1+a2) <= EPSILON and math.fabs(y1-y2)-(a1+a2) <= EPSILON and math.fabs(z1-z2)-(a1+a2) <= EPSILON
 
 	def showSubNetwork(self, node):
 		self.selectedNode = node
@@ -346,8 +350,27 @@ class DockedWindows(Frame):
 			except TypeError: # advanced geometry
 				for i in range(0, len(x)):
 					coord = self.drawPoint(50, i, len(x), 100, 75)
-					r=4
+					r=6
 					self.frameCanvas.create_oval(coord[0]-r, coord[1]-r, coord[0]+r, coord[1]+r, fill='red')
+					self.frameCanvas.create_text(coord[0], coord[1], text=str(i+1), fill='white')
+				for i in range(0, len(x)):
+					for j in range(i, len(x)):
+						if i != j:
+							x1 = self.G.node[self.selectedNode]['x'][i]
+							x2 = self.G.node[self.selectedNode]['x'][j]
+							y1 = self.G.node[self.selectedNode]['y'][i]
+							y2 = self.G.node[self.selectedNode]['y'][j]
+							z1 = self.G.node[self.selectedNode]['z'][i]
+							z2 = self.G.node[self.selectedNode]['z'][j]
+							a1 = self.G.node[self.selectedNode]['EdgeLength'][i]/2
+							a2 = self.G.node[self.selectedNode]['EdgeLength'][j]/2
+							adj = self.adjacency(x1, x2, y1, y2, z1, z2, a1, a2)
+							if adj:
+								x1 = (self.frameCanvas.coords(i*2+1)[0]+self.frameCanvas.coords(i*2+1)[2])/2
+								x2 = (self.frameCanvas.coords(j*2+1)[0]+self.frameCanvas.coords(j*2+1)[2])/2
+								y1 = (self.frameCanvas.coords(i*2+1)[1]+self.frameCanvas.coords(i*2+1)[3])/2
+								y2 = (self.frameCanvas.coords(j*2+1)[1]+self.frameCanvas.coords(j*2+1)[3])/2
+								self.frameCanvas.create_line(x1, y1, x2, y2, fill='black')
 
 
 		# updates node degree graph if tab is pressed again
