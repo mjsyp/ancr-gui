@@ -300,6 +300,7 @@ class NodeEdgeInfo(Frame):
 					self.G.node[self.index][x] = int(self.systemDict[x].get())
 
 		self.updateNodeSizes()
+		self.leftFrame.dockedWindows.showSubNetwork(self.index)
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of node " + str(self.index)

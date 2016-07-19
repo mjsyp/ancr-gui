@@ -309,9 +309,9 @@ class DockedWindows(Frame):
 		return [x, y]
 
 	def showSubNetwork(self, node):
+		self.selectedNode = node
 		if (not hasattr(self, 'subNetworkFrame') or  not self.subNetworkFrame.winfo_exists()) and (not hasattr(self, 'subNetworkPopUp') or self.subNetworkPopUp.winfo_exists() == 0) :
 			self.SubNeworkFrameOrWindow = 0 #0 is docked frame, 1 is pop up window
-			self.selectedNode = node
 			
 			self.subNetworkFrame = Frame(self.parent, height=200, width=200, bg='white', borderwidth=3, relief='raised')
 			self.subNetworkFrame.pack_propagate(0)
