@@ -219,12 +219,26 @@ class NodeEdgeInfo(Frame):
 
 	def deleteGeo(self, event):
 		deleteRow = int(event.widget.grid_info()['row'])
+		self.G.node[self.index]['x'].pop(deleteRow-1)
+		self.G.node[self.index]['y'].pop(deleteRow-1)
+		self.G.node[self.index]['z'].pop(deleteRow-1)
+		self.G.node[self.index]['EdgeLength'].pop(deleteRow-1)
+		self.xEntryList.pop(deleteRow-1)
+		self.yEntryList.pop(deleteRow-1)
+		self.zEntryList.pop(deleteRow-1)
+		self.edgeEntryList.pop(deleteRow-1)
+
 		for widget in self.geoGroup.grid_slaves():
 			thisRow = int(widget.grid_info()['row'])
+
 			if thisRow == deleteRow:
 				widget.grid_forget()
 			elif thisRow > deleteRow:
 				widget.grid_configure(row=thisRow-1)
+				if int(widget.grid_info()['column']) == 0:
+					widget.config(text=str(thisRow-1)+".")
+
+		self.numCoords -= 1
 
 	def updateNodeSizes(self):
 		if self.leftFrame.v.get() != 'All' and self.leftFrame.v.get() != 'Create New':
