@@ -638,7 +638,7 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.pack(fill="both", expand=1)
 
 		# creates frame for docked windows
-		self.miniFrames = PanedWindow(self.parent, height=200, width=700, bg='white', borderwidth=1, relief='sunken')
+		self.miniFrames = Frame(self.parent, height=200, width=700, bg='white', borderwidth=1, relief='sunken')
 		self.miniFrames.pack_propagate(0)
 		self.miniFrames.pack(side='bottom', fill="both", expand=1)
 

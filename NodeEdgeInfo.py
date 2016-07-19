@@ -162,7 +162,7 @@ class NodeEdgeInfo(Frame):
 
 	def createAdvGeoLabel(self):
 		self.numCoords = 1
-		self.geoDropdown.grid(row=0, column=0, columnspan=8, pady=5, sticky=E+W)
+		self.geoDropdown.grid(row=0, column=0, columnspan=7, padx=5, pady=5, sticky=E+W)
 
 		# initilize entry widget lists
 		self.xEntryList = []
@@ -171,15 +171,19 @@ class NodeEdgeInfo(Frame):
 		self.edgeEntryList = []
 		
 		self.createNewGeo()
-
-		# create new button
-		self.newCoordBtn = Button(self.geoGroup, text="Create New", command=self.createNewGeo, bg=self.color, highlightbackground=self.color)
-		self.newCoordBtn.grid(row=self.numCoords, column=6, columnspan=2, padx=5, pady=5, sticky=E+W)
+ 
+		# create new coord button
+		self.newCoordBtn = Button(self.geoGroup, text="Add Row", command=self.createNewGeo, bg=self.color, highlightbackground=self.color)
+		self.newCoordBtn.grid(row=0, column=7, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def createNewGeo(self):
 		idText = str(self.numCoords) + "."
 		self.idLabel = Label(self.geoGroup, text=idText, bg=self.color)
+		self.idLabel.config(activeforeground='red')
 		self.idLabel.grid(row=self.numCoords, column=0, padx=(5, 0), pady=(0, 5))
+		self.idLabel.bind('<Button-1>', self.deleteGeo)
+		self.idLabel.bind('<Enter>', lambda e: e.widget.config(fg='red'))
+		self.idLabel.bind('<Leave>', lambda e: e.widget.config(fg='black'))
 
 		# x, y, z coordinate entries
 		self.xLabel = Label(self.geoGroup, text="x", bg=self.color)
@@ -211,12 +215,16 @@ class NodeEdgeInfo(Frame):
 		self.edgeEntry.insert(0, 0)
 		self.edgeEntryList.append(self.edgeEntry)
 
-		try:
-			self.newCoordBtn.grid(row=self.numCoords+1, column=6, columnspan=2, padx=5, pady=5, sticky=E+W)
-		except AttributeError:
-			pass
-
 		self.numCoords += 1
+
+	def deleteGeo(self, event):
+		deleteRow = int(event.widget.grid_info()['row'])
+		for widget in self.geoGroup.grid_slaves():
+			thisRow = int(widget.grid_info()['row'])
+			if thisRow == deleteRow:
+				widget.grid_forget()
+			elif thisRow > deleteRow:
+				widget.grid_configure(row=thisRow-1)
 
 	def updateNodeSizes(self):
 		if self.leftFrame.v.get() != 'All' and self.leftFrame.v.get() != 'Create New':
