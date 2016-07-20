@@ -22,7 +22,7 @@ class Window(Frame):
 	def exit(self, event=None):
 		self.quit()
 
-	# will update saved file if 
+	# will update saved file if filename already exists or open up save as function 
 	def save(self, event=None):
 		if hasattr(self, 'filename'):
 			pickle.dump(self.G, open(str(self.filename), 'w'))

@@ -87,6 +87,7 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.itemconfig('node', fill='red')
 		self.systemsCanvas.itemconfig('edge', fill='black')
 
+	# binds mouse click to dragStart and binds mouse release to dragEnd
 	def dragNodeButtonClick(self):
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.dragNodeButton)
@@ -177,7 +178,7 @@ class CanvasFrame(Frame):
 			self.appendLog(log)
 	"""---------------------------------------------------END CREATE NODE/EDGE--------------------------------------------------------"""
 
-
+	# determines correct order of start and end node of an edge
 	def edgeEndpoints(self, edgeitem):
 		nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
 		try:
@@ -188,6 +189,7 @@ class CanvasFrame(Frame):
 
 
 	"""----------------------------------------------------------SELECT-------------------------------------------------------------------"""
+	# displays information of a selected node or edge
 	def select(self, event):
 		# clear right pane of any previous info
 		for widget in self.rightFrame.winfo_children():
@@ -196,6 +198,12 @@ class CanvasFrame(Frame):
 		# fill all nodes red and all edges black to reset any previously selected item
 		self.systemsCanvas.itemconfig('node', fill='red')
 		self.systemsCanvas.itemconfig('edge', fill='black')
+
+		# destroys the subNetworkWindow if no node is selected
+		if hasattr(self.dockedWindows, 'SubNeworkFrameOrWindow') and self.dockedWindows.SubNeworkFrameOrWindow == 0:
+			self.dockedWindows.subNetworkFrame.destroy()
+		if hasattr(self.dockedWindows, 'SubNeworkFrameOrWindow') and self.dockedWindows.SubNeworkFrameOrWindow == 1:
+			self.dockedWindows.subNetworkPopUp.destroy()
 		
 		if self.systemsCanvas.find_withtag(CURRENT):
 			item = self.systemsCanvas.find_withtag(CURRENT)[0]
@@ -616,6 +624,7 @@ class CanvasFrame(Frame):
 		self.dropdown.configure(bg="light blue", highlightbackground="light blue")
 		self.dropdown.pack(side='left')
 		
+		# creates toolbar buttons
 		self.createNodeButton = Button(self.toolbar, text="create node", command=self.createNodeButtonClick, 
 			highlightbackground=self.color)
 		self.createEdgeButton = Button(self.toolbar, text="create edge", command=self.createEdgeButtonClick,

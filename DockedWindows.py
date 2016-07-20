@@ -14,6 +14,7 @@ class DockedWindows(Frame):
 
 		self.initUI()
 	"""----------------------------------------------------NODE DEGREE ANALYSIS-------------------------------------------------------"""
+	# docked window frame to display histogram of node degrees
 	def nodeDegrees(self):
 		if len(self.G.nodes()) > 0 and \
 		  (not hasattr(self, 'nodeDegreeFrame') or self.nodeDegreeFrame.winfo_exists() == 0) and \
@@ -22,12 +23,13 @@ class DockedWindows(Frame):
 			self.frameOrWindow = 0 # 0 - frame, 1 - popup window
 			self.nodeDegreeFrame = Frame(self.parent, height=200, width=200, bg='white', borderwidth=3, relief='raised')
 			self.nodeDegreeFrame.pack_propagate(0)
-			self.nodeDegreeFrame.pack(side='left', anchor='sw')
+			self.nodeDegreeFrame.pack(side='left', anchor='nw', fill='y')
 
 			# toolbar to store max, min, exit buttons
 			self.toolbarFrame = Frame(self.nodeDegreeFrame, bg='light gray')
 			self.toolbarFrame.pack(side='top', fill='x')
 
+			# creates images for the buttons on the toolbar
 			image = Image.open("exit.png") 
 			self.exitImage = ImageTk.PhotoImage(image)
 			exitButton = Button(self.toolbarFrame, image=self.exitImage, highlightbackground='light gray', command=self.analysisExit)
@@ -42,11 +44,13 @@ class DockedWindows(Frame):
 			maxButton.pack(side='right')
 			minButton.pack(side='right')
 
+			# creates list of nodeDegrees
 			nodeDegrees = nx.degree(self.G)
 			degrees = []
 			for key in nodeDegrees:
 				degrees.append(nodeDegrees[key])
 
+			# creates histogram
 			fig = plt.figure(figsize=(1.2, 0.9)) 
 			ax = fig.add_subplot(1,1,1) # one row, one column, first plot
 			ax.hist(degrees, bins=max(degrees)+1, color="blue", range=(0, max(degrees)+1), align='left') # Plot the data.
@@ -62,10 +66,12 @@ class DockedWindows(Frame):
 			ax.set_ylabel("Frequency", fontsize=10)
 			ax.axis([min(degrees)-1, max(degrees)+1, 0, len(degrees)])
 
+			# saves figure
 			fig.savefig("histogramplot.png", bbox_inches='tight') # Produce an image.
 			image = Image.open("histogramplot.png")
 			photo = ImageTk.PhotoImage(image)
 
+			# displays figure on a label in the frame
 			label = Label(self.nodeDegreeFrame, image=photo, bg="white")
 			label.image = photo
 			label.pack(expand=1, fill=BOTH)
@@ -93,6 +99,7 @@ class DockedWindows(Frame):
 			self.nodeDegrees()
 		else:
 			self.nodeDegreeFrame.config(height='30')
+			self.nodeDegreeFrame.pack_configure(anchor='sw', fill='none')
 	
 	# maximizes toolbar into a docked frame or maximizes frame into a popup window when maximize button is pressed
 	def analysisMax(self):
@@ -107,11 +114,13 @@ class DockedWindows(Frame):
 			self.nodeDegreePopup.overrideredirect(1)
 			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
 
+			# toolbar for min, exit buttons
 			analysisToolbar = Frame(self.nodeDegreePopup, bg='light gray')
 			analysisToolbar.pack(side='top', fill='x')
 			analysisToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
 			analysisToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.nodeDegreePopup))
 
+			# creates images for toolbar buttons
 			image = Image.open("exit.png")
 			self.exitImage2 = ImageTk.PhotoImage(image)
 			exitButton = Button(analysisToolbar, image=self.exitImage2, highlightbackground='light gray', command=self.analysisExit)
@@ -154,6 +163,7 @@ class DockedWindows(Frame):
 
 		elif self.nodeDegreeFrame.winfo_height() == 30:
 			self.nodeDegreeFrame.config(height=200)
+			self.nodeDegreeFrame.pack_configure(anchor='nw', fill='y')
 	"""----------------------------------------------------END NODE DEGREE ANALYSIS-------------------------------------------------------"""
 	
 	# drags popup window to mouse location upon key press release for node degrees and log window
@@ -167,6 +177,7 @@ class DockedWindows(Frame):
 		geometry = s.split('+')
 		x = int(geometry[1])+event.x-self.startDragX
 		y = int(geometry[2])+event.y-self.startDragY
+		# drag window to release button location unless it is out of bounds, then drag window to respective edge of screen
 		if x>0 and y>0:
 			w.geometry(("%dx%d%+d%+d" % (600, 550, x, y)))
 		elif x>0 and y<0:
@@ -177,6 +188,7 @@ class DockedWindows(Frame):
 			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
 
 	"""---------------------------------------------------------LOG WINDOW----------------------------------------------------------------"""
+	# add events to the log text
 	def appendLog(self, text):
 		if (not hasattr(self, 'logFrame') or  not self.logFrame.winfo_exists()) and \
 		   (not hasattr(self, 'logPopUp') or self.logPopUp.winfo_exists() == 0) :
@@ -201,7 +213,7 @@ class DockedWindows(Frame):
 			self.logFrameOrWindow = 0
 			self.logFrame = Frame(self.parent, height=200, width=200, bg='white', borderwidth=3, relief='raised')
 			self.logFrame.pack_propagate(0)
-			self.logFrame.pack(side='left', anchor='sw')
+			self.logFrame.pack(side='left', anchor='nw', fill='y')
 
 			self.logToolbar = Frame(self.logFrame, bg='light gray')
 			self.logToolbar.pack(side='top', fill='x')
@@ -246,6 +258,7 @@ class DockedWindows(Frame):
 	def logMin(self):
 		if self.logFrameOrWindow == 0:
 			self.logFrame.config(height='30')
+			self.logFrame.pack_configure(anchor='sw', fill='none')
 		else:
 			contents = self.logPopUpText.get('1.0', END)
 			self.logPopUp.destroy()
@@ -267,12 +280,14 @@ class DockedWindows(Frame):
 			self.logPopUp.overrideredirect(1)
 			self.logPopUp.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
 
+			# creates toolbar for log pop up window
 			logPopUpToolbar = Frame(self.logPopUp, height=25, width=600, bg='light gray')
 			logPopUpToolbar.pack_propagate(0)
 			logPopUpToolbar.pack(side='top')
 			logPopUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
 			logPopUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.logPopUp))
 
+			# creates images for min, exit buttons on toolbar
 			image = Image.open("exit.png")
 			self.exitImage4 = ImageTk.PhotoImage(image)
 			exitButton = Button(logPopUpToolbar, image=self.exitImage4, highlightbackground='light gray', command=self.logExit)
@@ -283,6 +298,7 @@ class DockedWindows(Frame):
 			exitButton.pack(side='right')
 			minButton.pack(side='right')
 			
+			# creates scrollbar
 			self.logPopUpScroll = Scrollbar(self.logPopUp)
 			self.logPopUpScroll.pack(side='right', fill='y')
 			self.logPopUpText = Text(self.logPopUp, wrap='word', yscrollcommand=self.logPopUpScroll.set, bg='white', borderwidth=0)
@@ -294,12 +310,14 @@ class DockedWindows(Frame):
 
 		elif self.logFrame.winfo_height() == 30:
 			self.logFrame.config(height=200)
+			self.logFrame.pack_configure(anchor='nw', fill='y')
 
 	''' -----------------------------------------------------END LOG WINDOW-----------------------------------------------------'''
 
 
 
 	''' ----------------------------------------------------SUB NETWORK---------------------------------------------------------'''
+	# determines x, y, location of a node in order to be equally spaced out in a circle
 	def drawPoint(self, r, currPointIndex, totalNumPoints, centerX, centerY):
 		theta = (math.pi * 2) / totalNumPoints
 		angle = theta * currPointIndex
@@ -308,10 +326,12 @@ class DockedWindows(Frame):
 		y = r * math.sin(angle) + centerY
 		return [x, y]
 	
+	# determines if 2 cubes are touching or overlapping
 	def adjacency(self, x1, x2, y1, y2, z1, z2, a1, a2):
 		EPSILON = .001
 		return math.fabs(x1-x2)-(a1+a2) <= EPSILON and math.fabs(y1-y2)-(a1+a2) <= EPSILON and math.fabs(z1-z2)-(a1+a2) <= EPSILON
 
+	# frame that displays a network of a node's advanced geometry, edges represent cubes are touching/overlapping
 	def showSubNetwork(self, node):
 		self.selectedNode = node
 		if (not hasattr(self, 'subNetworkFrame') or not self.subNetworkFrame.winfo_exists()) and \
@@ -321,7 +341,7 @@ class DockedWindows(Frame):
 			
 			self.subNetworkFrame = Frame(self.parent, height=200, width=200, bg='white', borderwidth=3, relief='raised')
 			self.subNetworkFrame.pack_propagate(0)
-			self.subNetworkFrame.pack(side='left', anchor='sw')
+			self.subNetworkFrame.pack(side='left', anchor='nw', fill='y')
 
 			# toolbar to store max, min, exit buttons
 			self.subNetworktoolbar = Frame(self.subNetworkFrame, bg='light gray')
@@ -347,15 +367,20 @@ class DockedWindows(Frame):
 			x = self.G.node[self.selectedNode]['x']
 			try: # simple geometry
 				int(x)
+				r=6
+				# create single node in center of frame
+				self.frameCanvas.create_oval(100-r, 90-r, 100+r, 90+r, fill='red')
 			except TypeError: # advanced geometry
 				for i in range(0, len(x)):
 					coord = self.drawPoint(50, i, len(x), 100, 75)
 					r=6
+					# for n number of nodes, draw n nodes spaced equally apart
 					self.frameCanvas.create_oval(coord[0]-r, coord[1]-r, coord[0]+r, coord[1]+r, fill='red')
 					self.frameCanvas.create_text(coord[0], coord[1], text=str(i+1), fill='white')
 				for i in range(0, len(x)):
 					for j in range(i, len(x)):
 						if i != j:
+							# checks adjacency for every combination of 2 cubes in the adv geometry 
 							x1 = self.G.node[self.selectedNode]['x'][i]
 							x2 = self.G.node[self.selectedNode]['x'][j]
 							y1 = self.G.node[self.selectedNode]['y'][i]
@@ -366,6 +391,7 @@ class DockedWindows(Frame):
 							a2 = self.G.node[self.selectedNode]['EdgeLength'][j]/2
 							adj = self.adjacency(x1, x2, y1, y2, z1, z2, a1, a2)
 							if adj:
+								# if 2 cubes are adjacent, create an edge between them in the docked frame
 								x1 = (self.frameCanvas.coords(i*2+1)[0]+self.frameCanvas.coords(i*2+1)[2])/2
 								x2 = (self.frameCanvas.coords(j*2+1)[0]+self.frameCanvas.coords(j*2+1)[2])/2
 								y1 = (self.frameCanvas.coords(i*2+1)[1]+self.frameCanvas.coords(i*2+1)[3])/2
@@ -378,26 +404,31 @@ class DockedWindows(Frame):
 			self.subNetworkFrame.destroy()
 			self.showSubNetwork(self.selectedNode)
 		
+		# deletes popUp and updates node degree graph if tab is pressed again
 		elif hasattr(self, 'SubNeworkFrameOrWindow') and self.SubNeworkFrameOrWindow == 1:
 			self.subNetworkPopUp.destroy()
 			self.showSubNetwork(self.selectedNode)
 	
+	# exits either the subNetwork docked frame or pop up window
 	def subNetworkExit(self):
 		if self.SubNeworkFrameOrWindow == 0:
 			self.subNetworkFrame.destroy()
 		else:
 			self.subNetworkPopUp.destroy()
 	
+	# maximizes the toolbar into a docked frame, and a docked frame into a pop up window
 	def subNetworkMax(self):
 		if self.SubNeworkFrameOrWindow == 0 and self.subNetworkFrame.winfo_height() > 30:
 			self.subNetworkFrame.destroy()
 
+			# creates pop up window
 			self.SubNeworkFrameOrWindow = 1
 			self.subNetworkPopUp = Toplevel(self.parent, bg='white')
 			self.subNetworkPopUp.title("Node Degrees")
 			self.subNetworkPopUp.overrideredirect(1)
 			self.subNetworkPopUp.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
 
+			# creates toolbar for min, exit buttons
 			popUpToolbar = Frame(self.subNetworkPopUp, bg='light gray')
 			popUpToolbar.pack(side='top', fill='x')
 			popUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
@@ -406,6 +437,7 @@ class DockedWindows(Frame):
 			self.PopUpCanvas = Canvas(self.subNetworkPopUp, width=600, height=520, bg='white')
 			self.PopUpCanvas.pack(side='bottom')
 
+			# creates images for toolbar buttons
 			image = Image.open("exit.png")
 			self.exitImage6 = ImageTk.PhotoImage(image)
 			exitButton = Button(popUpToolbar, image=self.exitImage6, highlightbackground='light gray', command=self.subNetworkExit)
@@ -419,6 +451,9 @@ class DockedWindows(Frame):
 			x = self.G.node[self.selectedNode]['x']
 			try: # simple geometry
 				int(x)
+				r=10
+				# for n number of nodes, draw n nodes spaced equally apart
+				self.PopUpCanvas.create_oval(300-r, 260-r, 300+r, 260+r, fill='red')
 			except TypeError: # advanced geometry
 				for i in range(0, len(x)):
 					coord = self.drawPoint(200, i, len(x), 300, 260)
@@ -428,6 +463,7 @@ class DockedWindows(Frame):
 				for i in range(0, len(x)):
 					for j in range(i, len(x)):
 						if i != j:
+							# checks adjacency for every combination of 2 cubes in the adv geometry 
 							x1 = self.G.node[self.selectedNode]['x'][i]
 							x2 = self.G.node[self.selectedNode]['x'][j]
 							y1 = self.G.node[self.selectedNode]['y'][i]
@@ -438,21 +474,26 @@ class DockedWindows(Frame):
 							a2 = self.G.node[self.selectedNode]['EdgeLength'][j]/2
 							adj = self.adjacency(x1, x2, y1, y2, z1, z2, a1, a2)
 							if adj:
+								# if 2 cubes are adjacent, create an edge between them in the pop up window
 								x1 = (self.PopUpCanvas.coords(i*2+1)[0]+self.PopUpCanvas.coords(i*2+1)[2])/2
 								x2 = (self.PopUpCanvas.coords(j*2+1)[0]+self.PopUpCanvas.coords(j*2+1)[2])/2
 								y1 = (self.PopUpCanvas.coords(i*2+1)[1]+self.PopUpCanvas.coords(i*2+1)[3])/2
 								y2 = (self.PopUpCanvas.coords(j*2+1)[1]+self.PopUpCanvas.coords(j*2+1)[3])/2
 								self.PopUpCanvas.create_line(x1, y1, x2, y2, fill='black')
 
+		# maximizes a toolbar into a docked frame
 		elif self.subNetworkFrame.winfo_height() == 30:
 			self.subNetworkFrame.config(height=200)
+			self.subNetworkFrame.pack_configure(anchor='nw', fill='y')
 	
+	# minimizes a pop up window into a docked frame, and a docked frame into a toolbar
 	def subNetworkMin(self):
 		if self.SubNeworkFrameOrWindow == 1:
 			self.subNetworkPopUp.destroy()
 			self.showSubNetwork(self.selectedNode)
 		else:
 			self.subNetworkFrame.config(height='30')
+			self.subNetworkFrame.pack_configure(anchor='sw', fill='none')
 	"""----------------------------------------------------END SUB NETWORK-------------------------------------------------------"""
 	
 	def initUI(self):

@@ -112,6 +112,7 @@ class NodeEdgeInfo(Frame):
 			if widget != self.geoDropdown:
 				widget.grid_forget()
 
+		# if switching between simple and advanced geometry, erase old information and replace entries with zeroes
 		if self.geoOption.get() == "Simple":
 			self.createSimpleGeoLabel()
 			self.xEntry.delete(0, END)
@@ -286,6 +287,7 @@ class NodeEdgeInfo(Frame):
 		# if node has simple geometry 
 		if self.geoOption.get() == 'Simple':
 			geolist = ['x', 'y', 'z', 'EdgeLength']
+			# get the geometric values from their respective entries
 			geovalues = [float(self.xEntry.get()), float(self.yEntry.get()), float(self.zEntry.get()), float(self.edgeEntry.get())]
 
 			# for each field, check if value is updated in NetworkX; if not, save and add to 'updated'
@@ -298,18 +300,20 @@ class NodeEdgeInfo(Frame):
 						updated.append(geolist[i])
 		
 		else:
-			geolist = ['x', 'y', 'z', 'EdgeLength']
+			# initilize lists of geometric values
 			xVals = []
 			yVals = []
 			zVals = []
 			edgeVals = []
 			
+			# loop through x, y, z, edge entry lists and get the values from each of those and store in x, y, z,edge vals lists
 			for i in range(0, len(self.xEntryList)):
 				xVals.append(float(self.xEntryList[i].get()))
 				yVals.append(float(self.yEntryList[i].get()))
 				zVals.append(float(self.zEntryList[i].get()))
 				edgeVals.append(float(self.edgeEntryList[i].get()))
 			
+			# store each geo vals list to network x
 			self.G.node[self.index]['x'] = xVals
 			self.G.node[self.index]['y'] = yVals
 			self.G.node[self.index]['z'] = zVals
@@ -368,6 +372,7 @@ class NodeEdgeInfo(Frame):
 		log = log[:-2]
 		self.leftFrame.appendLog(log)
 
+	# inserts networkX data for the node into repsective entry box
 	def repopulateNodeData(self):
 		if 'Name' in self.G.node[self.index] and self.G.node[self.index]['Name'] != None:
 			self.nameEntry.delete(0, END)
@@ -378,7 +383,7 @@ class NodeEdgeInfo(Frame):
 			self.notes.delete('0.0', END)
 			self.notes.insert('0.0', self.G.node[self.index]['Notes'])
 		
-		try: 
+		try: #simple geometry
 			int(self.G.node[self.index]['x'])
 			if 'x' in self.G.node[self.index]:
 				self.xEntry.delete(0, END)
@@ -392,7 +397,7 @@ class NodeEdgeInfo(Frame):
 			if 'EdgeLength' in self.G.node[self.index] and self.G.node[self.index]['EdgeLength'] != None:
 				self.edgeEntry.delete(0, END)
 				self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'])
-		except TypeError: 
+		except TypeError: #advanced geometry
 			self.geoOption.set('Advanced')
 			self.geoSwitch()
 
@@ -421,7 +426,7 @@ class NodeEdgeInfo(Frame):
 				self.systemDict[x].delete(0, END)
 				self.systemDict[x].insert(0, self.G.node[self.index][x])
 
-
+	# inserts networkX data for the edge into repsective entry box
 	def repopulateEdgeData(self):
 		if ('Name' in self.G.edge[self.nodes[0]][self.nodes[1]]) and (self.G.edge[self.nodes[0]][self.nodes[1]]['Name'] != None):
 			self.nameEntry.delete(0, END)
