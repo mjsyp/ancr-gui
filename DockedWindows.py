@@ -416,15 +416,33 @@ class DockedWindows(Frame):
 			exitButton.pack(side='right')
 			minButton.pack(side='right')
 
-			#do stuff
 			x = self.G.node[self.selectedNode]['x']
 			try: # simple geometry
 				int(x)
 			except TypeError: # advanced geometry
 				for i in range(0, len(x)):
 					coord = self.drawPoint(200, i, len(x), 300, 260)
-					r=8
+					r=10
 					self.PopUpCanvas.create_oval(coord[0]-r, coord[1]-r, coord[0]+r, coord[1]+r, fill='red')
+					self.PopUpCanvas.create_text(coord[0], coord[1], text=str(i+1), fill='white')
+				for i in range(0, len(x)):
+					for j in range(i, len(x)):
+						if i != j:
+							x1 = self.G.node[self.selectedNode]['x'][i]
+							x2 = self.G.node[self.selectedNode]['x'][j]
+							y1 = self.G.node[self.selectedNode]['y'][i]
+							y2 = self.G.node[self.selectedNode]['y'][j]
+							z1 = self.G.node[self.selectedNode]['z'][i]
+							z2 = self.G.node[self.selectedNode]['z'][j]
+							a1 = self.G.node[self.selectedNode]['EdgeLength'][i]/2
+							a2 = self.G.node[self.selectedNode]['EdgeLength'][j]/2
+							adj = self.adjacency(x1, x2, y1, y2, z1, z2, a1, a2)
+							if adj:
+								x1 = (self.PopUpCanvas.coords(i*2+1)[0]+self.PopUpCanvas.coords(i*2+1)[2])/2
+								x2 = (self.PopUpCanvas.coords(j*2+1)[0]+self.PopUpCanvas.coords(j*2+1)[2])/2
+								y1 = (self.PopUpCanvas.coords(i*2+1)[1]+self.PopUpCanvas.coords(i*2+1)[3])/2
+								y2 = (self.PopUpCanvas.coords(j*2+1)[1]+self.PopUpCanvas.coords(j*2+1)[3])/2
+								self.PopUpCanvas.create_line(x1, y1, x2, y2, fill='black')
 
 		elif self.subNetworkFrame.winfo_height() == 30:
 			self.subNetworkFrame.config(height=200)
