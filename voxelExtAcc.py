@@ -23,11 +23,11 @@ cubePos = voxelHandler.custBox( -5, 5, -5, 5, -5, 5)
 cubePos2 = voxelHandler.custBox(8, 20 , 2, -2, 2, -2)
 #cubPos3 = voxelHandler.custBox()
 
+horribleThingWhichShouldNotExist = [cubePos,cubePos2]
 
+compList = voxelHandler.listAppend(horribleThingWhichShouldNotExist)
 
-for i in range(len(cubePos2)):
-		cubePos.append(cubePos2[i])
-curChunk = voxelHandler.createChunk(cubePos)
+curChunk = voxelHandler.createChunk(compList)
 
 voxelHandler.createOutline(curChunk)
 

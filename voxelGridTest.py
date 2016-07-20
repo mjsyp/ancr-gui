@@ -241,5 +241,13 @@ class voxelHandler():
 		return posList
 
 
-
+	def listAppend(self,cubePosList):
+		
+		cubeListFinal = []
+		
+		for i in range(len(cubePosList)):
+			for j in range(len(cubePosList[i])):
+				cubeListFinal.append(cubePosList[i][j])
+				
+		return cubeListFinal
 
