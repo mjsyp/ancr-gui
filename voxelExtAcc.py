@@ -29,16 +29,10 @@ for i in range(len(cubePos2)):
 		cubePos.append(cubePos2[i])
 curChunk = voxelHandler.createChunk(cubePos)
 
-chunkList = curChunk.voxGrid
+voxelHandler.createOutline(curChunk)
 
-voxelHandler.createOutline(chunkList)
 
-for i in range(len(chunkList)):
-	for j in range(len(chunkList[i])):
-		for k in range(len(chunkList[i][j])):
-			
-				if chunkList[i][j][k] != 0:
-					voxelHandler.drawCubeLines(chunkList[i][j][k])
+voxelHandler.drawCubeLines(curChunk)
 
 scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
 ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]]*3)

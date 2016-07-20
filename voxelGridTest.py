@@ -101,39 +101,51 @@ class voxelHandler():
 	
 		return newChunk
 
-	def drawCubeLines(self,curCube):
+	def drawCubeLines(self,curChunk):
 	
-		x = curCube.x
-		y = curCube.y
-		z = curCube.z
+		chunkList = curChunk.voxGrid
 	
-		#Top
-		if curCube.topBack == 1:
-			plt.plot((x , x + 1), (y + 1, y + 1),(z + 1,z + 1))
-		if curCube.topFront == 1:
-			plt.plot((x , x + 1), (y , y ),(z + 1,z + 1))
-		if curCube.topLeft == 1:
-			plt.plot((x , x ), (y , y + 1),(z + 1,z + 1))
-		if curCube.topRight == 1:
-			plt.plot((x + 1, x + 1), (y , y + 1),(z + 1,z + 1))
-		#Bottom
-		if curCube.botBack == 1:
-			plt.plot((x , x + 1), (y + 1, y + 1),(z ,z ))
-		if curCube.botFront == 1:
-			plt.plot((x , x + 1), (y , y ),(z ,z ))
-		if curCube.botLeft == 1:
-			plt.plot((x , x ), (y , y + 1),(z ,z ))
-		if curCube.botRight == 1:
-			plt.plot((x + 1, x + 1), (y , y + 1),(z ,z ))
-		#Vertical
-		if curCube.leftFront == 1:
-			plt.plot((x , x ), (y , y ),(z ,z + 1))
-		if curCube.leftBack == 1:
-			plt.plot((x , x ), (y + 1, y + 1),(z ,z + 1))
-		if curCube.rightFront == 1:
-			plt.plot((x + 1, x + 1), (y , y ),(z ,z + 1))
-		if curCube.rightBack == 1:
-			plt.plot((x + 1, x + 1), (y + 1, y + 1),(z ,z + 1))
+		for i in range(len(chunkList)):
+			for j in range(len(chunkList[i])):
+				for k in range(len(chunkList[i][j])):
+			
+					
+					
+					if chunkList[i][j][k] != 0:
+						
+						curCube = chunkList[i][j][k]
+						
+						x = curCube.x
+						y = curCube.y
+						z = curCube.z
+	
+						#Top
+						if curCube.topBack == 1:
+							plt.plot((x , x + 1), (y + 1, y + 1),(z + 1,z + 1))
+						if curCube.topFront == 1:
+							plt.plot((x , x + 1), (y , y ),(z + 1,z + 1))
+						if curCube.topLeft == 1:
+							plt.plot((x , x ), (y , y + 1),(z + 1,z + 1))
+						if curCube.topRight == 1:
+							plt.plot((x + 1, x + 1), (y , y + 1),(z + 1,z + 1))
+						#Bottom
+						if curCube.botBack == 1:
+							plt.plot((x , x + 1), (y + 1, y + 1),(z ,z ))
+						if curCube.botFront == 1:
+							plt.plot((x , x + 1), (y , y ),(z ,z ))
+						if curCube.botLeft == 1:
+							plt.plot((x , x ), (y , y + 1),(z ,z ))
+						if curCube.botRight == 1:
+							plt.plot((x + 1, x + 1), (y , y + 1),(z ,z ))
+						#Vertical
+						if curCube.leftFront == 1:
+							plt.plot((x , x ), (y , y ),(z ,z + 1))
+						if curCube.leftBack == 1:
+							plt.plot((x , x ), (y + 1, y + 1),(z ,z + 1))
+						if curCube.rightFront == 1:
+							plt.plot((x + 1, x + 1), (y , y ),(z ,z + 1))
+						if curCube.rightBack == 1:
+							plt.plot((x + 1, x + 1), (y + 1, y + 1),(z ,z + 1))
 
 	def cubeAdjChk(self,pos,chunk):
 		i = pos[0]
@@ -148,7 +160,10 @@ class voxelHandler():
 			return False
 
 	#determines what sides of cubes to show
-	def createOutline(self,chunk):	
+	def createOutline(self,chunkObj):
+		
+		chunk = chunkObj.voxGrid
+			
 		for i in range(len(chunk)):
 			for j in range(len(chunk[i])):
 				for k in range(len(chunk[i][j])):
