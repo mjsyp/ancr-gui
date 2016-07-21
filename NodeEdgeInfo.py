@@ -89,7 +89,7 @@ class NodeEdgeInfo(Frame):
 			self.leftFrame.dropdown.destroy()
 			self.leftFrame.dropdown = OptionMenu(self.leftFrame.toolbar, self.leftFrame.v, 
 				*self.leftFrame.optionList, command=self.leftFrame.newOptionMenu)
-			self.leftFrame.dropdown.configure(highlightbackground="light blue")
+			self.leftFrame.dropdown.configure(highlightbackground="light blue", bg='light blue')
 			self.leftFrame.dropdown.pack(side='left')
 
 	def creategeoGroup(self):
@@ -321,9 +321,7 @@ class NodeEdgeInfo(Frame):
 
 		# Demands
 		for x in self.manager.systems: # for each system
-			if self.systemDict[x].get() == '':
-				del self.G.node[self.index][x]
-			elif self.systemDict[x].get() != None: # if there is a value for this node
+			if self.systemDict[x].get() != None and self.systemDict[x].get() != '': # if there is a value for this node
 				# if system doesn't exist in NetworkX already OR if the curr value in NetworkX isn't updated
 				if (x not in self.G.node[self.index]) or (self.G.node[self.index][x] != int(self.systemDict[x].get())):
 					updated.append(x)
