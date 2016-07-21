@@ -1,16 +1,6 @@
-'''
-Created on Jul 14, 2016
-
-@author: Alice
-'''
-
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
-import time
-
-
-
 #Stores all info about a cube
 #maybe initialize to 0
 class voxel():
@@ -99,7 +89,6 @@ class voxelHandler():
 		newChunk.yOff = yMin
 		newChunk.voxGrid = voxGrid
 		
-		#print("createChunk done")
 		return newChunk
 
 	def drawCubeLines(self,curChunk,ax):
@@ -147,7 +136,6 @@ class voxelHandler():
 							ax.plot((x + 1, x + 1), (y , y ),(z ,z + 1))
 						if curCube.rightBack == 1:
 							ax.plot((x + 1, x + 1), (y + 1, y + 1),(z ,z + 1))
-		print("drawCubeLines done")
 
 	def cubeAdjChk(self,pos,chunk):
 		i = pos[0]
@@ -211,7 +199,6 @@ class voxelHandler():
 					#rightBack
 					if (self.cubeAdjChk([i,j + 1,k],chunk)) ^ (self.cubeAdjChk([i + 1,j,k],chunk))^ (self.cubeAdjChk([i + 1,j + 1,k],chunk)):
 						chunk[i][j][k].rightBack = 0
-		#print("createOutline done")
 
 	def custBox(self,x1,x2,y1,y2,z1,z2):
 		
@@ -240,15 +227,12 @@ class voxelHandler():
 					
 					posList.append(voxel(i + xOff,j + yOff,k + zOff))
 		
-		#print("custBox done")
 		return posList
 
 
 	def listAppend(self,cubePosList):
 		
-		cubeListFinal = []
-		#print("listAppend working")
-		
+		cubeListFinal = []		
 		for i in range(len(cubePosList)):
 			for j in range(len(cubePosList[i])):
 				cubeListFinal.append(cubePosList[i][j])

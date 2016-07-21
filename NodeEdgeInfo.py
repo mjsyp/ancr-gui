@@ -326,6 +326,15 @@ class NodeEdgeInfo(Frame):
 				if (x not in self.G.node[self.index]) or (self.G.node[self.index][x] != int(self.systemDict[x].get())):
 					updated.append(x)
 					self.G.node[self.index][x] = int(self.systemDict[x].get())
+			elif x in self.G.node[self.index] and self.systemDict[x].get() == '':
+				if self.leftFrame.v.get() != 'All':
+					nodeCoords = self.leftFrame.systemsCanvas.coords(self.index)
+					overlapped = self.leftFrame.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
+					for edge in overlapped:
+						if self.leftFrame.checkTag(edge) == 'edge':
+							self.leftFrame.systemsCanvas.itemconfig(edge, state='hidden')
+					self.leftFrame.systemsCanvas.itemconfig(self.index, state='hidden')
+				del self.G.node[self.index][x]
 
 		self.updateNodeSizes()
 		self.leftFrame.dockedWindows.showSubNetwork(self.index)
@@ -360,6 +369,10 @@ class NodeEdgeInfo(Frame):
 				if (x not in self.G.edge[self.nodes[0]][self.nodes[1]]) or (self.G.edge[self.nodes[0]][self.nodes[1]][x] != int(self.systemDict[x].get())):
 					updated.append(x)
 					self.G.edge[self.nodes[0]][self.nodes[1]][x] = int(self.systemDict[x].get())
+			elif x in self.G.edge[self.nodes[0]][self.nodes[1]] and self.systemDict[x].get() == '':
+				if self.leftFrame.v.get() != 'All':
+					self.leftFrame.systemsCanvas.itemconfig(self.index, state='hidden')
+				del self.G.edge[self.nodes[0]][self.nodes[1]][x]
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of edge between node " 

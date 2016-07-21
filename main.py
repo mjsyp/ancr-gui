@@ -38,8 +38,9 @@ class Window(Frame):
 	def save_as(self, event=None):
 		for node in self.G.nodes():
 			self.G.node[node]['systems'] = self.geoCanvas.manager.systems
-		self.filename = tkFileDialog.asksaveasfilename(defaultextension=".txt")
-		if self.filename != '': # asksaveasfile returns '' if dialog closed with "cancel".
+		fileExt = tkFileDialog.asksaveasfilename(defaultextension=".txt")
+		if fileExt != '': # asksaveasfile returns '' if dialog closed with "cancel".
+			self.filename = fileExt
 			s = str(self.filename)
 			filename = s.split('/')
 			self.parent.title("ANCR-GUI - " + filename[len(filename)-1])
@@ -51,8 +52,9 @@ class Window(Frame):
 
 	# can open any previously saved network x graph and plot nodes and edges onto the canvas, and resume all gui functionality 
 	def open(self, event=None):
-		self.filename = tkFileDialog.askopenfilename()
-		if self.filename != '':
+		fileExt = tkFileDialog.askopenfilename()
+		if fileExt != '':
+			self.filename = fileExt
 			s = str(self.filename)
 			filename = s.split('/')
 			self.parent.title("ANCR-GUI - " + filename[len(filename)-1])
@@ -85,9 +87,9 @@ class Window(Frame):
 				self.geoCanvas.dropdown.configure(bg="light blue")
 				self.geoCanvas.dropdown.pack(side='left')
 
-		# add to log file
-		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Opened file: " + str(self.filename)
-		self.geoCanvas.appendLog(log)	
+			# add to log file
+			log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Opened file: " + str(self.filename)
+			self.geoCanvas.appendLog(log)	
 	# creates the gui menubar
 	def createTabs(self):
 		# Binds submenus to their shortcut key; use ctrl for windows and cmd for OS X
