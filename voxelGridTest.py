@@ -98,10 +98,11 @@ class voxelHandler():
 		newChunk.xOff = xMin
 		newChunk.yOff = yMin
 		newChunk.voxGrid = voxGrid
-	
+		
+		#print("createChunk done")
 		return newChunk
 
-	def drawCubeLines(self,curChunk):
+	def drawCubeLines(self,curChunk,ax):
 	
 		chunkList = curChunk.voxGrid
 	
@@ -121,31 +122,32 @@ class voxelHandler():
 	
 						#Top
 						if curCube.topBack == 1:
-							plt.plot((x , x + 1), (y + 1, y + 1),(z + 1,z + 1))
+							ax.plot((x , x + 1), (y + 1, y + 1),(z + 1,z + 1))
 						if curCube.topFront == 1:
-							plt.plot((x , x + 1), (y , y ),(z + 1,z + 1))
+							ax.plot((x , x + 1), (y , y ),(z + 1,z + 1))
 						if curCube.topLeft == 1:
-							plt.plot((x , x ), (y , y + 1),(z + 1,z + 1))
+							ax.plot((x , x ), (y , y + 1),(z + 1,z + 1))
 						if curCube.topRight == 1:
-							plt.plot((x + 1, x + 1), (y , y + 1),(z + 1,z + 1))
+							ax.plot((x + 1, x + 1), (y , y + 1),(z + 1,z + 1))
 						#Bottom
 						if curCube.botBack == 1:
-							plt.plot((x , x + 1), (y + 1, y + 1),(z ,z ))
+							ax.plot((x , x + 1), (y + 1, y + 1),(z ,z ))
 						if curCube.botFront == 1:
-							plt.plot((x , x + 1), (y , y ),(z ,z ))
+							ax.plot((x , x + 1), (y , y ),(z ,z ))
 						if curCube.botLeft == 1:
-							plt.plot((x , x ), (y , y + 1),(z ,z ))
+							ax.plot((x , x ), (y , y + 1),(z ,z ))
 						if curCube.botRight == 1:
-							plt.plot((x + 1, x + 1), (y , y + 1),(z ,z ))
+							ax.plot((x + 1, x + 1), (y , y + 1),(z ,z ))
 						#Vertical
 						if curCube.leftFront == 1:
-							plt.plot((x , x ), (y , y ),(z ,z + 1))
+							ax.plot((x , x ), (y , y ),(z ,z + 1))
 						if curCube.leftBack == 1:
-							plt.plot((x , x ), (y + 1, y + 1),(z ,z + 1))
+							ax.plot((x , x ), (y + 1, y + 1),(z ,z + 1))
 						if curCube.rightFront == 1:
-							plt.plot((x + 1, x + 1), (y , y ),(z ,z + 1))
+							ax.plot((x + 1, x + 1), (y , y ),(z ,z + 1))
 						if curCube.rightBack == 1:
-							plt.plot((x + 1, x + 1), (y + 1, y + 1),(z ,z + 1))
+							ax.plot((x + 1, x + 1), (y + 1, y + 1),(z ,z + 1))
+		print("drawCubeLines done")
 
 	def cubeAdjChk(self,pos,chunk):
 		i = pos[0]
@@ -209,7 +211,7 @@ class voxelHandler():
 					#rightBack
 					if (self.cubeAdjChk([i,j + 1,k],chunk)) ^ (self.cubeAdjChk([i + 1,j,k],chunk))^ (self.cubeAdjChk([i + 1,j + 1,k],chunk)):
 						chunk[i][j][k].rightBack = 0
-
+		#print("createOutline done")
 
 	def custBox(self,x1,x2,y1,y2,z1,z2):
 		
@@ -238,12 +240,14 @@ class voxelHandler():
 					
 					posList.append(voxel(i + xOff,j + yOff,k + zOff))
 		
+		#print("custBox done")
 		return posList
 
 
 	def listAppend(self,cubePosList):
 		
 		cubeListFinal = []
+		#print("listAppend working")
 		
 		for i in range(len(cubePosList)):
 			for j in range(len(cubePosList[i])):

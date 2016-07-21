@@ -9,6 +9,8 @@ from PIL import Image, ImageTk
 from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure 
+import voxelGridTest as vox
+
 
 # graphs geometries of nodes of type: component
 def viewComponentGeo(G):
@@ -81,20 +83,34 @@ def viewCompartmentGeo(G):
 							ax.plot3D(*zip(s,e), color="b")
 				except TypeError: #advanced geometry
 					# if geometry is advanced, loop through each sub geometry and plot the cube with centroid x,y,z and edge length a
+					voxelHandler = vox.voxelHandler()
+					cubePos = []
 					for i in range(0, len(G.node[node]['x'])):	
 						a = G.node[node]['EdgeLength'][i]
 						x = G.node[node]['x'][i]
 						y = G.node[node]['y'][i]
 						z = G.node[node]['z'][i]
 						hSL = float(a/2)
-						r = [-hSL, hSL]
-						rX = [-hSL + x, hSL + x]
-						rY = [-hSL + y, hSL + y]
-						rZ = [-hSL + z, hSL + z]
-						for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
-							if not np.sum(np.abs(s-e)) > a+0.0000001:
-								ax.plot3D(*zip(s,e), color="b")
-
+						x1 = int(x - hSL)
+						x2 = int(x + hSL)
+						y1 = int(y - hSL)
+						y2 = int(y + hSL)
+						z1 = int(z - hSL)
+						z2 = int(z + hSL)
+						curBox = voxelHandler.custBox(x1, x2, y1, y2, z1, z2)
+						cubePos.append(curBox)
+						#r = [-hSL, hSL]
+						#rX = [-hSL + x, hSL + x]
+						#rY = [-hSL + y, hSL + y]
+						#rZ = [-hSL + z, hSL + z]
+						#for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
+							#if not np.sum(np.abs(s-e)) > a+0.0000001:
+								#ax.plot3D(*zip(s,e), color="b")
+					
+					compList = voxelHandler.listAppend(cubePos)
+					curChunk = voxelHandler.createChunk(compList)
+					voxelHandler.createOutline(curChunk)
+					voxelHandler.drawCubeLines(curChunk,ax)
 	# sets the scales of the graph to be equal so that cube shape is intact				
 	scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
 	ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]]*3)
