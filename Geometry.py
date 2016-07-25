@@ -91,12 +91,12 @@ def viewCompartmentGeo(G):
 						y = G.node[node]['y'][i]
 						z = G.node[node]['z'][i]
 						hSL = float(a/2)
-						x1 = int(x - hSL)
-						x2 = int(x + hSL)
-						y1 = int(y - hSL)
-						y2 = int(y + hSL)
-						z1 = int(z - hSL)
-						z2 = int(z + hSL)
+						x1 = x-hSL #int(x - hSL)
+						x2 = x+hSL #int(x + hSL)
+						y1 = y-hSL #int(y - hSL)
+						y2 = y+hSL #int(y + hSL)
+						z1 = z-hSL #int(z - hSL)
+						z2 = z+hSL #int(z + hSL)
 						curBox = voxelHandler.custBox(x1, x2, y1, y2, z1, z2)
 						cubePos.append(curBox)
 						#r = [-hSL, hSL]
