@@ -263,14 +263,18 @@ class CanvasFrame(Frame):
 					numEdges = 0
 					for x in overlapped:
 						if self.systemsCanvas.type(x) == 'line':
-							# add 'deleted' tag to ea. object x, and make it hidden
-							self.systemsCanvas.addtag_withtag('deleted', x)
-							self.systemsCanvas.itemconfig(x, state='hidden')
+							
+							nodes = self.edgeEndpoints(x)
+							
+							if item == nodes[0] or item == nodes[1]:
+								# add 'deleted' tag to ea. object x, and make it hidden
+								self.systemsCanvas.addtag_withtag('deleted', x)
+								self.systemsCanvas.itemconfig(x, state='hidden')
 
-							self.undoStack.append(x) # add edge to undo stack
-							self.systemsCanvas.dtag(x, 'edge')
-							self.deleteEdgeNX(x, self.G, self.D)
-							numEdges += 1
+								self.undoStack.append(x) # add edge to undo stack
+								self.systemsCanvas.dtag(x, 'edge')
+								self.deleteEdgeNX(x, self.G, self.D)
+								numEdges += 1
 
 					self.systemsCanvas.addtag_withtag('deleted', item)
 					self.systemsCanvas.itemconfig(item, state='hidden')
