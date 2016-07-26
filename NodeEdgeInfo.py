@@ -22,7 +22,7 @@ class NodeEdgeInfo(Frame):
 
 	def createTypeLabel(self):
 		self.typeLabel = Label(self.propGroup, text="Type:", bg=self.color)
-		self.typeLabel.grid(row=1, column=0, padx=5, pady=5, sticky=E)
+		self.typeLabel.grid(row=1, column=0, padx=5, pady=5, sticky=E+W)
 
 		# initialize default options in dropdown to the list in our Manager
 		self.optionList = self.manager.types
@@ -63,31 +63,6 @@ class NodeEdgeInfo(Frame):
 					widget.destroy()
 			self.compartmentInfo = Compartment(self.parent, self.leftFrame, self.index, self.G, self.manager, self.nodes)
 
-	def updateNodeSizes(self):
-		if self.leftFrame.v.get() != 'All' and self.leftFrame.v.get() != 'Create New':
-			self.leftFrame.minDemand = 1000000000
-			self.leftFrame.maxDemand = -1
-			visibleNodes = []
-
-			for nodeitem in self.leftFrame.systemsCanvas.find_withtag('node'):
-				if self.leftFrame.v.get() in self.G.node[nodeitem]:
-					visibleNodes.append(nodeitem) # add to a list of visible nodes
-
-					# find minimum and maximum values for this demand
-					thisDemand = self.G.node[nodeitem][self.leftFrame.v.get()]
-					if abs(thisDemand) < self.leftFrame.minDemand:
-						self.leftFrame.minDemand = abs(thisDemand)
-					if abs(thisDemand) > self.leftFrame.maxDemand:
-						self.leftFrame.maxDemand = abs(thisDemand)
-
-			# delete old '+' or '-' labels
-			self.leftFrame.systemsCanvas.delete('label')
-
-			for nodeitem in visibleNodes:
-				# update node sizes
-				self.leftFrame.normalNodeSize(nodeitem)
-				self.leftFrame.scaleNodeSize(nodeitem)
-
 	def saveNodeAttributes(self):
 		titles = ['Name', 'Type', 'Notes']
 		values = [self.nameEntry.get(), self.v.get(), self.notes.get('0.0', END)]
@@ -100,10 +75,6 @@ class NodeEdgeInfo(Frame):
 		if self.leftFrame.labels == 1:
 			self.leftFrame.hideLabels()
 			self.leftFrame.showLabels()
-
-		# TODO
-		self.updateNodeSizes()
-		self.leftFrame.dockedWindows.showSubNetwork(self.index) 
 
 		if self.G.node[self.index]['Type'] == 'Component':
 			self.componentInfo.saveNodeAttributes()
@@ -156,10 +127,13 @@ class NodeEdgeInfo(Frame):
 	def initUI(self):
 		self.propGroup = LabelFrame(self.parent, text="Properties", bg=self.color)
 		self.propGroup.grid(row=0, padx=10, sticky=E+W)
+		self.propGroup.columnconfigure(0, weight=1)
+		self.propGroup.columnconfigure(1, weight=1)
+		self.propGroup.columnconfigure(2, weight=1)
 
 		# Name, Type
 		self.nameLabel = Label(self.propGroup, text="Name:", bg=self.color)
-		self.nameLabel.grid(row=0, column=0, padx=5, pady=(5, 1), sticky=E)
+		self.nameLabel.grid(row=0, column=0, padx=5, pady=(5, 1), sticky=E+W)
 		self.nameEntry = Entry(self.propGroup, highlightbackground=self.color)
 		self.nameEntry.grid(row=0, column=1, columnspan=2, padx=5, pady=(5, 1), sticky=E+W)
 		self.createTypeLabel()
