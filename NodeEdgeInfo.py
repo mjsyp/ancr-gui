@@ -37,35 +37,37 @@ class NodeEdgeInfo(Frame):
 		self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def changeType(self, event):
-		if self.v.get() == "Create New":
-			typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
+		#TODO: change types available for edges
+		if self.nodes == None: # if a node is selected rather than an edge
+			if self.v.get() == "Create New":
+				typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
 
-			if typeLabel != None:
-				# select new 'type' in dropdown
-				self.optionList.insert(len(self.optionList)-1, typeLabel)
-				self.v.set(self.optionList[len(self.optionList)-2])
+				if typeLabel != None:
+					# select new 'type' in dropdown
+					self.optionList.insert(len(self.optionList)-1, typeLabel)
+					self.v.set(self.optionList[len(self.optionList)-2])
 
-				# redraw dropdown
-				self.dropdown.destroy()
-				self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.changeType)
-				self.dropdown.config(highlightbackground=self.color, bg=self.color)
-				self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
+					# redraw dropdown
+					self.dropdown.destroy()
+					self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.changeType)
+					self.dropdown.config(highlightbackground=self.color, bg=self.color)
+					self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
-		elif self.v.get() == "Component":
-			for widget in self.parent.grid_slaves():
-				if int(widget.grid_info()['row']) == 1:
-					widget.destroy()
-			try:
-				self.leftFrame.dockedWindows.subNetworkExit()
-			except AttributeError:
-				pass
-			self.componentInfo = Component(self.parent, self.leftFrame, self.index, self.G, self.manager)
+			elif self.v.get() == "Component":
+				for widget in self.parent.grid_slaves():
+					if int(widget.grid_info()['row']) == 1:
+						widget.destroy()
+				try:
+					self.leftFrame.dockedWindows.subNetworkExit()
+				except AttributeError:
+					pass
+				self.componentInfo = Component(self.parent, self.leftFrame, self.index, self.G, self.manager)
 
-		elif self.v.get() == "Compartment":
-			for widget in self.parent.grid_slaves():
-				if int(widget.grid_info()['row']) == 1:
-					widget.destroy()
-			self.compartmentInfo = Compartment(self.parent, self.leftFrame, self.index, self.G, self.manager)
+			elif self.v.get() == "Compartment":
+				for widget in self.parent.grid_slaves():
+					if int(widget.grid_info()['row']) == 1:
+						widget.destroy()
+				self.compartmentInfo = Compartment(self.parent, self.leftFrame, self.index, self.G, self.manager)
 
 	def saveNodeAttributes(self):
 		titles = ['Name', 'Type', 'Notes']
