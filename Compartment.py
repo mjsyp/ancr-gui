@@ -123,7 +123,7 @@ class Compartment(Frame):
 		self.G.node[self.index]['z'] = zVals
 		self.G.node[self.index]['EdgeLength'] = edgeVals
 
-		self.leftFrame.dockedWindows.showSubNetwork(self.index) 
+		self.leftFrame.dockedWindows.showSubNetwork(self.index)
 
 	# inserts networkX data for the node into repsective entry box
 	def repopulateNodeData(self):
@@ -158,3 +158,4 @@ class Compartment(Frame):
 		if self.nodes == None:
 			self.createGeometry()
 			self.repopulateNodeData()
+			self.leftFrame.dockedWindows.showSubNetwork(self.index)
