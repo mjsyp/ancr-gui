@@ -14,7 +14,7 @@ class NodeEdgeInfo(Frame):
 		self.index = index
 		self.G = G
 		self.manager = manager
-		self.nodes=nodes
+		self.nodes = nodes
 
 		self.systemDict = {}
  		self.color = "dark gray" 
@@ -25,7 +25,10 @@ class NodeEdgeInfo(Frame):
 		self.typeLabel.grid(row=1, column=0, padx=5, pady=5, sticky=E+W)
 
 		# initialize default options in dropdown to the list in our Manager
-		self.optionList = self.manager.types
+		if self.nodes == None:
+			self.optionList = self.manager.nodeTypes
+		else:
+			self.optionList = self.manager.edgeTypes
 
 		# create a StringVar that holds the selected option in the dropdown
 		self.v = StringVar()

@@ -29,6 +29,10 @@ class DockedWindows(Frame):
 			self.toolbarFrame = Frame(self.nodeDegreeFrame, bg='light gray')
 			self.toolbarFrame.pack(side='top', fill='x')
 
+			# toolbar label
+			analysisToolbarLabel = Label(self.toolbarFrame, text="Node Degrees", bg='light gray')
+			analysisToolbarLabel.pack(side='left')
+
 			# creates images for the buttons on the toolbar
 			image = Image.open("exit.png") 
 			self.exitImage = ImageTk.PhotoImage(image)
@@ -114,11 +118,15 @@ class DockedWindows(Frame):
 			self.nodeDegreePopup.overrideredirect(1)
 			self.nodeDegreePopup.geometry(("%dx%d%+d%+d" % (600, 550, 200, 100)))
 
-			# toolbar for min, exit buttons
+			# create a frame that makes the toolbar for min, max, and exit buttons
 			analysisToolbar = Frame(self.nodeDegreePopup, bg='light gray')
 			analysisToolbar.pack(side='top', fill='x')
 			analysisToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
 			analysisToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.nodeDegreePopup))
+
+			# toolbar label
+			analysisToolbarLabel = Label(analysisToolbar, text="Node Degrees", bg='light gray')
+			analysisToolbarLabel.pack(side='left')
 
 			# creates images for toolbar buttons
 			image = Image.open("exit.png")
@@ -151,12 +159,13 @@ class DockedWindows(Frame):
 			ax.set_xlabel("Degree", fontsize=18)
 			ax.set_ylabel("Frequency", fontsize=19)
 			ax.axis([min(degrees)-1, max(degrees)+1, 0, len(degrees)])
-			# Produce an image.
+			
+			# save the matplotlib plot and open it as a PhotoImage
 			fig.savefig("histogramplot.png", bbox_inches='tight')
-
 			image = Image.open("histogramplot.png")
 			photo = ImageTk.PhotoImage(image)
 
+			# make label to display image in
 			label = Label(self.nodeDegreePopup, image=photo, bg="white")
 			label.image = photo
 			label.pack()
@@ -178,11 +187,11 @@ class DockedWindows(Frame):
 		x = int(geometry[1])+event.x-self.startDragX
 		y = int(geometry[2])+event.y-self.startDragY
 		# drag window to release button location unless it is out of bounds, then drag window to respective edge of screen
-		if x>0 and y>0:
+		if x > 0 and y > 0:
 			w.geometry(("%dx%d%+d%+d" % (600, 550, x, y)))
-		elif x>0 and y<0:
+		elif x > 0 and y < 0:
 			w.geometry(("%dx%d%+d%+d" % (600, 550, x, 0)))
-		elif x<0 and y>0:
+		elif x < 0 and y > 0:
 			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, y)))
 		else:
 			w.geometry(("%dx%d%+d%+d" % (600, 550, 0, 0)))
@@ -190,16 +199,20 @@ class DockedWindows(Frame):
 	"""---------------------------------------------------------LOG WINDOW----------------------------------------------------------------"""
 	# add events to the log text
 	def appendLog(self, text):
+		# if log frame was exited out / it doesn't exist, just keep track of new logs
+		# in a string called self.logContents
 		if (not hasattr(self, 'logFrame') or  not self.logFrame.winfo_exists()) and \
 		   (not hasattr(self, 'logPopUp') or self.logPopUp.winfo_exists() == 0) :
 			self.logContents += text
 
+		# if the log frame is in the regular docked state, append text there
 		elif self.logFrameOrWindow == 0:
 			self.logText.config(state=NORMAL)
 			self.logText.insert(END, "\n" + text)
 			self.logText.config(state=DISABLED)
 			self.logText.see("end")
 
+		# else the log frame is a popup; append text there
 		else:
 			self.logPopUpText.config(state=NORMAL)
 			self.logPopUpText.insert(END, "\n" + text)
@@ -218,6 +231,11 @@ class DockedWindows(Frame):
 			self.logToolbar = Frame(self.logFrame, bg='light gray')
 			self.logToolbar.pack(side='top', fill='x')
 
+			# toolbar label
+			logLabel = Label(self.logToolbar, text="Log", bg='light gray')
+			logLabel.pack(side='left')
+
+			# create images for min/max/exit buttons
 			image = Image.open("exit.png")
 			self.exitImage3 = ImageTk.PhotoImage(image)
 			exitButton = Button(self.logToolbar, image=self.exitImage3, highlightbackground='light gray', command=self.logExit)
@@ -287,6 +305,9 @@ class DockedWindows(Frame):
 			logPopUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
 			logPopUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.logPopUp))
 
+			logPopUpLabel = Label(logPopUpToolbar, text="Log", bg='light gray')
+			logPopUpLabel.pack(side='left')
+
 			# creates images for min, exit buttons on toolbar
 			image = Image.open("exit.png")
 			self.exitImage4 = ImageTk.PhotoImage(image)
@@ -346,6 +367,8 @@ class DockedWindows(Frame):
 			# toolbar to store max, min, exit buttons
 			self.subNetworktoolbar = Frame(self.subNetworkFrame, bg='light gray')
 			self.subNetworktoolbar.pack(side='top', fill='x')
+			subNetworkLabel = Label(self.subNetworktoolbar, text="Sub-Network", bg='light gray')
+			subNetworkLabel.pack(side='left')
 
 			self.frameCanvas = Canvas(self.subNetworkFrame, width=200, height=180, bg='white')
 			self.frameCanvas.pack(side='bottom')
@@ -433,6 +456,10 @@ class DockedWindows(Frame):
 			popUpToolbar.pack(side='top', fill='x')
 			popUpToolbar.bind('<ButtonPress-1>', self.dragWindowStart)
 			popUpToolbar.bind('<ButtonRelease-1>', lambda event: self.dragWindowEnd(event, self.subNetworkPopUp))
+
+			# toolbar label
+			subNetworkLabel = Label(self.popUpToolbar, text="Sub-Network", bg='light gray')
+			subNetworkLabel.pack(side='left')
 
 			self.PopUpCanvas = Canvas(self.subNetworkPopUp, width=600, height=520, bg='white')
 			self.PopUpCanvas.pack(side='bottom')

@@ -5,7 +5,8 @@ class Manager:
 	def __init__(self, parent):
 		self.parent = parent
 		self.systems = []
-		self.types = ["Component", "Compartment"]
+		self.nodeTypes = ["Component", "Compartment"]
+		self.edgeTypes = ["Adjacency", "Residency", "Supply/Demand"]
 
 	def addSystem(self, system):
 		self.systems.append(system)
