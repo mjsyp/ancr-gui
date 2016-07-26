@@ -55,6 +55,10 @@ class NodeEdgeInfo(Frame):
 			for widget in self.parent.grid_slaves():
 				if int(widget.grid_info()['row']) == 1:
 					widget.destroy()
+			try:
+				self.leftFrame.dockedWindows.subNetworkExit()
+			except AttributeError:
+				pass
 			self.componentInfo = Component(self.parent, self.leftFrame, self.index, self.G, self.manager, self.nodes)
 
 		elif self.v.get() == "Compartment":

@@ -210,7 +210,6 @@ class CanvasFrame(Frame):
 			self.systemsCanvas.itemconfig(CURRENT, fill="green")
 			if self.checkTag(item) == 'node':
 				self.systemInfo = NodeEdgeInfo(self.rightFrame, self, item, self.G, self.manager)
-				self.dockedWindows.showSubNetwork(item)
 			if self.checkTag(item) == 'edge':
 				nodes = self.edgeEndpoints(item)
 				self.systemInfo = NodeEdgeInfo(self.rightFrame, self, item, self.G, self.manager, nodes)
@@ -297,11 +296,7 @@ class CanvasFrame(Frame):
 					del self.G.node[item][self.v.get()]
 				''' if system is not All, then removes that specific demand for the edge'''
 				if self.checkTag(item) == 'edge':
-					nodes = [int(n) for n in self.systemsCanvas.gettags(item) if n.isdigit()]
-					try:				
-						self.G[nodes[0]][nodes[1]]
-					except KeyError:	
-						nodes[0], nodes[1] = nodes[1], nodes[0]
+					nodes = self.edgeEndpoints(item)
 					self.systemsCanvas.itemconfig(item, state='hidden')
 					del self.G.edge[nodes[0]][nodes[1]][self.v.get()]
 
