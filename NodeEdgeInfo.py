@@ -59,13 +59,13 @@ class NodeEdgeInfo(Frame):
 				self.leftFrame.dockedWindows.subNetworkExit()
 			except AttributeError:
 				pass
-			self.componentInfo = Component(self.parent, self.leftFrame, self.index, self.G, self.manager, self.nodes)
+			self.componentInfo = Component(self.parent, self.leftFrame, self.index, self.G, self.manager)
 
 		elif self.v.get() == "Compartment":
 			for widget in self.parent.grid_slaves():
 				if int(widget.grid_info()['row']) == 1:
 					widget.destroy()
-			self.compartmentInfo = Compartment(self.parent, self.leftFrame, self.index, self.G, self.manager, self.nodes)
+			self.compartmentInfo = Compartment(self.parent, self.leftFrame, self.index, self.G, self.manager)
 
 	def saveNodeAttributes(self):
 		titles = ['Name', 'Type', 'Notes']
@@ -97,9 +97,6 @@ class NodeEdgeInfo(Frame):
 		for i in range(0, len(titles)):
 			if (titles[i] not in self.G.edge[self.nodes[0]][self.nodes[1]]) or (self.G.edge[self.nodes[0]][self.nodes[1]][titles[i]] != values[i]):
 				self.G.edge[self.nodes[0]][self.nodes[1]][titles[i]] = values[i]
-
-		if self.G.node[self.index]['Type'] == 'Component':
-			self.componentInfo.saveEdgeAttributes()
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of edge between node " 
@@ -153,11 +150,8 @@ class NodeEdgeInfo(Frame):
 		if self.nodes == None:
 			self.repopulateNodeData()
 			self.saveBtn = Button(self.parent, text="Save", command=self.saveNodeAttributes, highlightbackground=self.color)
-			self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
-
 		else:
 			self.repopulateEdgeData()
 			self.saveBtn = Button(self.parent, text="Save", command=self.saveEdgeAttributes, highlightbackground=self.color)
-			self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
-
+		self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
 		self.changeType(None) # call function so it will display the default 'Type' selection
