@@ -27,25 +27,32 @@ class CanvasFrame(Frame):
 
 	#binds mouse clicks to the createNode function when the 'create node' button is pressed 
 	def createNodeButtonClick(self):
-		# undo activefill 
-		self.systemsCanvas.itemconfig('node', activefill='red')
-		self.systemsCanvas.itemconfig('edge', activefill='black')
-
+		# undo activefill
+		for node in self.G.nodes():
+			if 'Type' in self.G.node[node] and self.G.node[node]['Type'] == 'Compartment':
+				self.systemsCanvas.itemconfig(node, activefill='blue', fill='blue')
+			else:
+				self.systemsCanvas.itemconfig(node, activefill='red', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black', activefill='black')
+		
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.createNodeButton)
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.createNode)
-		self.systemsCanvas.itemconfig('node', fill='red')
-		self.systemsCanvas.itemconfig('edge', fill='black')
+		
 	
 	# binds mouse clicks to the startEdge function and binds mouse click releases to the createEdge
 	# function when the 'create edge' button is pressed  
 	def createEdgeButtonClick(self):
 		# undo activefill 
-		self.systemsCanvas.itemconfig('node', activefill='red')
-		self.systemsCanvas.itemconfig('edge', activefill='black')
+		for node in self.G.nodes():
+			if 'Type' in self.G.node[node] and self.G.node[node]['Type'] == 'Compartment':
+				self.systemsCanvas.itemconfig(node, activefill='blue', fill='blue')
+			else:
+				self.systemsCanvas.itemconfig(node, activefill='red', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black', activefill='black')
 
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.createEdgeButton)
@@ -54,8 +61,6 @@ class CanvasFrame(Frame):
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<ButtonPress-1>', self.edgeStart)
 		self.systemsCanvas.bind('<ButtonRelease-1>', self.createEdge)
-		self.systemsCanvas.itemconfig('node', fill='red')
-		self.systemsCanvas.itemconfig('edge', fill='black')
 	
 	# binds mouse clicks to the selectEdge function when the 'select edge' button is pressed 
 	def selectButtonClick(self):
@@ -63,14 +68,16 @@ class CanvasFrame(Frame):
 		self.buttonRelief(self.selectButton)
 
 		# make nodes and edges green when your cursor scrolls over them
-		self.systemsCanvas.itemconfig('node', activefill='green')
-		self.systemsCanvas.itemconfig('edge', activefill='green')
+		for node in self.G.nodes():
+			if 'Type' in self.G.node[node] and self.G.node[node]['Type'] == 'Compartment':
+				self.systemsCanvas.itemconfig(node, activefill='green', fill='blue')
+			else:
+				self.systemsCanvas.itemconfig(node, activefill='green', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black', activefill='green')
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.select)
-		self.systemsCanvas.itemconfig('node', fill='red')
-		self.systemsCanvas.itemconfig('edge', fill='black')
 	
 	# binds mouse clicks to the deleteNode function when the 'delete node' button is pressed 
 	def deleteButtonClick(self):
@@ -78,14 +85,16 @@ class CanvasFrame(Frame):
 		self.buttonRelief(self.deleteButton)
 
 		# make nodes and edges green when your cursor scrolls over them
-		self.systemsCanvas.itemconfig('node', activefill='green')
-		self.systemsCanvas.itemconfig('edge', activefill='green')
+		for node in self.G.nodes():
+			if 'Type' in self.G.node[node] and self.G.node[node]['Type'] == 'Compartment':
+				self.systemsCanvas.itemconfig(node, activefill='green', fill='blue')
+			else:
+				self.systemsCanvas.itemconfig(node, activefill='green', fill='red')
+		self.systemsCanvas.itemconfig('edge', fill='black', activefill='green')
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.delete)
-		self.systemsCanvas.itemconfig('node', fill='red')
-		self.systemsCanvas.itemconfig('edge', fill='black')
 
 	# binds mouse click to dragStart and binds mouse release to dragEnd
 	def dragNodeButtonClick(self):
@@ -96,15 +105,18 @@ class CanvasFrame(Frame):
 		if self.v.get() == 'All':
 			self.systemsCanvas.itemconfig('node', activefill='green')
 		else:
-			self.systemsCanvas.itemconfig('node', activefill='red')
+			for node in self.G.nodes():
+				if 'Type' in self.G.node[node] and self.G.node[node]['Type'] == 'Compartment':
+					self.systemsCanvas.itemconfig(node, activefill='blue', fill='blue')
+				else:
+					self.systemsCanvas.itemconfig(node, activefill='red', fill='red')
 		self.systemsCanvas.itemconfig('edge', activefill='black')
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
 		self.systemsCanvas.bind('<Button-1>', self.dragStart)
 		self.systemsCanvas.bind('<ButtonRelease-1>', self.dragEnd)
-		self.systemsCanvas.itemconfig('node', fill='red')
-		self.systemsCanvas.itemconfig('edge', fill='black')
+
 	"""--------------------------------------------------END BUTTON BINDINGS----------------------------------------------------"""
 
 	
@@ -196,7 +208,11 @@ class CanvasFrame(Frame):
 			widget.destroy()
 
 		# fill all nodes red and all edges black to reset any previously selected item
-		self.systemsCanvas.itemconfig('node', fill='red')
+		for node in self.G.nodes():
+			if 'Type' in self.G.node[node] and self.G.node[node]['Type'] == 'Compartment':
+				self.systemsCanvas.itemconfig(node, activefill='green', fill='blue')
+			else:
+				self.systemsCanvas.itemconfig(node, activefill='green', fill='red')
 		self.systemsCanvas.itemconfig('edge', fill='black')
 
 		# destroys the subNetworkWindow if no node is selected
@@ -493,7 +509,7 @@ class CanvasFrame(Frame):
 			# if user didn't hit 'Cancel'
 			if typeLabel != None:
 				# Update dropdown menu
-				self.optionList.insert(len(self.optionList)-2, typeLabel)
+				self.optionList.insert(len(self.optionList)-3, typeLabel)
 				self.dropdown.destroy()
 				self.dropdown = OptionMenu(self.toolbar, self.v, *self.optionList, command=self.newOptionMenu)
 				self.dropdown.configure(highlightbackground="light blue", bg='light blue')
@@ -528,6 +544,23 @@ class CanvasFrame(Frame):
 				self.systemsCanvas.itemconfig(edgeitem, arrow='none')
 
 			self.prevOption = "All"
+
+		# shows compartment node geometry network
+		elif self.v.get() == 'Geometry':
+			# nodes
+			for node in self.G.nodes():
+				if 'Type' in self.G.node[node] and self.G.node[node]['Type'] == 'Compartment':
+					self.systemsCanvas.itemconfig(node, state='normal')
+				else:
+					self.systemsCanvas.itemconfig(node, state='hidden')
+			for edgeitem in self.systemsCanvas.find_withtag('edge'):
+				nodes = self.edgeEndpoints(edgeitem)
+				if (self.systemsCanvas.itemcget(nodes[0], 'state') == 'normal') and (self.systemsCanvas.itemcget(nodes[1], 'state') == 'normal'):
+					self.systemsCanvas.itemconfig(edgeitem, state='normal', arrow='none')
+				else:
+					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
+
+
 
 		# switched to a specific system
 		else:
