@@ -23,7 +23,6 @@ class Component(Frame):
 
 		self.createDemandBtn = Button(self.demandGroup, text="New Demand", command=self.createNewDemand, bg=self.color, highlightbackground=self.color)
 		self.createDemandBtn.grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky=E+W)
-
 		self.numDemands = 0
 
 		for x in self.manager.systems:
@@ -59,13 +58,40 @@ class Component(Frame):
 			self.leftFrame.dropdown.configure(highlightbackground="light blue", bg='light blue')
 			self.leftFrame.dropdown.pack(side='left')
 
+	def updateNodeSizes(self):
+		if self.leftFrame.v.get() != 'All' and self.leftFrame.v.get() != 'Create New':
+			self.leftFrame.minDemand = 1000000000
+			self.leftFrame.maxDemand = -1
+			visibleNodes = []
+
+			for nodeitem in self.leftFrame.systemsCanvas.find_withtag('node'):
+				if self.leftFrame.v.get() in self.G.node[nodeitem]:
+					visibleNodes.append(nodeitem) # add to a list of visible nodes
+
+					# find minimum and maximum values for this demand
+					thisDemand = self.G.node[nodeitem][self.leftFrame.v.get()]
+					if abs(thisDemand) < self.leftFrame.minDemand:
+						self.leftFrame.minDemand = abs(thisDemand)
+					if abs(thisDemand) > self.leftFrame.maxDemand:
+						self.leftFrame.maxDemand = abs(thisDemand)
+
+			# delete old '+' or '-' labels
+			self.leftFrame.systemsCanvas.delete('label')
+
+			for nodeitem in visibleNodes:
+				# update node sizes
+				self.leftFrame.normalNodeSize(nodeitem)
+				self.leftFrame.scaleNodeSize(nodeitem)
+
 	def saveNodeAttributes(self):
 		# save demands
 		for x in self.manager.systems: # for each system
-			if self.systemDict[x].get() != None and self.systemDict[x].get() != '': # if there is a value for this node
+			# if there is a value for this node
+			if self.systemDict[x].get() != None and self.systemDict[x].get() != '':
 				# if system doesn't exist in NetworkX already OR if the curr value in NetworkX isn't updated
 				if (x not in self.G.node[self.index]) or (self.G.node[self.index][x] != int(self.systemDict[x].get())):
 					self.G.node[self.index][x] = int(self.systemDict[x].get())
+			
 			elif x in self.G.node[self.index] and self.systemDict[x].get() == '':
 				if self.leftFrame.v.get() != 'All':
 					nodeCoords = self.leftFrame.systemsCanvas.coords(self.index)
@@ -75,6 +101,8 @@ class Component(Frame):
 							self.leftFrame.systemsCanvas.itemconfig(edge, state='hidden')
 					self.leftFrame.systemsCanvas.itemconfig(self.index, state='hidden')
 				del self.G.node[self.index][x]
+
+		self.updateNodeSizes()
 
 	def saveEdgeAttributes(self):
 		# save demands
@@ -90,14 +118,12 @@ class Component(Frame):
 				del self.G.edge[self.nodes[0]][self.nodes[1]][x]
 
 	def repopulateNodeData(self):
-		# repopulate demands
 		for x in self.manager.systems:
 			if x in self.G.node[self.index]:
 				self.systemDict[x].delete(0, END)
 				self.systemDict[x].insert(0, self.G.node[self.index][x])
 
 	def repopulateEdgeData(self):
-		# repopulate demands
 		for x in self.manager.systems:
 			if x in self.G.edge[self.nodes[0]][self.nodes[1]]:
 				self.systemDict[x].delete(0, END)
