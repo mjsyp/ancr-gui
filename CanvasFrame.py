@@ -616,7 +616,7 @@ class CanvasFrame(Frame):
 		self.toolbar.pack()
 
 		#creates systems dropdown menu
-		self.optionList = ['All', 'Create New']
+		self.optionList = ['Geometry', 'All', 'Create New']
 		self.v = StringVar()
 		self.v.set(self.optionList[len(self.optionList) - 2])
 
