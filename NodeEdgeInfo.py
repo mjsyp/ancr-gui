@@ -84,6 +84,7 @@ class NodeEdgeInfo(Frame):
 			self.componentInfo.saveNodeAttributes()
 		else:
 			self.compartmentInfo.saveNodeAttributes()
+			self.leftFrame.systemsCanvas.itemconfig(self.index, fill='blue')
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of node " + str(self.index)
