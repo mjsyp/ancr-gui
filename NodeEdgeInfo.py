@@ -1,3 +1,16 @@
+'''
+ * NodeEdgeInfo.py
+ * 
+ * Sets up layout of right frame of GUI and connects with
+ * Component.py or Compartment.py to display demands or 
+ * geometry respectively
+ * 
+ * Major functionalities include:
+ *     properties box
+ *         > name, type
+ *     notes box
+ *     save/repopulate
+'''
 from Tkinter import *
 from Component import *
 from Compartment import *
@@ -38,6 +51,9 @@ class NodeEdgeInfo(Frame):
 		self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.changeType)
 		self.dropdown.config(highlightbackground=self.color, bg=self.color)
 		self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
+
+		if self.nodes != None:
+			self.dropdown.config(state=DISABLED, disabledforeground='black')
 
 	def changeType(self, event):
 		#TODO: change types available for edges

@@ -1,3 +1,14 @@
+'''
+ * CanvasFrame.py
+ * 
+ * All functions relate to the drawing canvas on the left side of the GUI.
+ * 
+ * Major functionalities include:
+ *     creating/deleting/selecting nodes and edges
+ *     dropdown menu indicating what system of nodes/edges to view
+ *     undo/redo
+ *     showing/hiding labels of nodes on the canvas
+'''
 from Tkinter import *
 from DockedWindows import *
 from Manager import *
@@ -688,7 +699,7 @@ class CanvasFrame(Frame):
 		self.createEdgeButton.pack(side='right')
 		self.createNodeButton.pack(side='right')
 
-		#creates canvas 
+		# creates canvas 
 		self.systemsCanvas = Canvas(self.parent, height=500, width=700, bg='white')
 		self.systemsCanvas.pack(fill="both", expand=1)
 

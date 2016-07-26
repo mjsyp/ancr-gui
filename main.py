@@ -1,3 +1,14 @@
+'''
+ * main.py
+ * 
+ * Sets up the main layout of the GUI
+ * 
+ * Major functionalities include:
+ *     file/edit/view/analysis toolbar
+ *         > open, save, quit
+ *     specifies size of left frame and right frame
+ *     sets up scrollbar of right frame
+'''
 from Tkinter import *
 from CanvasFrame import *
 from DockedWindows import *
