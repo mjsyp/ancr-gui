@@ -113,7 +113,7 @@ class CanvasFrame(Frame):
 	def createNode(self, event):
 		r = 8
 		item = self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node', state='normal') 
-		self.G.add_node(item, x=0, y=0, z=0, x_coord=event.x, y_coord=event.y, EdgeLength=0)
+		self.G.add_node(item, x=0, y=0, z=0, x_coord=event.x, y_coord=event.y, EdgeLength=0,Type = 'Component')
 
 		self.undoStack.append(item)
 
@@ -163,8 +163,12 @@ class CanvasFrame(Frame):
 			self.G.edge[self.startNode[0]][self.endNode[0]]['x2_coord'] = self.endNodeX
 			self.G.edge[self.startNode[0]][self.endNode[0]]['y2_coord'] = self.endNodeY
 			self.G.edge[self.startNode[0]][self.endNode[0]]['edgeID'] = item
+			
 
 			self.undoStack.append(item)
+
+			self.setEdgeType(item)
+
 
 			# if an edge isn't created in 'All', initialize the system demand for this edge to 0 instead of None
 			if self.v.get() != "All":
@@ -182,10 +186,21 @@ class CanvasFrame(Frame):
 	def edgeEndpoints(self, edgeitem):
 		nodes = [int(n) for n in self.systemsCanvas.gettags(edgeitem) if n.isdigit()]
 		try:
-			self.G[nodes[0]][nodes[1]]
+			self.G.edge[nodes[0]][nodes[1]]
 		except KeyError:
 			nodes[0], nodes[1] = nodes[1], nodes[0]
 		return nodes
+	
+	#determines what type the end and start nodes are and changes appropriate information
+	def setEdgeType(self,edgeID):
+		nodes = self.edgeEndpoints(edgeID)
+			
+		if self.G.node[nodes[0]]['Type'] == 'Compartment' and self.G.node[nodes[1]]['Type'] == 'Compartment':
+				self.G.edge[nodes[0]][nodes[1]]['Type'] = 'Compartment'
+				self.G.edge[nodes[0]][nodes[1]]['Name'] = 'Geo-Geo'
+		if (self.G.node[nodes[0]]['Type'] == 'Compartment') ^ (self.G.node[nodes[1]]['Type'] == 'Compartment'):
+				self.G.edge[nodes[0]][nodes[1]]['Type'] = 'Compartment'
+				self.G.edge[nodes[0]][nodes[1]]['Name'] = 'Geo-Comp'
 
 
 	"""----------------------------------------------------------SELECT-------------------------------------------------------------------"""
