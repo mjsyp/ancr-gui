@@ -4,7 +4,7 @@ import networkx as nx
 #from datetime import datetime
 
 class Compartment(Frame):
-	def __init__(self, parent, leftFrame, index, G, manager, nodes=None):
+	def __init__(self, parent, leftFrame, index, G, manager):
 		Frame.__init__(self, parent)
 
 		self.parent = parent
@@ -12,7 +12,6 @@ class Compartment(Frame):
 		self.index = index
 		self.G = G
 		self.manager = manager
-		self.nodes = nodes
 
 		self.systemDict = {}
  		self.color = "dark gray" 
@@ -155,7 +154,6 @@ class Compartment(Frame):
 			self.xEntry.insert(0, 0) # undo the delete of xEntry before exception was caught
 
 	def initUI(self):
-		if self.nodes == None:
-			self.createGeometry()
-			self.repopulateNodeData()
-			self.leftFrame.dockedWindows.showSubNetwork(self.index)
+		self.createGeometry()
+		self.repopulateNodeData()
+		self.leftFrame.dockedWindows.showSubNetwork(self.index)

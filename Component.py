@@ -3,7 +3,7 @@ import tkSimpleDialog
 import networkx as nx
 
 class Component(Frame):
-	def __init__(self, parent, leftFrame, index, G, manager, nodes=None):
+	def __init__(self, parent, leftFrame, index, G, manager):
 		Frame.__init__(self, parent)
 
 		self.parent = parent
@@ -11,7 +11,6 @@ class Component(Frame):
 		self.index = index
 		self.G = G
 		self.manager = manager
-		self.nodes = nodes
 
 		self.systemDict = {}
  		self.color = "dark gray" 
@@ -91,7 +90,7 @@ class Component(Frame):
 				# if system doesn't exist in NetworkX already OR if the curr value in NetworkX isn't updated
 				if (x not in self.G.node[self.index]) or (self.G.node[self.index][x] != int(self.systemDict[x].get())):
 					self.G.node[self.index][x] = int(self.systemDict[x].get())
-			
+
 			elif x in self.G.node[self.index] and self.systemDict[x].get() == '':
 				if self.leftFrame.v.get() != 'All':
 					nodeCoords = self.leftFrame.systemsCanvas.coords(self.index)
@@ -104,37 +103,15 @@ class Component(Frame):
 
 		self.updateNodeSizes()
 
-	def saveEdgeAttributes(self):
-		# save demands
-		for x in self.manager.systems: # for each system
-			if self.systemDict[x].get() != None and self.systemDict[x].get() != '': # if there is a value for this demand
-				# if system doesn't exist in NetworkX already OR if the curr value in NetworkX isn't updated
-				if (x not in self.G.edge[self.nodes[0]][self.nodes[1]]) or (self.G.edge[self.nodes[0]][self.nodes[1]][x] != int(self.systemDict[x].get())):
-					self.G.edge[self.nodes[0]][self.nodes[1]][x] = int(self.systemDict[x].get())
-
-			elif x in self.G.edge[self.nodes[0]][self.nodes[1]] and self.systemDict[x].get() == '':
-				if self.leftFrame.v.get() != 'All':
-					self.leftFrame.systemsCanvas.itemconfig(self.index, state='hidden')
-				del self.G.edge[self.nodes[0]][self.nodes[1]][x]
-
 	def repopulateNodeData(self):
 		for x in self.manager.systems:
 			if x in self.G.node[self.index]:
 				self.systemDict[x].delete(0, END)
 				self.systemDict[x].insert(0, self.G.node[self.index][x])
 
-	def repopulateEdgeData(self):
-		for x in self.manager.systems:
-			if x in self.G.edge[self.nodes[0]][self.nodes[1]]:
-				self.systemDict[x].delete(0, END)
-				self.systemDict[x].insert(0, self.G.edge[self.nodes[0]][self.nodes[1]][x])
-
 	def initUI(self):
 		self.demandGroup = LabelFrame(self.parent, text="Demands", bg=self.color)
 		self.demandGroup.grid(row=1, padx=10, sticky=E+W)
 		self.createDemandLabel()
 
-		if self.nodes == None:
-			self.repopulateNodeData()
-		else:
-			self.repopulateEdgeData()
+		self.repopulateNodeData()

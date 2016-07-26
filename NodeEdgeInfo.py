@@ -37,35 +37,37 @@ class NodeEdgeInfo(Frame):
 		self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
 	def changeType(self, event):
-		if self.v.get() == "Create New":
-			typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
+		#TODO: change types available for edges
+		if self.nodes == None: # if a node is selected rather than an edge
+			if self.v.get() == "Create New":
+				typeLabel = tkSimpleDialog.askstring(title="New Type", prompt="Enter a new type")
 
-			if typeLabel != None:
-				# select new 'type' in dropdown
-				self.optionList.insert(len(self.optionList)-1, typeLabel)
-				self.v.set(self.optionList[len(self.optionList)-2])
+				if typeLabel != None:
+					# select new 'type' in dropdown
+					self.optionList.insert(len(self.optionList)-1, typeLabel)
+					self.v.set(self.optionList[len(self.optionList)-2])
 
-				# redraw dropdown
-				self.dropdown.destroy()
-				self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.changeType)
-				self.dropdown.config(highlightbackground=self.color, bg=self.color)
-				self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
+					# redraw dropdown
+					self.dropdown.destroy()
+					self.dropdown = OptionMenu(self.propGroup, self.v, *self.optionList, command=self.changeType)
+					self.dropdown.config(highlightbackground=self.color, bg=self.color)
+					self.dropdown.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky=E+W)
 
-		elif self.v.get() == "Component":
-			for widget in self.parent.grid_slaves():
-				if int(widget.grid_info()['row']) == 1:
-					widget.destroy()
-			try:
-				self.leftFrame.dockedWindows.subNetworkExit()
-			except AttributeError:
-				pass
-			self.componentInfo = Component(self.parent, self.leftFrame, self.index, self.G, self.manager, self.nodes)
+			elif self.v.get() == "Component":
+				for widget in self.parent.grid_slaves():
+					if int(widget.grid_info()['row']) == 1:
+						widget.destroy()
+				try:
+					self.leftFrame.dockedWindows.subNetworkExit()
+				except AttributeError:
+					pass
+				self.componentInfo = Component(self.parent, self.leftFrame, self.index, self.G, self.manager)
 
-		elif self.v.get() == "Compartment":
-			for widget in self.parent.grid_slaves():
-				if int(widget.grid_info()['row']) == 1:
-					widget.destroy()
-			self.compartmentInfo = Compartment(self.parent, self.leftFrame, self.index, self.G, self.manager, self.nodes)
+			elif self.v.get() == "Compartment":
+				for widget in self.parent.grid_slaves():
+					if int(widget.grid_info()['row']) == 1:
+						widget.destroy()
+				self.compartmentInfo = Compartment(self.parent, self.leftFrame, self.index, self.G, self.manager)
 
 	def saveNodeAttributes(self):
 		titles = ['Name', 'Type', 'Notes']
@@ -84,6 +86,7 @@ class NodeEdgeInfo(Frame):
 			self.componentInfo.saveNodeAttributes()
 		else:
 			self.compartmentInfo.saveNodeAttributes()
+			self.leftFrame.systemsCanvas.itemconfig(self.index, fill='blue')
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of node " + str(self.index)
@@ -97,9 +100,6 @@ class NodeEdgeInfo(Frame):
 		for i in range(0, len(titles)):
 			if (titles[i] not in self.G.edge[self.nodes[0]][self.nodes[1]]) or (self.G.edge[self.nodes[0]][self.nodes[1]][titles[i]] != values[i]):
 				self.G.edge[self.nodes[0]][self.nodes[1]][titles[i]] = values[i]
-
-		if self.G.node[self.index]['Type'] == 'Component':
-			self.componentInfo.saveEdgeAttributes()
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of edge between node " 
@@ -153,11 +153,8 @@ class NodeEdgeInfo(Frame):
 		if self.nodes == None:
 			self.repopulateNodeData()
 			self.saveBtn = Button(self.parent, text="Save", command=self.saveNodeAttributes, highlightbackground=self.color)
-			self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
-
 		else:
 			self.repopulateEdgeData()
 			self.saveBtn = Button(self.parent, text="Save", command=self.saveEdgeAttributes, highlightbackground=self.color)
-			self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
-
+		self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
 		self.changeType(None) # call function so it will display the default 'Type' selection
