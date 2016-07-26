@@ -106,6 +106,16 @@ class NodeEdgeInfo(Frame):
 		else:
 			self.compartmentInfo.saveNodeAttributes()
 			self.leftFrame.systemsCanvas.itemconfig(self.index, fill='blue')
+			
+		#updates type of attached edges
+
+		nodeCoords = self.leftFrame.systemsCanvas.coords(self.index)
+		overlapped = self.leftFrame.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
+		for x in overlapped:
+			if self.leftFrame.checkTag(x) == 'edge':
+				nodes = self.leftFrame.edgeEndpoints(x)
+				if self.index == nodes[0] or self.index == nodes[1]:
+						self.leftFrame.setEdgeType(x)
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Saved attributes of node " + str(self.index)

@@ -219,11 +219,11 @@ class CanvasFrame(Frame):
 		nodes = self.edgeEndpoints(edgeID)
 			
 		if self.G.node[nodes[0]]['Type'] == 'Compartment' and self.G.node[nodes[1]]['Type'] == 'Compartment':
-				self.G.edge[nodes[0]][nodes[1]]['Type'] = 'Compartment'
-				self.G.edge[nodes[0]][nodes[1]]['Name'] = 'Geo-Geo'
+			self.G.edge[nodes[0]][nodes[1]]['Type'] = 'Adjacency'
 		if (self.G.node[nodes[0]]['Type'] == 'Compartment') ^ (self.G.node[nodes[1]]['Type'] == 'Compartment'):
-				self.G.edge[nodes[0]][nodes[1]]['Type'] = 'Compartment'
-				self.G.edge[nodes[0]][nodes[1]]['Name'] = 'Geo-Comp'
+			self.G.edge[nodes[0]][nodes[1]]['Type'] = 'Residency'
+		if (self.G.node[nodes[0]]['Type'] == 'Component') and (self.G.node[nodes[1]]['Type'] == 'Component'):
+			self.G.edge[nodes[0]][nodes[1]]["Type"] = 'Supply/Demand'
 
 
 	"""----------------------------------------------------------SELECT-------------------------------------------------------------------"""
@@ -337,7 +337,9 @@ class CanvasFrame(Frame):
 					overlapped = self.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
 					for x in overlapped:
 						if self.checkTag(x) == 'edge':
-							self.systemsCanvas.itemconfig(x, state='hidden')
+							nodes = self.edgeEndpoints(x)
+							if item == nodes[0] or item == nodes[1]:
+								self.systemsCanvas.itemconfig(x, state='hidden')
 					self.systemsCanvas.itemconfig(item, state='hidden')
 					del self.G.node[item][self.v.get()]
 				''' if system is not All, then removes that specific demand for the edge'''
