@@ -43,7 +43,10 @@ class Compartment(Frame):
  
 		# create new coord button
 		self.newCoordBtn = Button(self.geoGroup, text="Add Row", command=self.createNewGeo, bg=self.color, highlightbackground=self.color)
-		self.newCoordBtn.grid(row=0, column=0, columnspan=9, padx=5, pady=5, sticky=E+W)
+		self.newCoordBtn.grid(row=0, column=0, columnspan=6, padx=5, pady=5, sticky=E+W)
+
+		self.showGeoBtn = Button(self.geoGroup, text='Show Geometry', command=self.showGeometry, bg=self.color, highlightbackground=self.color)
+		self.showGeoBtn.grid(row=0, column=6, columnspan=4, padx=5, pady=5, sticky=E+W)
 
 	def createNewGeo(self):
 		# numbers each row of geometry
@@ -162,6 +165,52 @@ class Compartment(Frame):
 		# no data in networkx yet
 		except TypeError:
 			self.xEntry.insert(0, 0) # undo the delete of xEntry before exception was caught
+	
+	def showGeometry(self):
+		geoWindow = Toplevel(height=300, width=500)
+		geoWindow.title('Compartment/Component Geometry')
+
+		fig = Figure()
+		canvas = FigureCanvasTkAgg(fig, master=geoWindow)
+		
+		ax = fig.add_subplot(111, projection='3d')
+		xs = []
+		ys = []
+		zs = []
+
+		# loops through each node with type: component and builds a 3D scatterplot of their x, y, z coordinates
+		for node in G.nodes():
+			if 'Type' in G.node[node]:
+				if G.node[node]['Type'] == 'Component':
+						xs.append(G.node[node]['x'])
+						ys.append(G.node[node]['y'])
+						zs.append(G.node[node]['z'])
+				if G.node[node]['Type'] == 'Compartment':
+					for i in range(0, len(G.node[node]['x'])):	
+						a = G.node[node]['EdgeLength'][i]
+						x = G.node[node]['x'][i]
+						y = G.node[node]['y'][i]
+						z = G.node[node]['z'][i]
+						hSL = float(a/2)
+						r = [-hSL, hSL]
+						rX = [-hSL + x, hSL + x]
+						rY = [-hSL + y, hSL + y]
+						rZ = [-hSL + z, hSL + z]
+						for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
+							if not np.sum(np.abs(s-e)) > a+0.0000001:
+								ax.plot3D(*zip(s,e), color="b")
+
+		ax.scatter(xs, ys, zs, c='r', marker='o')
+		ax.set_xlabel('X')
+		ax.set_ylabel('Y')
+		ax.set_zlabel('Z')
+		
+		# creates the matplotlib navigation toolbar
+		canvas.show()
+		canvas.get_tk_widget().configure(borderwidth=0, highlightbackground='gray', highlightcolor='gray', selectbackground='gray')
+		canvas.get_tk_widget().pack()
+		toolbar = NavigationToolbar2TkAgg(canvas, geoWindow)
+		toolbar.update()
 
 	def initUI(self):
 		self.createGeometry()

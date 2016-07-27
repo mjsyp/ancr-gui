@@ -8,7 +8,7 @@
  *     log window
  *     subnetwork window
  *     min/max/exit button for each window
- *     dragging popup windw
+ *     dragging popup window
 '''
 from Tkinter import *
 import networkx as nx

@@ -136,15 +136,19 @@ class CanvasFrame(Frame):
 	def createNode(self, event):
 		r = 8
 		item = self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node', state='normal') 
-		self.G.add_node(item, x=0, y=0, z=0, x_coord=event.x, y_coord=event.y, EdgeLength=0,Type = 'Component')
+		self.G.add_node(item, x=0, y=0, z=0, x_coord=event.x, y_coord=event.y, EdgeLength=0, Type = 'Component')
 
 		self.undoStack.append(item)
-
+		# if a node is created in Geometry, initilize its type to be compartment
+		if self.v.get() == 'Geometry':
+			self.G.node[item]['Type'] = 'Compartment'
+			self.systemsCanvas.itemconfig(item, fill='blue')
 		# if an node isn't created in 'All', initialize the system demand for this node to 0 instead of None
-		if self.v.get() != "All":
+		elif self.v.get() != "All":
 			self.G.node[item][self.v.get()] = 0
 			if len(self.rightFrame.winfo_children()) > 0:
 				self.systemInfo.repopulateData()
+
 
 		# add to log file
 		log = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ": Created new node (ID = " + str(item) + ")"
