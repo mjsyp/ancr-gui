@@ -1,3 +1,16 @@
+'''
+ * Component.py
+ * 
+ * Assumes the selected node is of type component;
+ * adds a box where demands of this component can be
+ * specified
+ * 
+ * Major functionalities include:
+ *     demand box / create new demand
+ *     update sizes of nodes if current system is not 'All'
+ *     save/repopulate
+ *
+'''
 from Tkinter import *
 import tkSimpleDialog
 import networkx as nx

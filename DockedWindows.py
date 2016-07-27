@@ -1,3 +1,15 @@
+'''
+ * DockedWindows.py
+ * 
+ * Includes functions that create and fill content of docked windows
+ * 
+ * Major functionalities include:
+ *     node degree histogram window
+ *     log window
+ *     subnetwork window
+ *     min/max/exit button for each window
+ *     dragging popup windw
+'''
 from Tkinter import *
 import networkx as nx
 import matplotlib
@@ -230,8 +242,6 @@ class DockedWindows(Frame):
 
 			self.logToolbar = Frame(self.logFrame, bg='light gray')
 			self.logToolbar.pack(side='top', fill='x')
-
-			# toolbar label
 			logLabel = Label(self.logToolbar, text="Log", bg='light gray')
 			logLabel.pack(side='left')
 

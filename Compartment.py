@@ -1,7 +1,17 @@
+'''
+ * Compartment.py
+ * 
+ * Assumes the selected node is of type compartment;
+ * adds a box where geometry of this compartment can be
+ * specified
+ * 
+ * Major functionalities include:
+ *     geometry box
+ *     add/delete rows in geometry
+ *     save/repopulate
+'''
 from Tkinter import *
-import tkSimpleDialog
 import networkx as nx
-#from datetime import datetime
 
 class Compartment(Frame):
 	def __init__(self, parent, leftFrame, index, G, manager):
