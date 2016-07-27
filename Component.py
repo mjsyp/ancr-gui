@@ -78,66 +78,22 @@ class Component(Frame):
 
 		# x coord
 		self.xLabel = Label(self.geoGroup, text="x", bg=self.color)
-		self.xLabel.grid(row=self.numCoords, column=1, padx=(5, 0), pady=(0, 5))
+		self.xLabel.grid(row=0, column=1, padx=(5, 0), pady=(0, 5))
 		self.xEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
-		self.xEntry.grid(row=self.numCoords, column=2, pady=(0, 5))
+		self.xEntry.grid(row=0, column=2, pady=(0, 5))
 		self.xEntry.insert(0, 0) # initialize to 0
 		# y coord
 		self.yLabel = Label(self.geoGroup, text="y", bg=self.color)
-		self.yLabel.grid(row=self.numCoords, column=3, padx=(5, 0), pady=(0, 5))
+		self.yLabel.grid(row=0, column=3, padx=(5, 0), pady=(0, 5))
 		self.yEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
-		self.yEntry.grid(row=self.numCoords, column=4, pady=(0, 5))
+		self.yEntry.grid(row=0, column=4, pady=(0, 5))
 		self.yEntry.insert(0, 0)
 		# z coord
 		self.zLabel = Label(self.geoGroup, text="z", bg=self.color)
-		self.zLabel.grid(row=self.numCoords, column=5, padx=(5, 0), pady=(0, 5))
+		self.zLabel.grid(row=0, column=5, padx=(5, 0), pady=(0, 5))
 		self.zEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
-		self.zEntry.grid(row=self.numCoords, column=6, pady=(0, 5))
+		self.zEntry.grid(row=0, column=6, pady=(0, 5))
 		self.zEntry.insert(0, 0)
-
-	def createNewGeo(self):
-		# numbers each row of geometry
-		idText = str(self.numCoords) + "."
-		self.idLabel = Label(self.geoGroup, text=idText, bg=self.color)
-		self.idLabel.config(activeforeground='red')
-		self.idLabel.grid(row=self.numCoords, column=0, padx=(5, 0), pady=(0, 5))
-		# adds fuctionality to be able to delete a row if you click on the number label
-		# and turns number label red on scrollover
-		self.idLabel.bind('<Button-1>', self.deleteGeo)
-		self.idLabel.bind('<Enter>', lambda e: e.widget.config(fg='red'))
-		self.idLabel.bind('<Leave>', lambda e: e.widget.config(fg='black'))
-
-		# x, y, z coordinate entries
-		self.xLabel = Label(self.geoGroup, text="x", bg=self.color)
-		self.xLabel.grid(row=self.numCoords, column=1, padx=(5, 0), pady=(0, 5))
-		self.xEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
-		self.xEntry.grid(row=self.numCoords, column=2, pady=(0, 5))
-		self.xEntry.insert(0, 0)
-		self.xEntryList.append(self.xEntry)
-
-		self.yLabel = Label(self.geoGroup, text="y", bg=self.color)
-		self.yLabel.grid(row=self.numCoords, column=3, padx=(5, 0), pady=(0, 5))
-		self.yEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
-		self.yEntry.grid(row=self.numCoords, column=4, pady=(0, 5))
-		self.yEntry.insert(0, 0)
-		self.yEntryList.append(self.yEntry)
-
-		self.zLabel = Label(self.geoGroup, text="z", bg=self.color)
-		self.zLabel.grid(row=self.numCoords, column=5, padx=(5, 0), pady=(0, 5))
-		self.zEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
-		self.zEntry.grid(row=self.numCoords, column=6, pady=(0, 5))
-		self.zEntry.insert(0, 0)
-		self.zEntryList.append(self.zEntry)
-
-		# Edge Length Parameter
-		self.edgeLabel = Label(self.geoGroup, text="Edge Length", bg=self.color)
-		self.edgeLabel.grid(row=self.numCoords, column=7, padx=(5, 0), pady=(0, 5))
-		self.edgeEntry = Entry(self.geoGroup, highlightbackground=self.color, width=5)
-		self.edgeEntry.grid(row=self.numCoords, column=8, padx=(0, 5), pady=(0, 5))
-		self.edgeEntry.insert(0, 0)
-		self.edgeEntryList.append(self.edgeEntry)
-
-		self.numCoords += 1
 
 	def updateNodeSizes(self):
 		if self.leftFrame.v.get() != 'All' and self.leftFrame.v.get() != 'Create New':
