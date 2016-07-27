@@ -108,7 +108,6 @@ class NodeEdgeInfo(Frame):
 			self.leftFrame.systemsCanvas.itemconfig(self.index, fill='blue')
 			
 		#updates type of attached edges
-
 		nodeCoords = self.leftFrame.systemsCanvas.coords(self.index)
 		overlapped = self.leftFrame.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
 		for x in overlapped:
@@ -173,7 +172,7 @@ class NodeEdgeInfo(Frame):
 
 		# Notes
 		self.notesGroup = LabelFrame(self.parent, text="Notes", bg=self.color)
-		self.notesGroup.grid(row=2, padx=10, sticky=E+W)
+		self.notesGroup.grid(row=3, padx=10, sticky=E+W)
 		self.notes = Text(self.notesGroup, font='TkDefaultFont', width=1, height=12)
 		self.notesGroup.columnconfigure(0, weight=1)
 		self.notes.grid(row=0, column=0, padx=5, pady=(1, 5), sticky=E+W)
@@ -185,5 +184,5 @@ class NodeEdgeInfo(Frame):
 		else:
 			self.repopulateEdgeData()
 			self.saveBtn = Button(self.parent, text="Save", command=self.saveEdgeAttributes, highlightbackground=self.color)
-		self.saveBtn.grid(row=3, padx=10, pady=5, sticky=E)
+		self.saveBtn.grid(row=4, padx=10, pady=5, sticky=E)
 		self.changeType(None) # call function so it will display the default 'Type' selection

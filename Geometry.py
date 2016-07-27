@@ -109,6 +109,7 @@ def viewCompartmentGeo(G):
 					curChunk = voxelHandler.createChunk(compList)
 					voxelHandler.createOutline(curChunk)
 					voxelHandler.drawCubeLines(curChunk,ax)
+
 	# sets the scales of the graph to be equal so that cube shape is intact				
 	scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
 	ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]]*3)
@@ -163,7 +164,8 @@ def compartmentDisplay(var, canvas, compartmentgeo, G, checkbox):
 		canvas1.show()
 		canvas1.get_tk_widget().configure(borderwidth=0, highlightbackground='gray', highlightcolor='gray', selectbackground='gray')
 		canvas1.get_tk_widget().pack()
-		canvas.get_tk_widget().destroy()	
+		canvas.get_tk_widget().destroy()
+
 	else:
 		fig2 = Figure()
 		canvas2 = FigureCanvasTkAgg(fig2, master=compartmentgeo)

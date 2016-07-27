@@ -591,8 +591,6 @@ class CanvasFrame(Frame):
 				else:
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
 
-
-
 		# switched to a specific system
 		else:
 			if self.prevOption != self.v.get():
