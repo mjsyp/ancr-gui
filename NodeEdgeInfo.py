@@ -84,7 +84,7 @@ class NodeEdgeInfo(Frame):
 
 			elif self.v.get() == "Compartment":
 				for widget in self.parent.grid_slaves():
-					if int(widget.grid_info()['row']) == 1 or int(widget.grid_info()['row'] == 2:
+					if int(widget.grid_info()['row']) == 1 or int(widget.grid_info()['row']) == 2:
 						widget.destroy()
 				self.compartmentInfo = Compartment(self.parent, self.leftFrame, self.index, self.G, self.manager)
 
