@@ -136,7 +136,7 @@ class CanvasFrame(Frame):
 	def createNode(self, event):
 		r = 8
 		item = self.systemsCanvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red', tag='node', state='normal') 
-		self.G.add_node(item, x=0, y=0, z=0, x_coord=event.x, y_coord=event.y, EdgeLength=0,Type = 'Component')
+		self.G.add_node(item, x=0, y=0, z=0, x_coord=event.x, y_coord=event.y, EdgeLength=0, Type = 'Component')
 
 		self.undoStack.append(item)
 
@@ -586,8 +586,6 @@ class CanvasFrame(Frame):
 					self.systemsCanvas.itemconfig(edgeitem, state='normal', arrow='none')
 				else:
 					self.systemsCanvas.itemconfig(edgeitem, state='hidden')
-
-
 
 		# switched to a specific system
 		else:

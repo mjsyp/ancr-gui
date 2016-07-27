@@ -90,21 +90,26 @@ class Compartment(Frame):
 		self.numCoords += 1
 
 	def deleteGeo(self, event):
-		deleteRow = int(event.widget.grid_info()['row'])
+		deleteRow = int(event.widget.grid_info()['row']) # row # to delete
+		# delete the info in this row from networkx
 		self.G.node[self.index]['x'].pop(deleteRow-1)
 		self.G.node[self.index]['y'].pop(deleteRow-1)
 		self.G.node[self.index]['z'].pop(deleteRow-1)
 		self.G.node[self.index]['EdgeLength'].pop(deleteRow-1)
+		# remove the info in this row from our lists of widgets
 		self.xEntryList.pop(deleteRow-1)
 		self.yEntryList.pop(deleteRow-1)
 		self.zEntryList.pop(deleteRow-1)
 		self.edgeEntryList.pop(deleteRow-1)
 
+		# for each widget in the geometry box
 		for widget in self.geoGroup.grid_slaves():
-			thisRow = int(widget.grid_info()['row'])
+			thisRow = int(widget.grid_info()['row']) # current row
 
+			# delete specified row to be deleted
 			if thisRow == deleteRow:
 				widget.grid_forget()
+			# move up rows below it and renumber the row
 			elif thisRow > deleteRow:
 				widget.grid_configure(row=thisRow-1)
 				if int(widget.grid_info()['column']) == 0:
@@ -137,7 +142,7 @@ class Compartment(Frame):
 	# inserts networkX data for the node into repsective entry box
 	def repopulateNodeData(self):
 		try:
-			# fill row 0 with data from networkx if it exists
+			# fill row 0 with data saved in networkx if it exists
 			self.xEntry.delete(0, END)
 			self.xEntry.insert(0, self.G.node[self.index]['x'][0])
 			self.yEntry.delete(0, END)
@@ -148,6 +153,7 @@ class Compartment(Frame):
 			self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'][0])
 
 			# add a new row for each row of saved data that exists
+			# and fill it with data saved in networkx
 			for i in range(0, len(self.G.node[self.index]['x'])-1):
 				self.createNewGeo()
 				self.xEntry.delete(0, END)
