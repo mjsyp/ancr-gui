@@ -48,7 +48,9 @@ class voxelHandler():
 	
 	#Turns list of voxels into properly placed voxels in a chunk
 	def createChunk(self,posList):
-	
+		
+		sL = 1
+		mpr = 1.0/sL
 		newChunk = chunkData()
 		
 		for i in range(len(posList)):
@@ -77,12 +79,12 @@ class voxelHandler():
 		yRange = yMax - yMin + 1
 		zRange = zMax - zMin + 1
 	
-		voxGrid = [[[0]* (int(zRange*2)) for i in range(int(yRange*2))] for j in range(int(xRange*2))]
+		voxGrid = [[[0]* (int(zRange*mpr)) for i in range(int(yRange*mpr))] for j in range(int(xRange*mpr))]
 		for i in range(len(posList)):
 			xLoc = posList[i].x - xMin
 			yLoc = posList[i].y - yMin
 			zLoc = posList[i].z - zMin
-			voxGrid[int(xLoc*2)][int(yLoc*2)][int(zLoc*2)] = voxel(posList[i].x,posList[i].y,posList[i].z)
+			voxGrid[int(xLoc*mpr)][int(yLoc*mpr)][int(zLoc*mpr)] = voxel(posList[i].x,posList[i].y,posList[i].z)
 	
 		newChunk.n = len(posList)
 		newChunk.xOff = xMin
@@ -96,7 +98,8 @@ class voxelHandler():
 		return newChunk
 
 	def drawCubeLines(self,curChunk,ax):
-	
+		
+		sL = 1
 		chunkList = curChunk.voxGrid
 		#print("drawCubeLines")
 		#print(len(chunkList))
@@ -118,31 +121,31 @@ class voxelHandler():
 	
 						#Top
 						if curCube.topBack == 1:
-							ax.plot((x , x + .5), (y + .5, y + .5),(z + .5,z + .5),'b-')
+							ax.plot((x , x + sL), (y + sL, y + sL),(z + sL,z + sL),'b-')
 						if curCube.topFront == 1:
-							ax.plot((x , x + .5), (y , y ),(z + .5,z + .5),'b-')
+							ax.plot((x , x + sL), (y , y ),(z + sL,z + sL),'b-')
 						if curCube.topLeft == 1:
-							ax.plot((x , x ), (y , y + .5),(z + .5,z + .5),'b-')
+							ax.plot((x , x ), (y , y + sL),(z + sL,z + sL),'b-')
 						if curCube.topRight == 1:
-							ax.plot((x + .5, x + .5), (y , y + .5),(z + .5,z + .5),'b-')
+							ax.plot((x + sL, x + sL), (y , y + sL),(z + sL,z + sL),'b-')
 						#Bottom
 						if curCube.botBack == 1:
-							ax.plot((x , x + .5), (y + .5, y + .5),(z ,z ),'b-')
+							ax.plot((x , x + sL), (y + sL, y + sL),(z ,z ),'b-')
 						if curCube.botFront == 1:
-							ax.plot((x , x + .5), (y , y ),(z ,z ),'b-')
+							ax.plot((x , x + sL), (y , y ),(z ,z ),'b-')
 						if curCube.botLeft == 1:
-							ax.plot((x , x ), (y , y + .5),(z ,z ),'b-')
+							ax.plot((x , x ), (y , y + sL),(z ,z ),'b-')
 						if curCube.botRight == 1:
-							ax.plot((x + .5, x + .5), (y , y + .5),(z ,z ),'b-')
+							ax.plot((x + sL, x + sL), (y , y + sL),(z ,z ),'b-')
 						#Vertical
 						if curCube.leftFront == 1:
-							ax.plot((x , x ), (y , y ),(z ,z + .5),'b-')
+							ax.plot((x , x ), (y , y ),(z ,z + sL),'b-')
 						if curCube.leftBack == 1:
-							ax.plot((x , x ), (y + .5, y + .5),(z ,z + .5),'b-')
+							ax.plot((x , x ), (y + sL, y + sL),(z ,z + sL),'b-')
 						if curCube.rightFront == 1:
-							ax.plot((x + .5, x + .5), (y , y ),(z ,z + .5),'b-')
+							ax.plot((x + sL, x + sL), (y , y ),(z ,z + sL),'b-')
 						if curCube.rightBack == 1:
-							ax.plot((x + .5, x + .5), (y + .5, y + .5),(z ,z + .5),'b-')
+							ax.plot((x + sL, x + sL), (y + sL, y + sL),(z ,z + sL),'b-')
 
 	def cubeAdjChk(self,pos,chunk):
 		i = pos[0]
@@ -213,6 +216,9 @@ class voxelHandler():
 #Each dimension has to be twice as long to allow for half value edge lengths
 	def custBox(self,x1,x2,y1,y2,z1,z2):
 		
+		sL = 1
+		mpr = 1.0/sL
+		
 		posList = []
 		
 		xRange = abs(x2-x1)
@@ -232,11 +238,11 @@ class voxelHandler():
 			zOff = z2
 		
 		
-		for i in range(int(xRange*2)):
-			for j in range(int(yRange*2)):
-				for k in range(int(zRange*2)):
+		for i in range(int(xRange*mpr)):
+			for j in range(int(yRange*mpr)):
+				for k in range(int(zRange*mpr)):
 					
-					posList.append(voxel(i/2.0 + xOff,j/2.0 + yOff,k/2.0 + zOff))
+					posList.append(voxel(i/mpr + xOff,j/mpr + yOff,k/mpr + zOff))
 		
 		return posList
 
