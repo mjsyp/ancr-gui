@@ -30,13 +30,9 @@ def viewComponentGeo(G):
 	for node in G.nodes():
 		if 'Type' in G.node[node]:
 			if G.node[node]['Type'] == 'Component':
-				try: 
-					int(G.node[node]['x'])
-					xs.append(G.node[node]['x'])
-					ys.append(G.node[node]['y'])
-					zs.append(G.node[node]['z'])
-				except TypeError:
-					pass
+				xs.append(int(G.node[node]['x']))
+				ys.append(int(G.node[node]['y']))
+				zs.append(int(G.node[node]['z']))
 
 	ax.scatter(xs, ys, zs, c='r', marker='o')
 	ax.set_xlabel('X')

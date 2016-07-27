@@ -12,6 +12,16 @@
 '''
 from Tkinter import *
 import networkx as nx
+import matplotlib
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+from itertools import product, combinations
+import networkx as nx
+from PIL import Image, ImageTk
+from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure 
 
 class Compartment(Frame):
 	def __init__(self, parent, leftFrame, index, G, manager):
@@ -185,26 +195,26 @@ class Compartment(Frame):
 		zs = []
 
 		# loops through each node with type: component and builds a 3D scatterplot of their x, y, z coordinates
-		for node in G.nodes():
-			if 'Type' in G.node[node]:
-				if G.node[node]['Type'] == 'Component':
-						xs.append(G.node[node]['x'])
-						ys.append(G.node[node]['y'])
-						zs.append(G.node[node]['z'])
-				if G.node[node]['Type'] == 'Compartment':
-					for i in range(0, len(G.node[node]['x'])):	
-						a = G.node[node]['EdgeLength'][i]
-						x = G.node[node]['x'][i]
-						y = G.node[node]['y'][i]
-						z = G.node[node]['z'][i]
-						hSL = float(a/2)
-						r = [-hSL, hSL]
-						rX = [-hSL + x, hSL + x]
-						rY = [-hSL + y, hSL + y]
-						rZ = [-hSL + z, hSL + z]
-						for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
-							if not np.sum(np.abs(s-e)) > a+0.0000001:
-								ax.plot3D(*zip(s,e), color="b")
+		for node in nx.all_neighbors(self.G, self.index):
+			if 'Type' in self.G.node[node]:
+				if self.G.node[node]['Type'] == 'Component':
+					xs.append(int(self.G.node[node]['x']))
+					ys.append(int(self.G.node[node]['y']))
+					zs.append(int(self.G.node[node]['z']))
+
+		for i in range(0, len(self.G.node[self.index]['x'])):	
+			a = self.G.node[self.index]['EdgeLength'][i]
+			x = self.G.node[self.index]['x'][i]
+			y = self.G.node[self.index]['y'][i]
+			z = self.G.node[self.index]['z'][i]
+			hSL = float(a/2)
+			r = [-hSL, hSL]
+			rX = [-hSL + x, hSL + x]
+			rY = [-hSL + y, hSL + y]
+			rZ = [-hSL + z, hSL + z]
+			for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
+				if not np.sum(np.abs(s-e)) > a+0.0000001:
+					ax.plot3D(*zip(s,e), color="b")
 
 		ax.scatter(xs, ys, zs, c='r', marker='o')
 		ax.set_xlabel('X')
