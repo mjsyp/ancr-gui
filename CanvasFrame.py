@@ -546,9 +546,9 @@ class CanvasFrame(Frame):
 				self.manager.addSystem(typeLabel)
 
 				# refresh right panel to include new Demand if a node is currently selected
-				if len(self.rightFrame.winfo_children()) > 0:
-					self.systemInfo.createNewDemand(typeLabel)
-					self.systemInfo.systemDict[typeLabel] = None
+				if len(self.rightFrame.winfo_children()) > 0 and self.G.node[self.systemInfo.index]['Type'] == 'Component':
+					self.systemInfo.componentInfo.createNewDemand(typeLabel)
+					self.systemInfo.componentInfo.systemDict[typeLabel] = None
 
 				# set current selection to prev selection (before 'Create New' was pressed) and update prevOption
 				self.v.set(self.prevOption)
