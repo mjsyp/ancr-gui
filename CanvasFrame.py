@@ -51,6 +51,7 @@ class CanvasFrame(Frame):
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
+		self.systemsCanvas.unbind('<B1-Motion>')
 		self.systemsCanvas.bind('<Button-1>', self.createNode)
 		
 	
@@ -70,6 +71,7 @@ class CanvasFrame(Frame):
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
+		self.systemsCanvas.unbind('<B1-Motion>')
 		self.systemsCanvas.bind('<ButtonPress-1>', self.edgeStart)
 		self.systemsCanvas.bind('<ButtonRelease-1>', self.createEdge)
 	
@@ -88,6 +90,7 @@ class CanvasFrame(Frame):
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
+		self.systemsCanvas.unbind('<B1-Motion>')
 		self.systemsCanvas.bind('<Button-1>', self.select)
 	
 	# binds mouse clicks to the deleteNode function when the 'delete node' button is pressed 
@@ -105,28 +108,28 @@ class CanvasFrame(Frame):
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
+		self.systemsCanvas.unbind('<B1-Motion>')
 		self.systemsCanvas.bind('<Button-1>', self.delete)
 
 	# binds mouse click to dragStart and binds mouse release to dragEnd
 	def dragNodeButtonClick(self):
 		# config all buttons as sunken or raised according to what was pressed
 		self.buttonRelief(self.dragNodeButton)
-
-		# makes nodes green when you scroll over them in All, and undos activefill on edges
-		if self.v.get() == 'All':
-			self.systemsCanvas.itemconfig('node', activefill='green')
-		else:
-			for node in self.G.nodes():
+		for node in self.G.nodes():
 				if 'Type' in self.G.node[node] and self.G.node[node]['Type'] == 'Compartment':
 					self.systemsCanvas.itemconfig(node, activefill='blue', fill='blue')
 				else:
 					self.systemsCanvas.itemconfig(node, activefill='red', fill='red')
-		self.systemsCanvas.itemconfig('edge', activefill='black')
+		
+		# makes nodes green when you scroll over them in All, and undos activefill on edges
+		if self.v.get() == 'All':
+			self.systemsCanvas.itemconfig('node', activefill='green')
+
+		self.systemsCanvas.itemconfig('edge', activefill='black', fill='black')
 
 		self.systemsCanvas.unbind('<Button-1>')
 		self.systemsCanvas.unbind('<ButtonRelease-1>')
-		self.systemsCanvas.bind('<Button-1>', self.dragStart)
-		self.systemsCanvas.bind('<ButtonRelease-1>', self.dragEnd)
+		self.systemsCanvas.bind('<B1-Motion>', self.dragNode)
 
 	"""--------------------------------------------------END BUTTON BINDINGS----------------------------------------------------"""
 
@@ -354,58 +357,48 @@ class CanvasFrame(Frame):
 			self.showLabels()
 
 	"""--------------------------------------------------------END DELETE-----------------------------------------------------------------"""
-
-	# selects node on button press and moves node to location at button release
-	def dragStart(self, event):
+	# selects node on button press, moves with cursor on button hold and end location is at button release
+	def dragNode(self, event):
+		r=8
 		self.nodeDragItem = None
 		if self.systemsCanvas.find_withtag(CURRENT):
 			item = self.systemsCanvas.find_withtag(CURRENT)[0]
 			if self.checkTag(item) == 'node':
 				self.nodeDragItem = item
-
-	def dragEnd(self, event):
-		r = 8
-		# will only move node if it's in All
-		if self.v.get() == 'All':
+		if self.nodeDragItem != None and self.v.get() == 'All':
 			# move node:
-			if (event.x < 0) or (event.x > self.systemsCanvas.winfo_width()) or (event.y < 0) or (event.y > self.systemsCanvas.winfo_height()):
-				return
+			self.systemsCanvas.coords(self.nodeDragItem, event.x-r, event.y-r, event.x+r, event.y+r)
+			# move edges:
+			for startNode, endNode in self.G.out_edges([self.nodeDragItem]):
+				edge = self.G.edge[startNode][endNode]['edgeID']
+				edgeCoordsInt = self.systemsCanvas.coords(edge)
+				self.systemsCanvas.coords(edge, event.x, event.y, edgeCoordsInt[2], edgeCoordsInt[3])
+				edgeCoordsFin = self.systemsCanvas.coords(edge)
+				# saves new edge coordinates
+				self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
+				self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
+				self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
+				self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
+			
+			for startNode, endNode in self.G.in_edges([self.nodeDragItem]): 
+				edge = self.G.edge[startNode][endNode]['edgeID']
+				edgeCoordsInt = self.systemsCanvas.coords(edge)				
+				self.systemsCanvas.coords(edge, edgeCoordsInt[0], edgeCoordsInt[1], event.x, event.y)
+				edgeCoordsFin = self.systemsCanvas.coords(edge)
+				# saves new edge coordinates
+				self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
+				self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
+				self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
+				self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
 
-			if self.nodeDragItem != None:
-				self.systemsCanvas.coords(self.nodeDragItem, event.x-r, event.y-r, event.x+r, event.y+r)
+			# saves new node coordinates
+			self.G.node[self.nodeDragItem]['x_coord'] = event.x
+			self.G.node[self.nodeDragItem]['y_coord'] = event.y
 
-				# move edges:
-				for startNode, endNode in self.G.out_edges([self.nodeDragItem]):
-					edge = self.G.edge[startNode][endNode]['edgeID']
-					edgeCoordsInt = self.systemsCanvas.coords(edge)
-					self.systemsCanvas.coords(edge, event.x, event.y, edgeCoordsInt[2], edgeCoordsInt[3])
-					edgeCoordsFin = self.systemsCanvas.coords(edge)
-					# saves new edge coordinates
-					self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
-					self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
-					self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
-					self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
-				
-				for startNode, endNode in self.G.in_edges([self.nodeDragItem]): 
-					edge = self.G.edge[startNode][endNode]['edgeID']
-					edgeCoordsInt = self.systemsCanvas.coords(edge)				
-					self.systemsCanvas.coords(edge, edgeCoordsInt[0], edgeCoordsInt[1], event.x, event.y)
-					edgeCoordsFin = self.systemsCanvas.coords(edge)
-					# saves new edge coordinates
-					self.G.edge[startNode][endNode]['x1_coord'] = edgeCoordsFin[0]
-					self.G.edge[startNode][endNode]['y1_coord'] = edgeCoordsFin[1]
-					self.G.edge[startNode][endNode]['x2_coord'] = edgeCoordsFin[2]
-					self.G.edge[startNode][endNode]['y2_coord'] = edgeCoordsFin[3]
-
-				# saves new node coordinates
-				self.G.node[self.nodeDragItem]['x_coord'] = event.x
-				self.G.node[self.nodeDragItem]['y_coord'] = event.y
-
-			# refreshes labels if show labels is active
-			if self.labels == 1:
-				self.hideLabels()
-				self.showLabels()
-
+		# refreshes labels if show labels is active
+		if self.labels == 1:
+			self.hideLabels()
+			self.showLabels()
 
 	# shows all node names when 'Show Labels' is clicked
 	def showLabels(self):
