@@ -176,7 +176,7 @@ class CanvasFrame(Frame):
 			self.endNodeY = (self.endNodeCoords[1] + self.endNodeCoords[3]) / 2
 			item = self.systemsCanvas.create_line(self.startNodeX, self.startNodeY, self.endNodeX, self.endNodeY, tag='edge', state='normal')
 			
-			if self.v.get() == 'All':
+			if self.v.get() == 'All' or 'Geometry':
 				self.systemsCanvas.itemconfig(item, arrow='none')
 			else:
 				self.systemsCanvas.itemconfig(item, arrow='last')
