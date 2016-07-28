@@ -286,7 +286,7 @@ class CanvasFrame(Frame):
 	def delete(self, event):
 		if self.systemsCanvas.find_withtag(CURRENT):
 			item = self.systemsCanvas.find_withtag(CURRENT)[0]
-			'''deletes selected node and any edges overlapping it in both Tkinter and networkX if system is All'''
+			# deletes selected node and any edges overlapping it in both Tkinter and networkX if system is All
 			if self.v.get() == 'All':
 				if self.checkTag(item) == 'node':
 					nodeCoords = self.systemsCanvas.coords(item)
@@ -334,8 +334,8 @@ class CanvasFrame(Frame):
 					log += " (ID = " + str(item) + ")"
 					self.appendLog(log)
 
+			# else if system is not All, then removes that specific demand for that node and its associated edges
 			else:
-				''' if system is not All, then removes that specific demand for that node and its associated edges'''
 				if self.checkTag(item) == 'node':
 					nodeCoords = self.systemsCanvas.coords(item)
 					overlapped = self.systemsCanvas.find_overlapping(nodeCoords[0], nodeCoords[1], nodeCoords[2], nodeCoords[3])
@@ -346,11 +346,7 @@ class CanvasFrame(Frame):
 								self.systemsCanvas.itemconfig(x, state='hidden')
 					self.systemsCanvas.itemconfig(item, state='hidden')
 					del self.G.node[item][self.v.get()]
-				''' if system is not All, then removes that specific demand for the edge'''
-				if self.checkTag(item) == 'edge':
-					nodes = self.edgeEndpoints(item)
-					self.systemsCanvas.itemconfig(item, state='hidden')
-					del self.G.edge[nodes[0]][nodes[1]][self.v.get()]
+
 
 		# refreshes labels if show labels is active
 		if self.labels == 1:
@@ -550,7 +546,9 @@ class CanvasFrame(Frame):
 				self.manager.addSystem(typeLabel)
 
 				# refresh right panel to include new Demand if a node is currently selected
-				if len(self.rightFrame.winfo_children()) > 0 and self.G.node[self.systemInfo.index]['Type'] == 'Component':
+				if len(self.rightFrame.winfo_children()) > 0 and \
+				   self.systemsCanvas.type(self.systemInfo.index) == 'oval'and \
+				   self.G.node[self.systemInfo.index]['Type'] == 'Component':
 					self.systemInfo.componentInfo.createNewDemand(typeLabel)
 					self.systemInfo.componentInfo.systemDict[typeLabel] = None
 
