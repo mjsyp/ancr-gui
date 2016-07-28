@@ -12,6 +12,16 @@
 '''
 from Tkinter import *
 import networkx as nx
+import matplotlib
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+from itertools import product, combinations
+import networkx as nx
+from PIL import Image, ImageTk
+from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure 
 
 class Compartment(Frame):
 	def __init__(self, parent, leftFrame, index, G, manager):
@@ -43,7 +53,10 @@ class Compartment(Frame):
  
 		# create new coord button
 		self.newCoordBtn = Button(self.geoGroup, text="Add Row", command=self.createNewGeo, bg=self.color, highlightbackground=self.color)
-		self.newCoordBtn.grid(row=0, column=0, columnspan=9, padx=5, pady=5, sticky=E+W)
+		self.newCoordBtn.grid(row=0, column=0, columnspan=6, padx=5, pady=5, sticky=E+W)
+
+		self.showGeoBtn = Button(self.geoGroup, text='Show Geometry', command=self.showGeometry, bg=self.color, highlightbackground=self.color)
+		self.showGeoBtn.grid(row=0, column=6, columnspan=4, padx=5, pady=5, sticky=E+W)
 
 	def createNewGeo(self):
 		# numbers each row of geometry
@@ -90,21 +103,26 @@ class Compartment(Frame):
 		self.numCoords += 1
 
 	def deleteGeo(self, event):
-		deleteRow = int(event.widget.grid_info()['row'])
+		deleteRow = int(event.widget.grid_info()['row']) # row # to delete
+		# delete the info in this row from networkx
 		self.G.node[self.index]['x'].pop(deleteRow-1)
 		self.G.node[self.index]['y'].pop(deleteRow-1)
 		self.G.node[self.index]['z'].pop(deleteRow-1)
 		self.G.node[self.index]['EdgeLength'].pop(deleteRow-1)
+		# remove the info in this row from our lists of widgets
 		self.xEntryList.pop(deleteRow-1)
 		self.yEntryList.pop(deleteRow-1)
 		self.zEntryList.pop(deleteRow-1)
 		self.edgeEntryList.pop(deleteRow-1)
 
+		# for each widget in the geometry box
 		for widget in self.geoGroup.grid_slaves():
-			thisRow = int(widget.grid_info()['row'])
+			thisRow = int(widget.grid_info()['row']) # current row
 
+			# delete specified row to be deleted
 			if thisRow == deleteRow:
 				widget.grid_forget()
+			# move up rows below it and renumber the row
 			elif thisRow > deleteRow:
 				widget.grid_configure(row=thisRow-1)
 				if int(widget.grid_info()['column']) == 0:
@@ -137,7 +155,7 @@ class Compartment(Frame):
 	# inserts networkX data for the node into repsective entry box
 	def repopulateNodeData(self):
 		try:
-			# fill row 0 with data from networkx if it exists
+			# fill row 0 with data saved in networkx if it exists
 			self.xEntry.delete(0, END)
 			self.xEntry.insert(0, self.G.node[self.index]['x'][0])
 			self.yEntry.delete(0, END)
@@ -148,6 +166,7 @@ class Compartment(Frame):
 			self.edgeEntry.insert(0, self.G.node[self.index]['EdgeLength'][0])
 
 			# add a new row for each row of saved data that exists
+			# and fill it with data saved in networkx
 			for i in range(0, len(self.G.node[self.index]['x'])-1):
 				self.createNewGeo()
 				self.xEntry.delete(0, END)
@@ -162,6 +181,52 @@ class Compartment(Frame):
 		# no data in networkx yet
 		except TypeError:
 			self.xEntry.insert(0, 0) # undo the delete of xEntry before exception was caught
+	
+	def showGeometry(self):
+		geoWindow = Toplevel(height=300, width=500)
+		geoWindow.title('Compartment/Component Geometry')
+
+		fig = Figure()
+		canvas = FigureCanvasTkAgg(fig, master=geoWindow)
+		
+		ax = fig.add_subplot(111, projection='3d')
+		xs = []
+		ys = []
+		zs = []
+
+		# loops through each node with type: component and builds a 3D scatterplot of their x, y, z coordinates
+		for node in nx.all_neighbors(self.G, self.index):
+			if 'Type' in self.G.node[node]:
+				if self.G.node[node]['Type'] == 'Component':
+					xs.append(int(self.G.node[node]['x']))
+					ys.append(int(self.G.node[node]['y']))
+					zs.append(int(self.G.node[node]['z']))
+
+		for i in range(0, len(self.G.node[self.index]['x'])):	
+			a = self.G.node[self.index]['EdgeLength'][i]
+			x = self.G.node[self.index]['x'][i]
+			y = self.G.node[self.index]['y'][i]
+			z = self.G.node[self.index]['z'][i]
+			hSL = float(a/2)
+			r = [-hSL, hSL]
+			rX = [-hSL + x, hSL + x]
+			rY = [-hSL + y, hSL + y]
+			rZ = [-hSL + z, hSL + z]
+			for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
+				if not np.sum(np.abs(s-e)) > a+0.0000001:
+					ax.plot3D(*zip(s,e), color="b")
+
+		ax.scatter(xs, ys, zs, c='r', marker='o')
+		ax.set_xlabel('X')
+		ax.set_ylabel('Y')
+		ax.set_zlabel('Z')
+		
+		# creates the matplotlib navigation toolbar
+		canvas.show()
+		canvas.get_tk_widget().configure(borderwidth=0, highlightbackground='gray', highlightcolor='gray', selectbackground='gray')
+		canvas.get_tk_widget().pack()
+		toolbar = NavigationToolbar2TkAgg(canvas, geoWindow)
+		toolbar.update()
 
 	def initUI(self):
 		self.createGeometry()

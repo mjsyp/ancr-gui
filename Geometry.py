@@ -30,13 +30,9 @@ def viewComponentGeo(G):
 	for node in G.nodes():
 		if 'Type' in G.node[node]:
 			if G.node[node]['Type'] == 'Component':
-				try: 
-					int(G.node[node]['x'])
-					xs.append(G.node[node]['x'])
-					ys.append(G.node[node]['y'])
-					zs.append(G.node[node]['z'])
-				except TypeError:
-					pass
+				xs.append(int(G.node[node]['x']))
+				ys.append(int(G.node[node]['y']))
+				zs.append(int(G.node[node]['z']))
 
 	ax.scatter(xs, ys, zs, c='r', marker='o')
 	ax.set_xlabel('X')
@@ -109,6 +105,7 @@ def viewCompartmentGeo(G):
 					curChunk = voxelHandler.createChunk(compList)
 					voxelHandler.createOutline(curChunk)
 					voxelHandler.drawCubeLines(curChunk,ax)
+
 	# sets the scales of the graph to be equal so that cube shape is intact				
 	scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
 	ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]]*3)
@@ -134,43 +131,27 @@ def compartmentDisplay(var, canvas, compartmentgeo, G, checkbox):
 		for node in G.nodes():
 			if 'Type' in G.node[node]:
 				if G.node[node]['Type'] == 'Compartment':
-					try: # simple geometry
-						# if geometry is simple then graph one cube with centroid x,y,z and edge length a
-						int(G.node[node]['x'])
-						a = G.node[node]['EdgeLength']
-						x = G.node[node]['x']
-						y = G.node[node]['y']
-						z = G.node[node]['z']
+					#loop through each sub geometry and plot the cube with centroid x,y,z and edge length a
+					voxelHandler = vox.voxelHandler()
+					cubePos = []
+					for i in range(0, len(G.node[node]['x'])):	
+						a = G.node[node]['EdgeLength'][i]
+						x = G.node[node]['x'][i]
+						y = G.node[node]['y'][i]
+						z = G.node[node]['z'][i]
 						hSL = float(a/2)
-						r = [-hSL, hSL]
-						rX = [-hSL + x, hSL + x]
-						rY = [-hSL + y, hSL + y]
-						rZ = [-hSL + z, hSL + z]
-						for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
-							if not np.sum(np.abs(s-e)) > a+0.0000001:
-								ax.plot3D(*zip(s,e), color="b")
-					except TypeError: #advanced geometry
-						# if geometry is advanced, loop through each sub geometry and plot the cube with centroid x,y,z and edge length a
-						voxelHandler = vox.voxelHandler()
-						cubePos = []
-						for i in range(0, len(G.node[node]['x'])):	
-							a = G.node[node]['EdgeLength'][i]
-							x = G.node[node]['x'][i]
-							y = G.node[node]['y'][i]
-							z = G.node[node]['z'][i]
-							hSL = float(a/2)
-							x1 = x-hSL #int(x - hSL)
-							x2 = x+hSL #int(x + hSL)
-							y1 = y-hSL #int(y - hSL)
-							y2 = y+hSL #int(y + hSL)
-							z1 = z-hSL #int(z - hSL)
-							z2 = z+hSL #int(z + hSL)
-							curBox = voxelHandler.custBox(x1, x2, y1, y2, z1, z2)
-							cubePos.append(curBox)
-						compList = voxelHandler.listAppend(cubePos)
-						curChunk = voxelHandler.createChunk(compList)
-						voxelHandler.createOutline(curChunk)
-						voxelHandler.drawCubeLines(curChunk,ax)
+						x1 = x-hSL #int(x - hSL)
+						x2 = x+hSL #int(x + hSL)
+						y1 = y-hSL #int(y - hSL)
+						y2 = y+hSL #int(y + hSL)
+						z1 = z-hSL #int(z - hSL)
+						z2 = z+hSL #int(z + hSL)
+						curBox = voxelHandler.custBox(x1, x2, y1, y2, z1, z2)
+						cubePos.append(curBox)
+					compList = voxelHandler.listAppend(cubePos)
+					curChunk = voxelHandler.createChunk(compList)
+					voxelHandler.createOutline(curChunk)
+					voxelHandler.drawCubeLines(curChunk,ax)
 		# sets the scales of the graph to be equal so that cube shape is intact				
 		scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
 		ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]]*3)
@@ -179,7 +160,8 @@ def compartmentDisplay(var, canvas, compartmentgeo, G, checkbox):
 		canvas1.show()
 		canvas1.get_tk_widget().configure(borderwidth=0, highlightbackground='gray', highlightcolor='gray', selectbackground='gray')
 		canvas1.get_tk_widget().pack()
-		canvas.get_tk_widget().destroy()	
+		canvas.get_tk_widget().destroy()
+
 	else:
 		fig2 = Figure()
 		canvas2 = FigureCanvasTkAgg(fig2, master=compartmentgeo)
@@ -190,12 +172,11 @@ def compartmentDisplay(var, canvas, compartmentgeo, G, checkbox):
 		for node in G.nodes():
 			if 'Type' in G.node[node]:
 				if G.node[node]['Type'] == 'Compartment':
-					try: 
-						int(G.node[node]['x'])
-						a = G.node[node]['EdgeLength']
-						x = G.node[node]['x']
-						y = G.node[node]['y']
-						z = G.node[node]['z']
+					for i in range(0, len(G.node[node]['x'])):	
+						a = G.node[node]['EdgeLength'][i]
+						x = G.node[node]['x'][i]
+						y = G.node[node]['y'][i]
+						z = G.node[node]['z'][i]
 						hSL = float(a/2)
 						r = [-hSL, hSL]
 						rX = [-hSL + x, hSL + x]
@@ -204,20 +185,6 @@ def compartmentDisplay(var, canvas, compartmentgeo, G, checkbox):
 						for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
 							if not np.sum(np.abs(s-e)) > a+0.0000001:
 								ax.plot3D(*zip(s,e), color="b")
-					except TypeError:
-						for i in range(0, len(G.node[node]['x'])):	
-							a = G.node[node]['EdgeLength'][i]
-							x = G.node[node]['x'][i]
-							y = G.node[node]['y'][i]
-							z = G.node[node]['z'][i]
-							hSL = float(a/2)
-							r = [-hSL, hSL]
-							rX = [-hSL + x, hSL + x]
-							rY = [-hSL + y, hSL + y]
-							rZ = [-hSL + z, hSL + z]
-							for s, e in combinations(np.array(list(product(rX,rY,rZ))), 2):
-								if not np.sum(np.abs(s-e)) > a+0.0000001:
-									ax.plot3D(*zip(s,e), color="b")
 
 			scaling = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
 			ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]]*3)
