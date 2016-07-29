@@ -43,10 +43,12 @@
 ### Window
 * _Log Window:_ Will create a docked window of gui log actions if it had been exited
 * _Component Geometry:_ will display a pop up window with an interactive 3d scatterplot of the component node geometries. 
-* _Compartment Geometry:_
+* _Compartment Geometry:_ will display a pop up window with an interactive 3D plot of compartment node geometries (x, y, z, edge-length), made up of voxels. In this window you can toggle between seeing each individual voxel that makes up each compartment by selecting show intersection lines or you can remove these lines by unchecking show intersection lines. 
+
 
 ### Analysis
-* _Node Degrees:_
+* _Node Degrees:_ will create a docked window of a histogram plot of the node degrees (frequency vs degree)
+
 
 
 # Node Properties
@@ -70,7 +72,7 @@
 		* _Delete:_ rows can be deleted by clicking on the number label for the row
 
 
-# Edge Properties:
+# Edge Properties
 * when you select a node, you can edit some of its attributes on the right frame of the GUI
 * you must click Save before selecting another node/edge or the user input will be lost
 
@@ -82,3 +84,11 @@
 		* Residency for compartment-component
 		* Supply/Demand for component-component
 	* _Notes_
+
+
+# Docked Windows
+Windows that can be docked include: log window, node degrees, sub-network
+* Log window is initialized as already being docked. However if it is exited you can view it again through menu bar>windows>log window. 
+* Node degrees can be docked by going to menu bar>analysis>node degrees. Pressing node degrees again will update the docked window if more objects were created on the canvas. 
+* Sub-Network is automatically docked whenever you select a compartment node. It represents a network of the multiple voxels making up that compartment. Edges represent adjacency. 
+Each docked window will originally be placed in the frame underneath the canvas. Each includes exit, minimize, and maximize buttons. Exit will destroy the current window. Maximize will destroy the docked window and create a larger pop up window instead which can be resized and moved. Minimizing while the window is docked will configure it into just its toolbar. Minimizing while the window is a pop up will destroy the pop up and dock the window like it originally was. 
