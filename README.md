@@ -1,10 +1,11 @@
-## Requirements/Setup
+# Requirements/Setup
 * requires: Python 2.7
 * install external modules: networkX, matplotlib, Pillow
 * clone github.com/mjsyp/ancr-gui in your preferred working directory
 * run main.py from command line/terminal
 
-## System Dropdown
+
+# System Dropdown
 * All: view all nodes and edges created 
 * Geometry: view only nodes of type Compartment and the edges that connect them
 * Other System: 
@@ -14,7 +15,8 @@
 * if a node is created while you are in another system, the demand corresponding to the current system will be initialized to 0
 * Create New: create a new system, which will also be added as a demand of component nodes with no initialized value
 
-## Toolbar Buttons
+
+# Toolbar Buttons
 * to create a node: press the ‘create node’ button on the toolbar and left-click on the white canvas below the toolbar
 * to create an edge: two nodes must have already been created on the canvas and in order to create an edge between them, first press the ‘create edge’ Button and left click on the start node and release at the end node. An edge will only be created between two distinct nodes.
 * in order to view and edit the properties of a node or edge, press the ‘select’ button and hover over your desired canvas object. The selected object will be highlighted as green and display its current properties.
@@ -22,7 +24,7 @@
 * to drag a node and its associated edges to another location on the canvas, press the ‘drag node’ button on the toolbar and left click and hold on the desired node, which will highlight to green. To drag it to a new location hold down the left key and move the cursor to the node’s new position and release.  
 
 
-## Menu Bar
+# Menu Bar
 
 ### File
 * _Open:_ in order to open a previously saved file created through the gui, select open in the menu bar or use the shortcut command (ctrl-O) and a file explorer window will pop up. Select the desired file to open, and the previously saved network will appear on the canvas. 
@@ -47,7 +49,7 @@
 * _Node Degrees:_
 
 
-## Node Properties
+# Node Properties
 * when you select a node, you can edit its attributes on the right frame of the GUI
 * you must click Save before selecting another node/edge or the user input will be lost
 
@@ -68,7 +70,7 @@
 		* _Delete:_ rows can be deleted by clicking on the number label for the row
 
 
-## Edge Properties:
+# Edge Properties:
 * when you select a node, you can edit some of its attributes on the right frame of the GUI
 * you must click Save before selecting another node/edge or the user input will be lost
 
