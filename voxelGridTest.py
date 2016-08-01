@@ -43,14 +43,15 @@ class chunkData():
 
 class voxelHandler():
 	
-	def __init__(self):
-		pass
+	sL = 1
+	
+	def __init__(self,dim):
+		self.sL = dim
 	
 	#Turns list of voxels into properly placed voxels in a chunk
 	def createChunk(self,posList):
 		
-		sL = 1
-		mpr = 1.0/sL
+		mpr = 1.0/self.sL
 		newChunk = chunkData()
 		
 		for i in range(len(posList)):
@@ -99,7 +100,7 @@ class voxelHandler():
 
 	def drawCubeLines(self,curChunk,ax):
 		
-		sL = 1
+		sL = self.sL
 		chunkList = curChunk.voxGrid
 		#print("drawCubeLines")
 		#print(len(chunkList))
@@ -216,7 +217,7 @@ class voxelHandler():
 #Each dimension has to be twice as long to allow for half value edge lengths
 	def custBox(self,x1,x2,y1,y2,z1,z2):
 		
-		sL = 1
+		sL = self.sL
 		mpr = 1.0/sL
 		
 		posList = []

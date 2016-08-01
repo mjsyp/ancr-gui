@@ -63,13 +63,14 @@ def viewCompartmentGeo(G):
 	
 	ax = fig.gca(projection='3d')
 	ax.set_aspect("equal")
+	voxelHandler = vox.voxelHandler(1)
 
 	# loops through every node with type: compartment, and graphs cubes with given centroid and edge length
 	for node in G.nodes():
 		if 'Type' in G.node[node]:
 			if G.node[node]['Type'] == 'Compartment':
 					#loop through each sub geometry and plot the cube with centroid x,y,z and edge length a
-					voxelHandler = vox.voxelHandler()
+					
 					cubePos = []
 					for i in range(0, len(G.node[node]['x'])):	
 						a = G.node[node]['EdgeLength'][i]
@@ -110,13 +111,13 @@ def compartmentDisplay(var, canvas, compartmentgeo, G, checkbox):
 		
 		ax = fig1.gca(projection='3d')
 		ax.set_aspect("equal")
-
+		voxelHandler = vox.voxelHandler(1)
 		# loops through every node with type: compartment, and graphs cubes with given centroid and edge length
 		for node in G.nodes():
 			if 'Type' in G.node[node]:
 				if G.node[node]['Type'] == 'Compartment':
 					#loop through each sub geometry and plot the cube with centroid x,y,z and edge length a
-					voxelHandler = vox.voxelHandler()
+					
 					cubePos = []
 					for i in range(0, len(G.node[node]['x'])):	
 						a = G.node[node]['EdgeLength'][i]
