@@ -1,8 +1,18 @@
-﻿# ANCR-GUI USER GUIDE
+# ANCR-GUI USER GUIDE
 
 ## Table of Contents:
 1. [Requirements/Setup](https://github.com/mjsyp/ancr-gui#requirementssetup)
 2. [System Dropdown](https://github.com/mjsyp/ancr-gui#system-dropdown)
+3. [Menubar](https://github.com/mjsyp/ancr-gui#menu-bar)
+	* [File](https://github.com/mjsyp/ancr-gui#file)
+	* [Edit](https://github.com/mjsyp/ancr-gui#edit)
+	* [View](https://github.com/mjsyp/ancr-gui#view)
+	* [Window](https://github.com/mjsyp/ancr-gui#window)
+	* [Analysis](https://github.com/mjsyp/ancr-gui#analysis)
+4. [Toolbar](https://github.com/mjsyp/ancr-gui#toolbar-buttons)
+5. [Node Properties](https://github.com/mjsyp/ancr-gui#node-properties)
+6. [Edge Properties](https://github.com/mjsyp/ancr-gui#edge-properties)
+7. [Docked Windows](https://github.com/mjsyp/ancr-gui#docked-windows)
 
 
 ## Requirements/Setup
@@ -21,14 +31,6 @@
 * nodes change size based on the magnitude of the value for the demand of this system
 * if a node is created while you are in another system, the demand corresponding to the current system will be initialized to 0
 * Create New: create a new system, which will also be added as a demand of component nodes with no initialized value
-
-
-## Toolbar Buttons
-* to create a node: press the ‘create node’ button on the toolbar and left-click on the white canvas below the toolbar
-* to create an edge: two nodes must have already been created on the canvas and in order to create an edge between them, first press the ‘create edge’ Button and left click on the start node and release at the end node. An edge will only be created between two distinct nodes.
-* in order to view and edit the properties of a node or edge, press the ‘select’ button and hover over your desired canvas object. The selected object will be highlighted as green and display its current properties.
-* to delete a node or edge press the ‘delete’ button on the toolbar, and hover over the desired canvas object. To delete the object highlighted in green, left click on the object. Deleting a node will removed all associated edges. 
-* to drag a node and its associated edges to another location on the canvas, press the ‘drag node’ button on the toolbar and left click and hold on the desired node, which will highlight to green. To drag it to a new location hold down the left key and move the cursor to the node’s new position and release.  
 
 
 ## Menu Bar
@@ -52,10 +54,16 @@
 * _Component Geometry:_ will display a pop up window with an interactive 3d scatterplot of the component node geometries. 
 * _Compartment Geometry:_ will display a pop up window with an interactive 3D plot of compartment node geometries (x, y, z, edge-length), made up of voxels. In this window you can toggle between seeing each individual voxel that makes up each compartment by selecting show intersection lines or you can remove these lines by unchecking show intersection lines. 
 
-
 #### Analysis
 * _Node Degrees:_ will create a docked window of a histogram plot of the node degrees (frequency vs degree)
 
+
+## Toolbar Buttons
+* to create a node: press the ‘create node’ button on the toolbar and left-click on the white canvas below the toolbar
+* to create an edge: two nodes must have already been created on the canvas and in order to create an edge between them, first press the ‘create edge’ Button and left click on the start node and release at the end node. An edge will only be created between two distinct nodes.
+* in order to view and edit the properties of a node or edge, press the ‘select’ button and hover over your desired canvas object. The selected object will be highlighted as green and display its current properties.
+* to delete a node or edge press the ‘delete’ button on the toolbar, and hover over the desired canvas object. To delete the object highlighted in green, left click on the object. Deleting a node will removed all associated edges. 
+* to drag a node and its associated edges to another location on the canvas, press the ‘drag node’ button on the toolbar and left click and hold on the desired node, which will highlight to green. To drag it to a new location hold down the left key and move the cursor to the node’s new position and release.
 
 
 ## Node Properties
