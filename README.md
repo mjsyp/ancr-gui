@@ -1,4 +1,4 @@
-# Requirements/Setup
+﻿# Requirements/Setup
 * requires: Python 2.7
 * install external modules: networkX, matplotlib, Pillow
 * clone github.com/mjsyp/ancr-gui in your preferred working directory
@@ -37,8 +37,8 @@
 * _Redo:_ Redoes last undo action
 	
 ### View
-	*Show Labels: Will display name labels of nodes above them 
-	*Hide Labels: Will hide name labels of nodes
+* _Show Labels:_ Will display name labels of nodes above them 
+* _Hide Labels:_ Will hide name labels of nodes
 	
 ### Window
 * _Log Window:_ Will create a docked window of gui log actions if it had been exited
@@ -88,7 +88,7 @@
 
 # Docked Windows
 Windows that can be docked include: log window, node degrees, sub-network
-* Log window is initialized as already being docked. However if it is exited you can view it again through menu bar>windows>log window. 
-* Node degrees can be docked by going to menu bar>analysis>node degrees. Pressing node degrees again will update the docked window if more objects were created on the canvas. 
-* Sub-Network is automatically docked whenever you select a compartment node. It represents a network of the multiple voxels making up that compartment. Edges represent adjacency. 
+* _Log window_ is initialized as already being docked. However if it is exited you can view it again through menu bar>windows>log window. 
+* _Node degrees_ can be docked by going to menu bar>analysis>node degrees. Pressing node degrees again will update the docked window if more objects were created on the canvas. 
+* _Sub-Network_ is automatically docked whenever you select a compartment node. It represents a network of the multiple voxels making up that compartment. Edges represent adjacency. 
 Each docked window will originally be placed in the frame underneath the canvas. Each includes exit, minimize, and maximize buttons. Exit will destroy the current window. Maximize will destroy the docked window and create a larger pop up window instead which can be resized and moved. Minimizing while the window is docked will configure it into just its toolbar. Minimizing while the window is a pop up will destroy the pop up and dock the window like it originally was. 
