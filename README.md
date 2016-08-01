@@ -35,26 +35,26 @@
 
 ## Menu Bar
 
-#### File
+### File
 * __Open:__ in order to open a previously saved file created through the gui, select open in the menu bar or use the shortcut command (ctrl-O) and a file explorer window will pop up. Select the desired file to open, and the previously saved network will appear on the canvas. 
 * __Save:__ pressing save through the menu bar or using shortcut key (ctrl-S) will update the file contents if it was previously named. If a filename was not already established, a file explorer window will pop up and prompt you to save the file’s name and the directory it will be saved in. 
 * __Save As:__ pressing save through the menu bar or using shortcut key (ctrl-shift-S) will prompt a file explorer window to pop up, where you will name the file and select where it will be saved. 
 * __Exit:__ pressing exit on the menu bar will exit out of the gui. Note: it will not automatically save your file, all contents not previously saved will be lost.  
 
-#### Edit
+### Edit
 * __Undo:__ Undoes last canvas item action (node/edge creation or deletion)
 * __Redo:__ Redoes last undo action
 	
-#### View
+### View
 * __Show Labels:__ Will display name labels of nodes above them 
 * __Hide Labels:__ Will hide name labels of nodes
 	
-#### Window
+### Window
 * __Log Window:__ Will create a docked window of gui log actions if it had been exited
 * __Component Geometry:__ will display a pop up window with an interactive 3d scatterplot of the component node geometries. 
 * __Compartment Geometry:__ will display a pop up window with an interactive 3D plot of compartment node geometries (x, y, z, edge-length), made up of voxels. In this window you can toggle between seeing each individual voxel that makes up each compartment by selecting show intersection lines or you can remove these lines by unchecking show intersection lines. 
 
-#### Analysis
+### Analysis
 * __Node Degrees:__ will create a docked window of a histogram plot of the node degrees (frequency vs degree)
 
 
@@ -70,17 +70,17 @@
 * when you select a node, you can edit its attributes on the right frame of the GUI
 * you must click Save before selecting another node/edge or the user input will be lost
 
-	#### All Nodes
+	### All Nodes
 	* _Name_
 	* _Type_ (either Component or Compartment)
 	* _Notes_
 
-	#### Component Nodes
+	### Component Nodes
 	* _Demands_
 		* __Create New Button:__ new demands can be added to each node with this button. The demand will also be added to the dropdown of systems in the canvas toolbar
 		* __Geometry__ (x, y, z)
 
-	#### Compartment Nodes
+	### Compartment Nodes
 	* _Geometry_ (x, y, z, edge length)
 		* __Add Row Button:__ multiple rows can be added in order to create a more complex compartment shape
 		* __Show Geometry Button:__ the shape of the compartment and the components within it can be viewed in a 3-D matplotlib plot
@@ -91,7 +91,7 @@
 * when you select a node, you can edit some of its attributes on the right frame of the GUI
 * you must click Save before selecting another node/edge or the user input will be lost
 
-	#### All Edges
+	### All Edges
 	* _Name_
 	* _Type_
 		* automatically changes based on node connections
