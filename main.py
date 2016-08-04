@@ -15,9 +15,11 @@ from DockedWindows import *
 from Geometry import *
 import networkx as nx
 import tkFileDialog
+import tkMessageBox
 import pickle
 from sys import platform as _platform
 import matplotlib.pyplot as plt
+import sys
 
 class Window(Frame):
   
@@ -28,6 +30,7 @@ class Window(Frame):
 		self.G = nx.DiGraph()
 		self.D = nx.DiGraph()
 		self.initUI()
+			
 
 	# exits out of gui when clicked on 
 	def exit(self, event=None):
@@ -193,8 +196,12 @@ class Window(Frame):
 
 def main():
 	root = Tk()
-	app = Window(root)
-	root.mainloop()
+	if sys.version_info[0] != 2 or sys.version_info[1] != 8:
+			root.wm_withdraw()
+			tkMessageBox.showerror('Version Error', 'Please run the program with Python 2.7')		
+	else:
+		app = Window(root)
+		root.mainloop()
 	#to see the networkx representation of the graph after exiting the gui:
 	#nx.draw(app.G)
 	#plt.show()
