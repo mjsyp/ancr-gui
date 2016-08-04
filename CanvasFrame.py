@@ -9,17 +9,13 @@
  *     undo/redo
  *     showing/hiding labels of nodes on the canvas
 '''
-try:
-	from Tkinter import *
-	import tkMessageBox
-	from DockedWindows import *
-	from Manager import *
-	from NodeEdgeInfo import *
-	import tkSimpleDialog
-	import networkx as nx
-	from datetime import datetime
-except ImportError, e:
-	tkMessageBox.showinfo("Import Error", "Error: " + str(e))
+from Tkinter import *
+from DockedWindows import *
+from Manager import *
+from NodeEdgeInfo import *
+import tkSimpleDialog
+import networkx as nx
+from datetime import datetime
 
 class CanvasFrame(Frame):
 	def __init__(self, parent, rightFrame, G, D):

@@ -10,16 +10,12 @@
  *     min/max/exit button for each window
  *     dragging popup window
 '''
-try:
-	from Tkinter import *
-	import tkMessageBox
-	import networkx as nx
-	import matplotlib
-	from matplotlib import pyplot as plt
-	from PIL import Image, ImageTk
-	import math
-except ImportError, e:
-	tkMessageBox.showinfo("Import Error", "Error: " + str(e))
+from Tkinter import *
+import networkx as nx
+import matplotlib
+from matplotlib import pyplot as plt
+from PIL import Image, ImageTk
+import math
 
 class DockedWindows(Frame):
 	def __init__(self, parent, G):

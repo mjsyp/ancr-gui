@@ -11,6 +11,7 @@
 '''
 try:
 	from Tkinter import *
+	root = Tk()
 	import tkMessageBox
 	from CanvasFrame import *
 	from DockedWindows import *
@@ -19,9 +20,25 @@ try:
 	import tkFileDialog
 	import pickle
 	from sys import platform as _platform
+	import sys
 	import matplotlib.pyplot as plt
+
+	# make sure modules used in other files are imported
+	import tkSimpleDialog
+	from datetime import datetime
+	import matplotlib
+	from mpl_toolkits.mplot3d import Axes3D
+	import numpy as np
+	from itertools import product, combinations
+	from PIL import Image, ImageTk
+	from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
+	from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+	from matplotlib.figure import Figure
+
 except ImportError, e:
-	tkMessageBox.showinfo("Import Error", "Error: " + str(e))
+	root.wm_withdraw()
+	tkMessageBox.showerror('Import Error', 'Error: ' + str(e))
+	quit()
 
 class Window(Frame):
   
@@ -32,6 +49,7 @@ class Window(Frame):
 		self.G = nx.DiGraph()
 		self.D = nx.DiGraph()
 		self.initUI()
+			
 
 	# exits out of gui when clicked on 
 	def exit(self, event=None):
@@ -149,10 +167,14 @@ class Window(Frame):
 		viewTab = Menu(menubar, tearoff=0)
 		viewTab.add_command(label="Show Labels", command=self.geoCanvas.showLabels)
 		viewTab.add_command(label="Hide Labels", command=self.geoCanvas.hideLabels)
-		viewTab.add_command(label='Log Window', command=self.geoCanvas.dockedWindows.logWindow)
-		viewTab.add_command(label='Component Geometry', command=lambda:viewComponentGeo(self.G)) 
-		viewTab.add_command(label='Compartment Geometry', command=lambda:viewCompartmentGeo(self.G))
 		menubar.add_cascade(label="View", menu=viewTab)
+
+		#Window Tab
+		windowTab = Menu(menubar, tearoff=0)
+		windowTab.add_command(label='Log Window', command=self.geoCanvas.dockedWindows.logWindow)
+		windowTab.add_command(label='Component Geometry', command=lambda:viewComponentGeo(self.G)) 
+		windowTab.add_command(label='Compartment Geometry', command=lambda:viewCompartmentGeo(self.G))
+		menubar.add_cascade(label="Windows", menu=windowTab)
 
 		#Analysis Tab
 		analysisTab = Menu(menubar, tearoff=0)
@@ -192,9 +214,12 @@ class Window(Frame):
 
 
 def main():
-	root = Tk()
-	app = Window(root)
-	root.mainloop()
+	if sys.version_info[0] != 2 or sys.version_info[1] != 7:
+			root.wm_withdraw()
+			tkMessageBox.showerror('Version Error', 'Please run the program with Python 2.7')		
+	else:
+		app = Window(root)
+		root.mainloop()
 	#to see the networkx representation of the graph after exiting the gui:
 	#nx.draw(app.G)
 	#plt.show()

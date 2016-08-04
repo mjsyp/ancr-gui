@@ -1,19 +1,15 @@
-try:
-	from Tkinter import *
-	import tkMessageBox
-	import matplotlib
-	from matplotlib import pyplot as plt
-	from mpl_toolkits.mplot3d import Axes3D
-	import numpy as np
-	from itertools import product, combinations
-	import networkx as nx
-	from PIL import Image, ImageTk
-	from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
-	from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-	from matplotlib.figure import Figure 
-	import voxelGridTest as vox
-except ImportError, e:
-	tkMessageBox.showinfo("Import Error", "Error: " + str(e))
+from Tkinter import *
+import matplotlib
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+from itertools import product, combinations
+import networkx as nx
+from PIL import Image, ImageTk
+from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure 
+import voxelGridTest as vox
 
 
 # graphs geometries of nodes of type: component

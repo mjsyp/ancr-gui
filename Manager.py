@@ -4,6 +4,7 @@
  * Keeps track of all of the systems and types
  * that have been specified
 '''
+from Tkinter import *
 
 class Manager:
   
