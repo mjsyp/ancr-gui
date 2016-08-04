@@ -9,15 +9,19 @@
  *     specifies size of left frame and right frame
  *     sets up scrollbar of right frame
 '''
-from Tkinter import *
-from CanvasFrame import *
-from DockedWindows import *
-from Geometry import *
-import networkx as nx
-import tkFileDialog
-import pickle
-from sys import platform as _platform
-import matplotlib.pyplot as plt
+try:
+	from Tkinter import *
+	import tkMessageBox
+	from CanvasFrame import *
+	from DockedWindows import *
+	from Geometry import *
+	import networkx as nx
+	import tkFileDialog
+	import pickle
+	from sys import platform as _platform
+	import matplotlib.pyplot as plt
+except ImportError, e:
+	tkMessageBox.showinfo("Import Error", "Error: " + str(e))
 
 class Window(Frame):
   

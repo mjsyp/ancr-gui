@@ -11,9 +11,13 @@
  *     save/repopulate
  *
 '''
-from Tkinter import *
-import tkSimpleDialog
-import networkx as nx
+try:
+	from Tkinter import *
+	import tkMessageBox
+	import tkSimpleDialog
+	import networkx as nx
+except ImportError, e:
+	tkMessageBox.showinfo("Import Error", "Error: " + str(e))
 
 class Component(Frame):
 	def __init__(self, parent, leftFrame, index, G, manager):

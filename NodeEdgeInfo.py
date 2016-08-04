@@ -11,12 +11,16 @@
  *     notes box
  *     save/repopulate
 '''
-from Tkinter import *
-from Component import *
-from Compartment import *
-import tkSimpleDialog
-import networkx as nx
-from datetime import datetime
+try:
+	from Tkinter import *
+	import tkMessageBox
+	from Component import *
+	from Compartment import *
+	import tkSimpleDialog
+	import networkx as nx
+	from datetime import datetime
+except ImportError, e:
+	tkMessageBox.showinfo("Import Error", "Error: " + str(e))
 
 class NodeEdgeInfo(Frame):
 	def __init__(self, parent, leftFrame, index, G, manager, nodes=None):

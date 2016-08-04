@@ -10,18 +10,22 @@
  *     add/delete rows in geometry
  *     save/repopulate
 '''
-from Tkinter import *
-import networkx as nx
-import matplotlib
-from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import numpy as np
-from itertools import product, combinations
-import networkx as nx
-from PIL import Image, ImageTk
-from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure 
+try:
+	from Tkinter import *
+	import tkMessageBox
+	import networkx as nx
+	import matplotlib
+	from matplotlib import pyplot as plt
+	from mpl_toolkits.mplot3d import Axes3D
+	import numpy as np
+	from itertools import product, combinations
+	import networkx as nx
+	from PIL import Image, ImageTk
+	from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
+	from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+	from matplotlib.figure import Figure 
+except ImportError, e:
+	tkMessageBox.showinfo("Import Error", "Error: " + str(e))
 
 class Compartment(Frame):
 	def __init__(self, parent, leftFrame, index, G, manager):

@@ -1,6 +1,10 @@
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-import numpy as np
+try:
+	import tkMessageBox
+	from mpl_toolkits.mplot3d import Axes3D
+	import matplotlib.pyplot as plt
+	import numpy as np
+except ImportError, e:
+	tkMessageBox.showinfo("Import Error", "Error: " + str(e))
 #Stores all info about a cube
 #maybe initialize to 0
 class voxel():
