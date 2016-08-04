@@ -145,10 +145,14 @@ class Window(Frame):
 		viewTab = Menu(menubar, tearoff=0)
 		viewTab.add_command(label="Show Labels", command=self.geoCanvas.showLabels)
 		viewTab.add_command(label="Hide Labels", command=self.geoCanvas.hideLabels)
-		viewTab.add_command(label='Log Window', command=self.geoCanvas.dockedWindows.logWindow)
-		viewTab.add_command(label='Component Geometry', command=lambda:viewComponentGeo(self.G)) 
-		viewTab.add_command(label='Compartment Geometry', command=lambda:viewCompartmentGeo(self.G))
 		menubar.add_cascade(label="View", menu=viewTab)
+
+		#Window Tab
+		windowTab = Menu(menubar, tearoff=0)
+		windowTab.add_command(label='Log Window', command=self.geoCanvas.dockedWindows.logWindow)
+		windowTab.add_command(label='Component Geometry', command=lambda:viewComponentGeo(self.G)) 
+		windowTab.add_command(label='Compartment Geometry', command=lambda:viewCompartmentGeo(self.G))
+		menubar.add_cascade(label="Windows", menu=windowTab)
 
 		#Analysis Tab
 		analysisTab = Menu(menubar, tearoff=0)
