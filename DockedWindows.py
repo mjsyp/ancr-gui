@@ -16,6 +16,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 from PIL import Image, ImageTk
 import math
+import numpy as np
 
 class DockedWindows(Frame):
 	def __init__(self, parent, G):
@@ -532,6 +533,26 @@ class DockedWindows(Frame):
 			self.subNetworkFrame.config(height='30')
 			self.subNetworkFrame.pack_configure(anchor='sw', fill='none')
 	"""----------------------------------------------------END SUB NETWORK-------------------------------------------------------"""
+
+	def centrality(self):
+		kIn=[]
+		kOut=[]
+		k=0
+		for x in self.G.out_degree():
+			kIn.append(self.G.out_degree()[x])
+			kOut.append(self.G.in_degree()[x])
+			k=k+self.G.out_degree()[x]+self.G.in_degree()[x]
+		k=(float(k))/(float(nx.number_of_nodes(self.G)))
+		alpha = 2*k/((k*k)-k)
+		A= nx.to_numpy_matrix(self.G)
+		np.array(kIn)
+		np.array(kOut)
+		I = np.identity(nx.number_of_nodes(self.G))
+		w0 = np.linalg.inv(I-(alpha*(np.transpose(A))))
+		w = np.dot(w0, kOut)
+		l0 = np.linalg.inv(I-(alpha*A))
+		l = np.dot(l0, kIn)
+		parkCentrality= w-l
 	
 	def initUI(self):
 		self.logWindow()

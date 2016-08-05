@@ -179,6 +179,7 @@ class Window(Frame):
 		#Analysis Tab
 		analysisTab = Menu(menubar, tearoff=0)
 		analysisTab.add_command(label="Node Degrees", command=self.geoCanvas.dockedWindows.nodeDegrees)
+		analysisTab.add_command(label='Centrality', command=self.geoCanvas.dockedWindows.centrality)
 		menubar.add_cascade(label="Analysis", menu=analysisTab)
 
 	def initUI(self):
